@@ -2,7 +2,7 @@
 
 # ========================================================
 # jenkins_configuration.sh
-# 오브젝트 기반 Jenkins 설정 및 사용자 구성 (Jenkins CLI 버전)
+# 오브젝트 기반 Jenkins 설정 및 사용자 구성 (자동화 버전)
 # ========================================================
 
 # Jenkins 플러그인 설치 (CLI 방식)
@@ -20,7 +20,7 @@ install_jenkins_plugins() {
   ssh_exec "wget http://localhost:${SERVER[jenkins_port]}/jnlpJars/jenkins-cli.jar -O $cli_jar"
 
   local plugins=(
-    # 추후에 플러그인 추가
+    # 필요한 플러그인 리스트를 여기에 추가
   )
 
   for plugin in "${plugins[@]}"; do
@@ -38,9 +38,13 @@ configure_jenkins_user() {
   log "[Jenkins] 사용자 설정 중..."
 
   if ssh_exec "[ -f ${SERVER[config_dir]}/jenkins_user ]"; then
-    log "[Jenkins] 저장된 비밀번호로 로그인 설정 적용 중..."
     export JENKINS_PASSWORD=$(ssh_exec "cat ${SERVER[config_dir]}/jenkins_user")
+    log "[Jenkins] 기존 사용자 비밀번호 사용."
     return
+  fi
+
+  if [ -z "$JENKINS_PASSWORD" ]; then
+    error_exit "[Jenkins] --jenkins-password 인자가 필요합니다."
   fi
 
   local initial_pw
@@ -49,43 +53,38 @@ configure_jenkins_user() {
     error_exit "[Jenkins] 초기 비밀번호를 가져올 수 없습니다."
   fi
 
-  read -s -p "젠킨스에 사용할 새 비밀번호 입력: " NEW_PW
-  echo ""
-
   local cli_jar="/tmp/jenkins-cli.jar"
   ssh_exec "wget -q -O $cli_jar http://localhost:${SERVER[jenkins_port]}/jnlpJars/jenkins-cli.jar"
 
-  # 관리자 비밀번호 변경용 Groovy 파일 준비
+  # 비밀번호 변경용 Groovy 스크립트 작성
   cat <<EOF > /tmp/change_password.groovy
 import jenkins.model.*
 import hudson.security.*
 
 def instance = Jenkins.getInstance()
 def user = instance.getSecurityRealm().getUser("admin")
-user.addProperty(hudson.security.HudsonPrivateSecurityRealm.Details.fromPlainPassword("$NEW_PW"))
+user.addProperty(hudson.security.HudsonPrivateSecurityRealm.Details.fromPlainPassword("$JENKINS_PASSWORD"))
 instance.save()
 EOF
 
   upload_file "/tmp/change_password.groovy" "/tmp/change_password.groovy"
   ssh_exec "java -jar $cli_jar -s http://localhost:${SERVER[jenkins_port]} -auth admin:$initial_pw groovy = < /tmp/change_password.groovy"
 
-  ssh_exec "echo '$NEW_PW' | sudo tee ${SERVER[config_dir]}/jenkins_user > /dev/null && sudo chmod 600 ${SERVER[config_dir]}/jenkins_user"
-  export JENKINS_PASSWORD="$NEW_PW"
-  log "[Jenkins] 사용자 설정 완료."
+  ssh_exec "echo '$JENKINS_PASSWORD' | sudo tee ${SERVER[config_dir]}/jenkins_user > /dev/null && sudo chmod 600 ${SERVER[config_dir]}/jenkins_user"
+  log "[Jenkins] 사용자 비밀번호 설정 완료."
 }
 
-# Jenkins 보안 설정 (CLI로 보안 설정 변경)
+# Jenkins 보안 설정 (CLI로 설정)
 setup_security_options() {
   log "[Jenkins] 보안 설정 구성 중..."
 
-  local password="$JENKINS_PASSWORD"
-  if [ -z "$password" ]; then
-    error_exit "[Jenkins] 비밀번호가 설정되지 않았습니다."
+  if [ -z "$JENKINS_PASSWORD" ]; then
+    error_exit "[Jenkins] --jenkins-password 인자가 필요합니다."
   fi
 
   local cli_jar="/tmp/jenkins-cli.jar"
 
-  # 보안 설정용 Groovy 파일 준비
+  # 보안 설정용 Groovy 스크립트 작성
   cat <<'EOF' > /tmp/setup_security.groovy
 import jenkins.model.*
 import hudson.security.*
@@ -100,7 +99,7 @@ instance.save()
 EOF
 
   upload_file "/tmp/setup_security.groovy" "/tmp/setup_security.groovy"
-  ssh_exec "java -jar $cli_jar -s http://localhost:${SERVER[jenkins_port]} -auth admin:$password groovy = < /tmp/setup_security.groovy"
+  ssh_exec "java -jar $cli_jar -s http://localhost:${SERVER[jenkins_port]} -auth admin:$JENKINS_PASSWORD groovy = < /tmp/setup_security.groovy"
 
   log "[Jenkins] 보안 설정 완료."
 }
