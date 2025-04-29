@@ -1,0 +1,57 @@
+spring:
+  application:
+    name: devpilot
+
+  thymeleaf:
+    cache: false
+    prefix: classpath:/templates/
+    suffix: .txt
+    mode: TEXT
+
+server:
+  port: ${PORT:8080}
+  compression:
+    enabled: true
+  error:
+    include-stacktrace: never
+
+  ssh:
+    connection-timeout: 30000
+    channel-timeout: 60000
+    default-port: 22
+    known-hosts-file: ${user.home}/.ssh/known_hosts
+
+  jenkins:
+    default-port: 7070
+    cli-download-path: /jnlpJars/jenkins-cli.jar
+    admin-scripts-path: classpath:/scripts/jenkins
+    default-plugins:
+      - git
+      - workflow-aggregator
+      - pipeline-stage-view
+      - docker-workflow
+      - credentials-binding
+      - ssh-credentials
+
+  logging:
+    file-path: ${user.home}/.devpilot/logs
+    keep-days: 7
+    max-size: 100MB
+
+  execution:
+    timeout: 300000
+    retry-count: 3
+    retry-delay: 5000
+
+  temp:
+    cleanup-on-exit: true
+    directory: ${user.home}/.devpilot/temp
+
+logging:
+  level:
+    root: INFO
+    com.devpilot: DEBUG
+    org.springframework.web: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
