@@ -1,81 +1,73 @@
 #!/bin/bash
 
 # ========================================================
-# docker_helper.sh
-# 오브젝트 기반 Docker 설치 및 관리 (최신 개선 버전)
+# jenkins_pipeline.sh
+# 오브젝트 기반 Jenkins 파이프라인 EC2 업로드 및 등록 (Spring Boot 연동 전용)
 # ========================================================
 
-# EC2에 Docker 설치
-install_docker() {
-  log "[Docker] EC2에 Docker 설치 중..."
+# Jenkins 파이프라인 생성 (Groovy 스크립트 파일을 EC2로 업로드 후 실행)
+create_jenkins_pipeline() {
+  local local_groovy_path="$1" # 로컬 Groovy 파일 경로
+  local pipeline_name="$2"     # 생성할 파이프라인 이름
 
-  local OS
-  OS=$(detect_os)
+  log "[Jenkins] 파이프라인 생성 준비 중: $pipeline_name"
 
-  if [[ "$OS" == "ubuntu" || "$OS" == "debian" ]]; then
-    ssh_exec "sudo apt-get remove -y docker docker-engine docker.io containerd runc || true"
-    ssh_exec "sudo apt-get update -y"
-    ssh_exec "sudo apt-get install -y apt-transport-https ca-certificates curl gnupg lsb-release"
-    ssh_exec "curl -fsSL https://download.docker.com/linux/$OS/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg"
-    ssh_exec "echo \"deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/$OS \$(lsb_release -cs) stable\" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null"
-    ssh_exec "sudo apt-get update -y && sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin"
+  local password="$JENKINS_PASSWORD"
 
-  elif [[ "$OS" == "rhel" || "$OS" == "centos" || "$OS" == "fedora" || "$OS" == "amzn" ]]; then
-    ssh_exec "sudo yum remove -y docker docker-client docker-client-latest docker-common docker-latest docker-latest-logrotate docker-logrotate docker-engine || true"
-    local PKG_MGR
-    PKG_MGR=$(ssh_exec "command -v dnf || command -v yum")
-    ssh_exec "sudo \$($PKG_MGR) update -y"
-    ssh_exec "sudo \$($PKG_MGR) install -y yum-utils"
-    ssh_exec "sudo yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo"
-    ssh_exec "sudo \$($PKG_MGR) install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin"
+  # Groovy 파일을 EC2 /tmp 디렉토리에 업로드
+  upload_file "$local_groovy_path" "/tmp/${pipeline_name}_create_pipeline.groovy"
 
-  else
-    error_exit "[Docker] 지원되지 않는 운영체제: $OS"
-  fi
+  # 업로드된 Groovy 스크립트를 이용해 Jenkins에 파이프라인 생성
+  ssh_exec "java -jar jenkins-cli.jar -s http://localhost:${SERVER[jenkins_port]} -auth admin:$password groovy = < /tmp/${pipeline_name}_create_pipeline.groovy"
 
-  ssh_exec "sudo systemctl enable docker && sudo systemctl start docker"
-  log "[Docker] Docker 설치 및 서비스 시작 완료."
+  # (선택) 사용 후 Groovy 파일 삭제
+  ssh_exec "rm -f /tmp/${pipeline_name}_create_pipeline.groovy"
+
+  log "[Jenkins] 파이프라인 생성 완료: $pipeline_name"
 }
 
-# Docker Compose 설치 (구버전 standalone 설치 방식 - 필요 시)
-install_docker_compose() {
-  log "[Docker] Standalone Docker Compose 설치 중..."
+# Jenkins 파이프라인 실행
+run_jenkins_pipeline() {
+  local pipeline_name="$1"
+  log "[Jenkins] 파이프라인 실행: $pipeline_name"
 
-  local compose_version
-  compose_version=$(ssh_exec "curl -s https://api.github.com/repos/docker/compose/releases/latest | grep 'tag_name' | cut -d'\"' -f4")
+  local password="$JENKINS_PASSWORD"
 
-  ssh_exec "sudo curl -L \"https://github.com/docker/compose/releases/download/${compose_version}/docker-compose-\$(uname -s)-\$(uname -m)\" -o /usr/local/bin/docker-compose"
-  ssh_exec "sudo chmod +x /usr/local/bin/docker-compose"
-
-  log "[Docker] Docker Compose (standalone) ${compose_version} 설치 완료."
+  ssh_exec "curl -X POST http://localhost:${SERVER[jenkins_port]}/job/${pipeline_name}/build --user admin:$password"
 }
 
-# Docker 버전 확인
-check_docker_version() {
-  log "[Docker] Docker 버전 확인 중..."
-  ssh_exec "docker --version"
+# Jenkins 빌드 상태 확인
+check_build_status() {
+  local pipeline_name="$1"
+  local build_number="${2:-lastBuild}"
+
+  log "[Jenkins] 빌드 상태 확인: ${pipeline_name} #${build_number}"
+
+  local password="$JENKINS_PASSWORD"
+
+  ssh_exec "curl -s http://localhost:${SERVER[jenkins_port]}/job/${pipeline_name}/${build_number}/api/json --user admin:$password | grep 'result'"
 }
 
-# Docker Compose 버전 확인
-check_docker_compose_version() {
-  log "[Docker] Docker Compose 버전 확인 중..."
-  if ! ssh_exec "docker compose version"; then
-    log "[Docker] Compose v2 플러그인이 설치되지 않은 것 같습니다. standalone 버전 확인 시도합니다."
-    ssh_exec "docker-compose --version"
-  fi
+# Jenkins 파이프라인 목록 조회
+list_jenkins_pipelines() {
+  log "[Jenkins] 파이프라인 목록 조회"
+
+  local password="$JENKINS_PASSWORD"
+
+  ssh_exec "curl -s http://localhost:${SERVER[jenkins_port]}/api/json?tree=jobs[name] --user admin:$password | grep 'name'"
 }
 
 # Docker 레지스트리 로그인
+# registry, username, password는 모두 인자로 전달
+# ex) docker_registry_login "docker.io" "myuser" "mypassword"
 docker_registry_login() {
   local registry="$1"
   local username="$2"
+  local password="$3"
 
   log "[Docker] 레지스트리 로그인 중: $registry"
 
-  read -s -p "도커 레지스트리 비밀번호 입력: " docker_password
-  echo ""
-
-  if ssh_exec "echo '$docker_password' | docker login $registry -u $username --password-stdin"; then
+  if ssh_exec "echo '$password' | docker login $registry -u $username --password-stdin"; then
     log "[Docker] 레지스트리 로그인 성공."
   else
     error_exit "[Docker] 레지스트리 로그인 실패."
