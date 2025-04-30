@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class BranchConfig {
+public class JenkinsfileBranchConfig {
 	private String branchName;
 	private boolean buildEnabled;
 	private boolean testEnabled;

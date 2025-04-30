@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class JenkinsResponseDto {
+public class JenkinsfileResponseDto {
 
 	private String content;
 	private String projectType;
@@ -21,8 +21,8 @@ public class JenkinsResponseDto {
 		this.generatedTimestamp = System.currentTimeMillis();
 	}
 
-	public static JenkinsResponseDto success(String content, String projectType) {
-		return JenkinsResponseDto.builder()
+	public static JenkinsfileResponseDto success(String content, String projectType) {
+		return JenkinsfileResponseDto.builder()
 			.content(content)
 			.projectType(projectType)
 			.success(true)
@@ -30,8 +30,8 @@ public class JenkinsResponseDto {
 			.build();
 	}
 
-	public static JenkinsResponseDto failure(String errorMessage) {
-		return JenkinsResponseDto.builder()
+	public static JenkinsfileResponseDto failure(String errorMessage) {
+		return JenkinsfileResponseDto.builder()
 			.success(false)
 			.errorMessage(errorMessage)
 			.generatedTimestamp(System.currentTimeMillis())

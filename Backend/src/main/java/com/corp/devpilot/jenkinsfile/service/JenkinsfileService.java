@@ -6,8 +6,8 @@ import org.thymeleaf.TemplateEngine;
 
 import com.corp.devpilot.global.error.code.ErrorCode;
 import com.corp.devpilot.global.error.exception.JenkinsfileException;
-import com.corp.devpilot.jenkinsfile.domain.dto.BranchConfig;
-import com.corp.devpilot.jenkinsfile.domain.dto.JenkinsResponseDto;
+import com.corp.devpilot.jenkinsfile.domain.dto.JenkinsfileBranchConfig;
+import com.corp.devpilot.jenkinsfile.domain.dto.JenkinsfileResponseDto;
 import com.corp.devpilot.jenkinsfile.domain.dto.JenkinsfileRequestDto;
 
 import lombok.RequiredArgsConstructor;
@@ -24,7 +24,7 @@ public class JenkinsfileService {
 
 	private final TemplateEngine templateEngine;
 
-	public JenkinsResponseDto generateJenkinsfile(JenkinsfileRequestDto requestDto) {
+	public JenkinsfileResponseDto generateJenkinsfile(JenkinsfileRequestDto requestDto) {
 		try {
 			validateRequest(requestDto);
 
@@ -32,7 +32,7 @@ public class JenkinsfileService {
 
 			String jenkinsfileContent = replaceVariables(templateContent, requestDto);
 
-			return JenkinsResponseDto.success(jenkinsfileContent, requestDto.getProjectType().toString());
+			return JenkinsfileResponseDto.success(jenkinsfileContent, requestDto.getJenkinsfileProjectType().toString());
 		} catch (IOException e) {
 			throw new JenkinsfileException(ErrorCode.JENKINS_TEMPLATE_ERROR);
 		} catch (Exception e) {
@@ -88,7 +88,7 @@ public class JenkinsfileService {
 	private String replaceBranchConfigs(String template, JenkinsfileRequestDto requestDto) {
 		StringBuilder branchConfigsStr = new StringBuilder();
 
-		for (BranchConfig config : requestDto.getBranchConfigs()) {
+		for (JenkinsfileBranchConfig config : requestDto.getJenkinsfileBranchConfigs()) {
 			branchConfigsStr.append("        [branchName: '")
 				.append(config.getBranchName())
 				.append("', buildEnabled: ")
@@ -112,7 +112,7 @@ public class JenkinsfileService {
 			throw new JenkinsfileException(ErrorCode.INVALID_INPUT_VALUE);
 		}
 
-		if (requestDto.getProjectType() == null) {
+		if (requestDto.getJenkinsfileProjectType() == null) {
 			throw new JenkinsfileException(ErrorCode.INVALID_ENUM_VALUE);
 		}
 
@@ -128,7 +128,7 @@ public class JenkinsfileService {
 			throw new JenkinsfileException(ErrorCode.JENKINS_INVALID_CREDENTIAL_ID);
 		}
 
-		if (requestDto.getBranchConfigs() == null || requestDto.getBranchConfigs().isEmpty()) {
+		if (requestDto.getJenkinsfileBranchConfigs() == null || requestDto.getJenkinsfileBranchConfigs().isEmpty()) {
 			throw new JenkinsfileException(ErrorCode.JENKINS_INVALID_BRANCH_CONFIG);
 		}
 

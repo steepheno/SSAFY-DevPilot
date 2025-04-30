@@ -2,7 +2,7 @@ package com.corp.devpilot.jenkinsfile.domain.dto;
 
 import java.util.List;
 
-import com.corp.devpilot.jenkinsfile.domain.ProjectType;
+import com.corp.devpilot.jenkinsfile.domain.JenkinsfileProjectType;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,11 +17,11 @@ import lombok.Setter;
 @AllArgsConstructor
 public class JenkinsfileRequestDto {
 
-	private ProjectType projectType;
+	private JenkinsfileProjectType jenkinsfileProjectType;
 	private String projectName;
 	private String gitRepositoryUrl;
 	private String gitCredentialsId;
-	private List<BranchConfig> branchConfigs;
+	private List<JenkinsfileBranchConfig> jenkinsfileBranchConfigs;
 
 	private String JavaVersion;
 
