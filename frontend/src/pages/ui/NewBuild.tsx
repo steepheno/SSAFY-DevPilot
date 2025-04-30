@@ -1,11 +1,11 @@
 import PageLayout from "@/shared/ui/PageLayout";
 
-const MainPage = () => {
+const NewBuildPage = () => {
   return (
     <PageLayout>
-      <p>Main</p>
+      <div>newbuildpage</div>
     </PageLayout>
   );
 };
 
-export default MainPage;
+export default NewBuildPage;
