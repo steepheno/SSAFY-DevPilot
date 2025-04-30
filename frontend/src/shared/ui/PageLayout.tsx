@@ -1,7 +1,9 @@
+import { ReactNode } from "react";
+
 import Header from "./Header";
 import Sidebar from "./Sidebar";
 
-const PageLayout = ({ children }) => {
+const PageLayout = ({ children }: { children: ReactNode }) => {
   return (
     <div className="h-screen overflow-y-auto">
       <Header />
