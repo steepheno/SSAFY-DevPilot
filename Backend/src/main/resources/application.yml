@@ -8,6 +8,11 @@ spring:
     suffix: .txt
     mode: TEXT
 
+  jackson:
+    default-property-inclusion: non_null
+    serialization:
+      fail-on-empty-beans: false
+
 server:
   port: ${PORT:8080}
   compression:
@@ -50,8 +55,26 @@ server:
 logging:
   level:
     root: INFO
-    com.devpilot: DEBUG
+    com.corp.devpilot: DEBUG
     org.springframework.web: INFO
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
     file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+springdoc:
+  api-docs:
+    path: /api-docs
+    enabled: true
+  packages-to-scan: com.corp.devpilot
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+    disable-swagger-default-url: true
+    display-request-duration: true
+    filter: true
+  cache:
+    disabled: true
+  show-actuator: false
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json
