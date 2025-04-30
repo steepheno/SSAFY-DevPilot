@@ -27,6 +27,9 @@ server:
     known-hosts-file: ${user.home}/.ssh/known_hosts
 
   jenkins:
+    url: https://localhost
+    user: admin
+    token: 11035a554fcc47853bfee29c226715999a
     default-port: 7070
     cli-download-path: /jnlpJars/jenkins-cli.jar
     admin-scripts-path: classpath:/scripts/jenkins
