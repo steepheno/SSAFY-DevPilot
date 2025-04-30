@@ -1,4 +1,4 @@
-package com.corp.devpilot.jenkinsfile.dto;
+package com.corp.devpilot.jenkinsfile.domain.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

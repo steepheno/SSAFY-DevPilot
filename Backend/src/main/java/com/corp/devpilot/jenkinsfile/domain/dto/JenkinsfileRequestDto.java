@@ -1,4 +1,4 @@
-package com.corp.devpilot.jenkinsfile.dto;
+package com.corp.devpilot.jenkinsfile.domain.dto;
 
 import java.util.List;
 

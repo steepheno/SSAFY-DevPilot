@@ -6,9 +6,9 @@ import org.thymeleaf.TemplateEngine;
 
 import com.corp.devpilot.global.error.code.ErrorCode;
 import com.corp.devpilot.global.error.exception.JenkinsfileException;
-import com.corp.devpilot.jenkinsfile.dto.BranchConfig;
-import com.corp.devpilot.jenkinsfile.dto.JenkinsResponseDto;
-import com.corp.devpilot.jenkinsfile.dto.JenkinsfileRequestDto;
+import com.corp.devpilot.jenkinsfile.domain.dto.BranchConfig;
+import com.corp.devpilot.jenkinsfile.domain.dto.JenkinsResponseDto;
+import com.corp.devpilot.jenkinsfile.domain.dto.JenkinsfileRequestDto;
 
 import lombok.RequiredArgsConstructor;
 
