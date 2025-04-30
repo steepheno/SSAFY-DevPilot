@@ -1,4 +1,5 @@
 import DevPilotLogoWithoutTitle from "../../assets/devPilot-logo-without-title.svg?react";
+import Breadcrumbs from "@/widgets/Breadcrumb";
 
 const Header = () => {
   return (
@@ -8,7 +9,9 @@ const Header = () => {
           <DevPilotLogoWithoutTitle className="w-10 h-10" />
           <h1>DevPilot</h1>
         </div>
-        <div className="sticky top-0">Nav</div>
+        <div className="sticky top-0 z-10 bg-white shadow px-4 py-2">
+          <Breadcrumbs />
+        </div>
       </div>
     </>
   );
