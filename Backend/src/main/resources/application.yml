@@ -6,7 +6,12 @@ spring:
     cache: false
     prefix: classpath:/templates/
     suffix: .txt
-    mode: TXT
+    mode: TEXT
+
+  jackson:
+    default-property-inclusion: non_null
+    serialization:
+      fail-on-empty-beans: false
 
 server:
   port: ${PORT:8080}

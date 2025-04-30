@@ -1,19 +1,23 @@
 package com.corp.devpilot.jenkinsfile.service;
 
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
-import org.thymeleaf.context.Context;
-import org.thymeleaf.exceptions.TemplateEngineException;
 
 import com.corp.devpilot.global.error.code.ErrorCode;
 import com.corp.devpilot.global.error.exception.JenkinsfileException;
+import com.corp.devpilot.jenkinsfile.dto.BranchConfig;
 import com.corp.devpilot.jenkinsfile.dto.JenkinsResponseDto;
 import com.corp.devpilot.jenkinsfile.dto.JenkinsfileRequestDto;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class JenkinsfileService {
@@ -24,48 +28,83 @@ public class JenkinsfileService {
 		try {
 			validateRequest(requestDto);
 
-			Context context = createTemplateContext(requestDto);
+			String templateContent = readTemplateFile("templates/jenkinsfile/monorepo-template.txt");
 
-			String templatePath = "jenkinsfile/monorepo-template";
-
-			String jenkinsfileContent = processTemplate(templatePath, context);
+			String jenkinsfileContent = replaceVariables(templateContent, requestDto);
 
 			return JenkinsResponseDto.success(jenkinsfileContent, requestDto.getProjectType().toString());
-
-		} catch (TemplateEngineException e) {
+		} catch (IOException e) {
 			throw new JenkinsfileException(ErrorCode.JENKINS_TEMPLATE_ERROR);
 		} catch (Exception e) {
 			throw new JenkinsfileException(ErrorCode.INTERNAL_SERVER_ERROR);
 		}
 	}
 
-	private Context createTemplateContext(JenkinsfileRequestDto requestDto) {
-		Context context = new Context();
-
-		context.setVariable("projectName", requestDto.getProjectName());
-		context.setVariable("gitRepositoryUrl", requestDto.getGitRepositoryUrl());
-		context.setVariable("gitCredentialsId", requestDto.getGitCredentialsId());
-		context.setVariable("branchConfigs", requestDto.getBranchConfigs());
-		context.setVariable("javaVersion", requestDto.getJavaVersion());
-		context.setVariable("frontendDir", requestDto.getFrontendDir());
-		context.setVariable("backendDir", requestDto.getBackendDir());
-
-		context.setVariable("mattermostNotification", requestDto.isMattermostNotification());
-		if (requestDto.isMattermostNotification()) {
-			context.setVariable("mattermostWebhookUrl", requestDto.getMattermostWebhookUrl());
-			context.setVariable("mattermostChannel", requestDto.getMattermostChannel());
+	private String readTemplateFile(String path) throws IOException {
+		try (BufferedReader reader = new BufferedReader(
+			new InputStreamReader(new ClassPathResource(path).getInputStream(), StandardCharsets.UTF_8))) {
+			return reader.lines().collect(Collectors.joining("\n"));
 		}
-
-		return context;
 	}
 
-	private String processTemplate(String templatePath, Context context) {
-		try {
-			return templateEngine.process(templatePath, context);
-		} catch (TemplateEngineException e) {
-			log.error("템플릿 처리 중 오류 발생: {}", e.getMessage(), e);
-			throw new JenkinsfileException(ErrorCode.JENKINS_TEMPLATE_ERROR);
+	private String replaceVariables(String template, JenkinsfileRequestDto requestDto) {
+		String result = template;
+
+		result = result.replace("[(${projectName})]", requestDto.getProjectName());
+		result = result.replace("[(${gitRepositoryUrl})]", requestDto.getGitRepositoryUrl());
+		result = result.replace("[(${gitCredentialsId})]", requestDto.getGitCredentialsId());
+		result = result.replace("[(${javaVersion})]", requestDto.getJavaVersion());
+		result = result.replace("[(${frontendDir})]", requestDto.getFrontendDir());
+		result = result.replace("[(${backendDir})]", requestDto.getBackendDir());
+
+		result = result.replace("##BRANCH_NAME##", "${BRANCH_NAME}");
+		result = result.replace("[(${BRANCH_NAME_VAR})]", "${BRANCH_NAME}");
+
+		if (requestDto.isMattermostNotification()) {
+			result = result.replace("[# th:if=\"${mattermostNotification}\"]", "");
+			result = result.replace("[/]", "");
+			result = result.replace("[(${mattermostWebhookUrl})]", requestDto.getMattermostWebhookUrl());
+			result = result.replace("[(${mattermostChannel})]", requestDto.getMattermostChannel());
+		} else {
+			result = removeMattermostSection(result);
 		}
+
+		result = replaceBranchConfigs(result, requestDto);
+
+		return result;
+	}
+
+	private String removeMattermostSection(String template) {
+		int startIdx = template.indexOf("[# th:if=\"${mattermostNotification}\"]");
+		int endIdx = template.indexOf("[/]", startIdx);
+
+		if (startIdx >= 0 && endIdx >= 0) {
+			return template.substring(0, startIdx) + template.substring(endIdx + 3);
+		}
+
+		return template;
+	}
+
+	private String replaceBranchConfigs(String template, JenkinsfileRequestDto requestDto) {
+		StringBuilder branchConfigsStr = new StringBuilder();
+
+		for (BranchConfig config : requestDto.getBranchConfigs()) {
+			branchConfigsStr.append("        [branchName: '")
+				.append(config.getBranchName())
+				.append("', buildEnabled: ")
+				.append(config.isBuildEnabled())
+				.append(", testEnabled: ")
+				.append(config.isTestEnabled())
+				.append(", deployEnabled: ")
+				.append(config.isDeployEnabled())
+				.append("],\n");
+		}
+
+		if (branchConfigsStr.length() > 0) {
+			branchConfigsStr.setLength(branchConfigsStr.length() - 2);
+		}
+
+		return template.replace("##BRANCH_CONFIGS##", branchConfigsStr.toString());
 	}
 
 	private void validateRequest(JenkinsfileRequestDto requestDto) {

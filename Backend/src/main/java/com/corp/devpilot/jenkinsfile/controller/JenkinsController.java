@@ -1,5 +1,6 @@
 package com.corp.devpilot.jenkinsfile.controller;
 
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,9 +22,11 @@ public class JenkinsController {
 
 	private final JenkinsfileService jenkinsfileService;
 
-	@PostMapping("/generate")
+	@PostMapping(value = "/generate", produces = "application/json")
 	public ResponseEntity<JenkinsResponseDto> generateJenkinsfile(@RequestBody JenkinsfileRequestDto requestDto) {
 		JenkinsResponseDto responseDto = jenkinsfileService.generateJenkinsfile(requestDto);
-		return ResponseEntity.ok(responseDto);
+		return ResponseEntity.ok()
+			.contentType(MediaType.APPLICATION_JSON)
+			.body(responseDto);
 	}
 }
