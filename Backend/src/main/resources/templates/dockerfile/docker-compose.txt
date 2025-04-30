@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: ##PROJECT_NAME##-backend
+    ports:
+      - "##BACKEND_PORT##:##BACKEND_PORT##"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+    restart: always
+    networks:
+      - ##PROJECT_NAME##-network
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: ##PROJECT_NAME##-frontend
+    ports:
+      - "##FRONTEND_PORT##:##FRONTEND_PORT##"
+    depends_on:
+      - backend
+    restart: always
+    networks:
+      - ##PROJECT_NAME##-network
+
+  ##ADDITIONAL_SERVICES##
+
+networks:
+  ##PROJECT_NAME##-network:
+    driver: bridge
+
+volumes:
+  mysql-data:
+  redis-data:
