@@ -1,7 +1,9 @@
+import Sidebar from "@/shared/ui/Sidebar";
+
 const MainPage = () => {
   return (
     <div>
-      <p>Main</p>
+      <Sidebar />
     </div>
   );
 };

@@ -1,7 +1,9 @@
+import Sidebar from "@/shared/ui/Sidebar";
+
 const RepositorySettings = () => {
   return (
     <div>
-      <p>RepositorySettings</p>
+      <Sidebar />
     </div>
   );
 };
