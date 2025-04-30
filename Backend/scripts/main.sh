@@ -86,10 +86,10 @@ main() {
 
   if ! check_jenkins_installed; then
     remove_existing_installations
-    install_java_jenkins
-    install_docker
-    install_jenkins_plugins
   fi
+  install_java_jenkins
+  install_docker
+  install_jenkins_plugins
 
   configure_jenkins_user
   setup_security_options
