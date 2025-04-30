@@ -35,8 +35,10 @@ upload_file() {
   local local_path="$1"
   local remote_path="$2"
 
-  if ! scp -i "${SERVER[pem_path]}" "$local_path" "${SERVER[host]}:$remote_path"; then
-    return 1
+  log "[UPLOAD] $local_path → ${SERVER[host]}:$remote_path"
+
+  if ! scp -i "${SERVER[pem_path]}" -o StrictHostKeyChecking=no "$local_path" "${SERVER[host]}:$remote_path"; then
+    error_exit "📦 파일 업로드 실패: $local_path"
   fi
 }
 
@@ -68,4 +70,8 @@ check_ssh_fingerprint() {
     log "경고: PEM 키 핑거프린트 확인 실패."
     return 1
   fi
+}
+
+upload_project_files() {
+  local backend-dockerfile="$1"
 }
