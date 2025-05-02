@@ -20,6 +20,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import com.corp.devpilot.global.error.code.ErrorCode;
+import com.corp.devpilot.global.error.exception.JenkinsApiException;
 import com.corp.devpilot.jenkinsapi.domain.dto.CrumbDto;
 import com.corp.devpilot.jenkinsapi.parser.JenkinsParser;
 
@@ -67,7 +69,7 @@ public class TokenManager {
 			}
 			return Files.readString(tokenFile.toPath(), StandardCharsets.UTF_8).trim();
 		} catch (Exception e) {
-			throw new IllegalStateException("Cannot read token file", e);
+			throw new JenkinsApiException(ErrorCode.JENKINS_INVALID_TOKEN_FILE);
 		}
 	}
 
@@ -91,12 +93,7 @@ public class TokenManager {
 		if (crumbEntity == null
 			|| !crumbEntity.getStatusCode().is2xxSuccessful()
 			|| crumbEntity.getBody() == null) {
-			throw new IllegalStateException(
-				"Failed to fetch crumb: status="
-					+ (crumbEntity == null ? "null" : crumbEntity.getStatusCode())
-					+ ", body=" + (crumbEntity == null
-					? "null" : crumbEntity.getBody())
-			);
+			throw new JenkinsApiException(ErrorCode.JENKINS_EMPTY_CRUMB);
 		}
 
 		CrumbDto crumb = JenkinsParser.parseCrumb(crumbEntity.getBody());
@@ -105,7 +102,7 @@ public class TokenManager {
 		// crumbEntity.getHeaders().getFirst("Set-Cookie") 예: "JSESSIONID=abc123; Path=/; HttpOnly"
 		String setCookie = crumbEntity.getHeaders().getFirst(HttpHeaders.SET_COOKIE);
 		if (setCookie == null) {
-			throw new IllegalStateException("No JSESSIONID in crumb response");
+			throw new JenkinsApiException(ErrorCode.JENKINS_EMPTY_COOKIE);
 		}
 		// 세미콜론 앞부분만 가져와 "JSESSIONID=abc123"
 		String jsessionPair = setCookie.split(";", 2)[0];
@@ -113,7 +110,7 @@ public class TokenManager {
 		// 3) 토큰명 생성
 		String tokenName = "token-" + System.currentTimeMillis();
 
-		// 4) POST 요청에 쿠키 값만 전달
+		// 4) POST 요청에 쿠키 값 전달
 		ResponseEntity<String> tokenEntity = webClientForAuth.mutate()
 			.defaultHeaders(h -> {
 				h.setBasicAuth(user, initialPassword);
@@ -130,6 +127,9 @@ public class TokenManager {
 			.block();
 
 		// 5) tokenValue 파싱 & 저장 (기존대로)
+		if (tokenEntity == null || !tokenEntity.getStatusCode().is2xxSuccessful() || tokenEntity.getBody() == null) {
+			throw new JenkinsApiException(ErrorCode.JENKINS_EMPTY_TOKEN);
+		}
 		String response = tokenEntity.getBody();
 		String tokenValue = new JSONObject(response)
 			.getJSONObject("data")
@@ -139,7 +139,7 @@ public class TokenManager {
 		if (parentDir != null && !parentDir.exists()) {
 			boolean created = parentDir.mkdirs();
 			if (!created) {
-				throw new IllegalStateException("Failed to create directory: " + parentDir.getAbsolutePath());
+				throw new JenkinsApiException(ErrorCode.JENKINS_DIRECTORY_CREATE_ERROR);
 			}
 		}
 

@@ -11,23 +11,22 @@ import com.corp.devpilot.jenkinsapi.domain.dto.JenkinsInfoDto;
 import com.corp.devpilot.jenkinsapi.service.JenkinsApiService;
 import com.corp.devpilot.jenkinsapi.service.TokenManager;
 
+import lombok.RequiredArgsConstructor;
+
 @RestController
-@RequestMapping("/api/jenkins")
+@RequestMapping("/api/jenkinsapi")
+@RequiredArgsConstructor
 public class JenkinsApiController {
 
 	private final JenkinsApiService svc;
 	private final TokenManager tokenManager;
-
-	public JenkinsApiController(JenkinsApiService svc, TokenManager tokenManager) {
-		this.svc = svc;
-		this.tokenManager = tokenManager;
-	}
 
 	@GetMapping("/info")
 	public ResponseEntity<JenkinsInfoDto> getInfo() {
 		return ResponseEntity.ok(svc.fetchInfo());
 	}
 
+	// api token 테스트 용. 나중에 삭제
 	public static class LoginRequest {
 		public String initialPassword;
 	}
