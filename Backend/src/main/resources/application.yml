@@ -38,6 +38,10 @@ server:
       - credentials-binding
       - ssh-credentials
 
+  jenkinsfile:
+    output:
+      directory: ./result/jenkinsfile
+
   logging:
     file-path: ${user.home}/.devpilot/logs
     keep-days: 7

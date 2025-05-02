@@ -1,5 +1,13 @@
 package com.corp.devpilot.jenkinsfile.service;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.stream.Collectors;
+
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
@@ -7,16 +15,10 @@ import org.thymeleaf.TemplateEngine;
 import com.corp.devpilot.global.error.code.ErrorCode;
 import com.corp.devpilot.global.error.exception.JenkinsfileException;
 import com.corp.devpilot.jenkinsfile.domain.dto.JenkinsfileBranchConfig;
-import com.corp.devpilot.jenkinsfile.domain.dto.JenkinsfileResponseDto;
 import com.corp.devpilot.jenkinsfile.domain.dto.JenkinsfileRequestDto;
+import com.corp.devpilot.jenkinsfile.domain.dto.JenkinsfileResponseDto;
 
 import lombok.RequiredArgsConstructor;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -32,7 +34,8 @@ public class JenkinsfileService {
 
 			String jenkinsfileContent = replaceVariables(templateContent, requestDto);
 
-			return JenkinsfileResponseDto.success(jenkinsfileContent, requestDto.getJenkinsfileProjectType().toString());
+			return JenkinsfileResponseDto.success(jenkinsfileContent,
+				requestDto.getJenkinsfileProjectType().toString());
 		} catch (IOException e) {
 			throw new JenkinsfileException(ErrorCode.JENKINS_TEMPLATE_ERROR);
 		} catch (Exception e) {
@@ -142,6 +145,43 @@ public class JenkinsfileService {
 
 		if (requestDto.getBackendDir() == null || requestDto.getBackendDir().isEmpty()) {
 			throw new JenkinsfileException(ErrorCode.JENKINS_INVALID_DIRECTORY);
+		}
+	}
+
+	public String saveJenkinsfileToFile(JenkinsfileRequestDto requestDto, String targetDirectory) {
+		try {
+			validateRequest(requestDto);
+
+			String templateContent = readTemplateFile("templates/jenkinsfile/monorepo-template.txt");
+			String jenkinsfileContent = replaceVariables(templateContent, requestDto);
+
+			File directory;
+			if (targetDirectory.startsWith("./") || !targetDirectory.startsWith("/")) {
+				String projectRoot = new File("").getAbsolutePath();
+				directory = new File(projectRoot, targetDirectory.startsWith("./") ?
+					targetDirectory.substring(2) : targetDirectory);
+			} else {
+				directory = new File(targetDirectory);
+			}
+
+			if (!directory.exists()) {
+				if (!directory.mkdirs()) {
+					throw new JenkinsfileException(ErrorCode.JENKINS_DIRECTORY_CREATE_ERROR);
+				}
+			}
+
+			String fileName = "Jenkinsfile_" + requestDto.getProjectName().replaceAll("[^a-zA-Z0-9]", "_");
+			File jenkinsfile = new File(directory, fileName);
+
+			try (FileWriter writer = new FileWriter(jenkinsfile)) {
+				writer.write(jenkinsfileContent);
+			}
+
+			return jenkinsfile.getAbsolutePath();
+		} catch (IOException e) {
+			throw new JenkinsfileException(ErrorCode.JENKINS_TEMPLATE_ERROR);
+		} catch (Exception e) {
+			throw new JenkinsfileException(ErrorCode.INTERNAL_SERVER_ERROR);
 		}
 	}
 }
