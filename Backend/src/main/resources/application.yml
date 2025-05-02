@@ -14,7 +14,7 @@ spring:
       fail-on-empty-beans: false
 
 server:
-  port: ${PORT:8080}
+  port: ${PORT:3000}
   compression:
     enabled: true
   error:
@@ -29,6 +29,7 @@ ssh:
   jenkins:
     url: https://localhost
     user: admin
+    tokenFile: ${user.home}/.devpilot/jenkins_api_token.txt
     token: 11035a554fcc47853bfee29c226715999a
     default-port: 7070
     cli-download-path: /jnlpJars/jenkins-cli.jar
