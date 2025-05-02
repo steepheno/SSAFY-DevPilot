@@ -1,7 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom';
 import Main from '@/pages/ui/Main';
-import RepositorySettings from '@/pages/ui/RepositorySettings';
-import EnvironmentSettings from '@/pages/ui/EnvironmentSettings';
+import JenkinsSettings from '@/pages/ui/JenkinsSettings';
+import DockerfileSettings from '@/pages/ui/DockerSettings';
 import Configure from '@/pages/ui/Configure';
 import NewBuildPage from '@/pages/ui/NewBuild/NewBuildPage';
 
@@ -18,11 +18,11 @@ const Router = createBrowserRouter([
     children: [
       {
         path: 'repository',
-        element: <RepositorySettings />,
+        element: <JenkinsSettings />,
       },
       {
         path: 'environment',
-        element: <EnvironmentSettings />,
+        element: <DockerfileSettings />,
       },
       {
         path: 'configure',
