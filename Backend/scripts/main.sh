@@ -22,7 +22,7 @@ source "$SCRIPT_DIR/docker_helper.sh"
 declare -A SERVER=(
   [pem_path]=""
   [host]=""
-  [jenkins_port]="8080"
+  [jenkins_port]="7070"
   [config_dir]="/opt/jenkins_config"
 )
 

@@ -103,3 +103,95 @@ EOF
 
   log "[Jenkins] 보안 설정 완료."
 }
+
+register_git_credentials() {
+  local provider="$1"
+  local token="$2"
+  local cred_id="$3"
+
+  cat <<EOF > "/tmp/${cred_id}.xml"
+<com.cloudbees.plugins.credentials.impl.StringCredentialsImpl>
+  <scope>GLOBAL</scope>
+  <id>${cred_id}</id>
+  <description>${provider} token</description>
+  <secret>${token}</secret>
+</com.cloudbees.plugins.credentials.impl.StringCredentialsImpl>
+EOF
+
+  ssh_exec "wget -q -O /tmp/jenkins-cli.jar http://localhost:${SERVER[jenkins_port]}/jnlpJars/jenkins-cli.jar"
+
+  ssh_exec "cat > /tmp/${cred_id}.xml" < "/tmp/${cred_id}.xml"
+
+  ssh_exec "java -jar /tmp/jenkins-cli.jar -s http://localhost:${SERVER[jenkins_port]} -auth admin:$JENKINS_PASSWORD create-credentials-by-xml system::system::jenkins _ < /tmp/${cred_id}.xml"
+
+  log "[${provider}] 자격 증명 등록 완료: ${cred_id}"
+}
+
+generate_job_config() {
+  local repo_url="$1"
+  local branch_name="$2"
+  local cred_id="$3"
+  local provider="$4"
+
+  cat <<EOF > /tmp/${project_name}-job.xml
+<?xml version='1.1' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job@2.40">
+  <description>자동 생성된 파이프라인</description>
+  <keepDependencies>false</keepDependencies>
+
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition" plugin="workflow-cps@2.94">
+    <scm class="hudson.plugins.git.GitSCM" plugin="git@5.2.1">
+      <userRemoteConfigs>
+        <hudson.plugins.git.UserRemoteConfig>
+          <url>${repo_url}</url>
+          <credentialsId>${cred_id}</credentialsId>
+        </hudson.plugins.git.UserRemoteConfig>
+      </userRemoteConfigs>
+      <branches>
+        <hudson.plugins.git.BranchSpec>
+          <name>${branch_name}</name>
+        </hudson.plugins.git.BranchSpec>
+      </branches>
+    </scm>
+    <scriptPath>Jenkinsfile</scriptPath>
+    <lightweight>true</lightweight>
+  </definition>
+
+  <triggers>
+    $(if [[ "$provider" == "gitlab" ]]; then cat <<GITLAB
+    <com.dabsquared.gitlabjenkins.GitLabPushTrigger plugin="gitlab-plugin@1.5.35">
+      <spec></spec>
+      <triggerOnPush>true</triggerOnPush>
+      <triggerOnMergeRequest>true</triggerOnMergeRequest>
+      <addVoteOnMergeRequest>true</addVoteOnMergeRequest>
+      <branchFilterType>All</branchFilterType>
+    </com.dabsquared.gitlabjenkins.GitLabPushTrigger>
+GITLAB
+    elif [[ "$provider" == "github" ]]; then cat <<GITHUB
+    <com.cloudbees.jenkins.GitHubPushTrigger plugin="github@1.37.3">
+      <spec></spec>
+    </com.cloudbees.jenkins.GitHubPushTrigger>
+GITHUB
+    fi)
+  </triggers>
+
+  <disabled>false</disabled>
+</flow-definition>
+EOF
+}
+
+create_job_in_jenkins() {
+  local job_name="$1"
+  local config_xml="/tmp/${job_name}-job.xml"
+
+  # (1) EC2로 Job XML 업로드
+  upload_file "$config_xml" "$config_xml"
+
+  # (2) EC2에서 jenkins-cli로 job 생성 명령 실행
+  ssh_exec "java -jar /tmp/jenkins-cli.jar \
+    -s http://localhost:${SERVER[jenkins_port]} \
+    -auth admin:$JENKINS_PASSWORD \
+    create-job '$job_name' < $config_xml"
+
+  log "[${job_name}] Job 생성 완료"
+}
