@@ -24,9 +24,10 @@ public enum ErrorCode {
 	JENKINS_DEPLOY_ERROR(500, "Jenkinsfile 배포 중 오류가 발생했습니다"),
 	JENKINS_FILE_UPLOAD_ERROR(500, "파일 업로드 중 오류가 발생했습니다"),
 	JENKINS_EMPTY_FILE(400, "빈 파일이 업로드되었습니다"),
+	JENKINS_DIRECTORY_CREATE_ERROR(400, "디렉토리 생성에 실패했습니다."),
 
 	// Dockerfile 관련
-	DOCKER_TEMPLATE_ERROR(500,  "Docker 템플릿 파일 처리 중 오류가 발생했습니다."),
+	DOCKER_TEMPLATE_ERROR(500, "Docker 템플릿 파일 처리 중 오류가 발생했습니다."),
 	DOCKER_INVALID_PROJECT_NAME(400, "유효하지 않은 프로젝트 이름입니다."),
 	DOCKER_INVALID_DIRECTORY(400, "유효하지 않은 디렉토리 경로입니다."),
 	DOCKER_INVALID_JAVA_VERSION(400, "유효하지 않은 Java 버전입니다."),

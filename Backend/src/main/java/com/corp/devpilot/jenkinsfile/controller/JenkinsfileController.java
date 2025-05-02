@@ -1,13 +1,15 @@
 package com.corp.devpilot.jenkinsfile.controller;
 
-import org.springframework.http.MediaType;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.corp.devpilot.jenkinsfile.domain.dto.JenkinsfileResponseDto;
 import com.corp.devpilot.jenkinsfile.domain.dto.JenkinsfileRequestDto;
 import com.corp.devpilot.jenkinsfile.service.JenkinsfileService;
 
@@ -17,16 +19,25 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/jenkins")
 @RequiredArgsConstructor
-@Tag(name = "Jenkinsfile", description = "Jenkinsfile 생성 API")
+@Tag(name = "Jenkinsfile", description = "Jenkinsfile 생성")
 public class JenkinsfileController {
 
 	private final JenkinsfileService jenkinsfileService;
 
-	@PostMapping(value = "/generate", produces = "application/json")
-	public ResponseEntity<JenkinsfileResponseDto> generateJenkinsfile(@RequestBody JenkinsfileRequestDto requestDto) {
-		JenkinsfileResponseDto responseDto = jenkinsfileService.generateJenkinsfile(requestDto);
-		return ResponseEntity.ok()
-			.contentType(MediaType.APPLICATION_JSON)
-			.body(responseDto);
+	@Value("${jenkinsfile.output.directory:./result/jenkinsfile}")
+	private String outputDirectory;
+
+	@PostMapping(value = "/generate-file")
+	public ResponseEntity<Map<String, String>> generateJenkinsfileToFile(
+		@RequestBody JenkinsfileRequestDto requestDto) {
+		String filePath = jenkinsfileService.saveJenkinsfileToFile(requestDto, outputDirectory);
+
+		Map<String, String> response = new HashMap<>();
+		response.put("message", "Jenkinsfile이 성공적으로 생성되었습니다.");
+		response.put("filePath", filePath);
+		response.put("projectType", requestDto.getJenkinsfileProjectType().toString());
+
+		return ResponseEntity.ok().body(response);
 	}
+
 }
