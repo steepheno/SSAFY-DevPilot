@@ -17,7 +17,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/jenkins")
+@RequestMapping("/api/jenkinsfile")
 @RequiredArgsConstructor
 @Tag(name = "Jenkinsfile", description = "Jenkinsfile 생성")
 public class JenkinsfileController {

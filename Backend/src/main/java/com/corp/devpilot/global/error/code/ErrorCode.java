@@ -34,7 +34,13 @@ public enum ErrorCode {
 	DOCKER_INVALID_JAVA_VERSION(400, "유효하지 않은 Java 버전입니다."),
 	DOCKER_INVALID_PORT(400, "유효하지 않은 포트 설정입니다."),
 	DOCKER_INVALID_MYSQL_CONFIG(400, "MySQL 설정이 완전하지 않습니다."),
-	DOCKER_DIRECTORY_CREATE_ERROR(400, "디렉토리 생성에 실패했습니다.");
+	DOCKER_DIRECTORY_CREATE_ERROR(400, "디렉토리 생성에 실패했습니다."),
+
+	// JenkinsApi 관련
+	JENKINS_EMPTY_CRUMB(500, "유효하지 않은 crumb 입니다."),
+	JENKINS_EMPTY_COOKIE(500, "유효하지 않은 Jenkins Cookie 입니다."),
+	JENKINS_INVALID_TOKEN_FILE(500, "유효하지 않은 token file 입니다."),
+	JENKINS_EMPTY_TOKEN(500, "토큰 발급이 이루어지지 않았습니다.");
 
 	private final int status;
 	private final String message;
