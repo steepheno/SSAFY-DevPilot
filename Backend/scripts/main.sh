@@ -94,6 +94,9 @@ main() {
   configure_jenkins_user
   setup_security_options
 
+  upload_file "$SCRIPT_DIR/setup_jenkins_system_config.groovy" "/tmp/setup_jenkins_system_config.groovy"
+  ssh_exec "java -jar /tmp/jenkins-cli.jar -s http://localhost:${SERVER[jenkins_port]} -auth admin:$JENKINS_PASSWORD groovy = < /tmp/setup_jenkins_system_config.groovy"
+
   log "[메인] Jenkins 설치 및 설정 완료!"
   log "URL: http://${SERVER[host]}:${SERVER[jenkins_port]}"
 }
