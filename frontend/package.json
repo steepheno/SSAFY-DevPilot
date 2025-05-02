@@ -11,10 +11,16 @@
   },
   "dependencies": {
     "lucide-react": "^0.503.0",
+    "emblor": "^1.4.8",
+    "@radix-ui/react-checkbox": "^1.2.3",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
     "path": "^0.12.7",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router-dom": "^7.5.3"
+    "react-router-dom": "^7.5.3",
+    "tailwind-merge": "^3.2.0",
+    "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
     "@eslint/js": "^9.22.0",
