@@ -23,7 +23,7 @@ const MainPage = () => {
           )}
           <div className="flex justify-end">
             <button
-              className="flex items-center rounded-lg bg-gray-100 px-3 py-2 text-gray-800"
+              className="flex items-center rounded-lg bg-gray-100 px-3 py-2"
               onClick={() => setIsEditMode(true)}
             >
               <Pencil />
