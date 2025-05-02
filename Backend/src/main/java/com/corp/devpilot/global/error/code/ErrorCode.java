@@ -32,7 +32,8 @@ public enum ErrorCode {
 	DOCKER_INVALID_DIRECTORY(400, "유효하지 않은 디렉토리 경로입니다."),
 	DOCKER_INVALID_JAVA_VERSION(400, "유효하지 않은 Java 버전입니다."),
 	DOCKER_INVALID_PORT(400, "유효하지 않은 포트 설정입니다."),
-	DOCKER_INVALID_MYSQL_CONFIG(400, "MySQL 설정이 완전하지 않습니다.");
+	DOCKER_INVALID_MYSQL_CONFIG(400, "MySQL 설정이 완전하지 않습니다."),
+	DOCKER_DIRECTORY_CREATE_ERROR(400, "디렉토리 생성에 실패했습니다.");
 
 	private final int status;
 	private final String message;
