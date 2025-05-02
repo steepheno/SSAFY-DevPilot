@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.corp.devpilot.jenkinsfile.domain.dto.JenkinsResponseDto;
+import com.corp.devpilot.jenkinsfile.domain.dto.JenkinsfileResponseDto;
 import com.corp.devpilot.jenkinsfile.domain.dto.JenkinsfileRequestDto;
 import com.corp.devpilot.jenkinsfile.service.JenkinsfileService;
 
@@ -18,13 +18,13 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/jenkins")
 @RequiredArgsConstructor
 @Tag(name = "Jenkinsfile", description = "Jenkinsfile 생성 API")
-public class JenkinsController {
+public class JenkinsfileController {
 
 	private final JenkinsfileService jenkinsfileService;
 
 	@PostMapping(value = "/generate", produces = "application/json")
-	public ResponseEntity<JenkinsResponseDto> generateJenkinsfile(@RequestBody JenkinsfileRequestDto requestDto) {
-		JenkinsResponseDto responseDto = jenkinsfileService.generateJenkinsfile(requestDto);
+	public ResponseEntity<JenkinsfileResponseDto> generateJenkinsfile(@RequestBody JenkinsfileRequestDto requestDto) {
+		JenkinsfileResponseDto responseDto = jenkinsfileService.generateJenkinsfile(requestDto);
 		return ResponseEntity.ok()
 			.contentType(MediaType.APPLICATION_JSON)
 			.body(responseDto);
