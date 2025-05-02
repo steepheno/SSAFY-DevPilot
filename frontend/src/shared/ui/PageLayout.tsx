@@ -1,15 +1,15 @@
-import { ReactNode } from "react";
+import { ReactNode } from 'react';
 
-import Header from "./Header";
-import Sidebar from "./Sidebar";
+import Header from './Header';
+import Sidebar from './Sidebar';
 
 const PageLayout = ({ children }: { children: ReactNode }) => {
   return (
     <div className="h-screen overflow-y-auto">
       <Header />
-      <div className="flex flex-row h-full">
+      <div className="flex h-full flex-row">
         <Sidebar />
-        <div className="flex-1 bg-green-400">{children}</div>
+        <div className="flex-1">{children}</div>
       </div>
     </div>
   );
