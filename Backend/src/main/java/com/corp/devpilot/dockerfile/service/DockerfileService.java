@@ -1,16 +1,19 @@
 package com.corp.devpilot.dockerfile.service;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 import com.corp.devpilot.dockerfile.domain.dto.DockerfileRequestDto;
-import com.corp.devpilot.dockerfile.domain.dto.DockerfileResponseDto;
 import com.corp.devpilot.global.error.code.ErrorCode;
 import com.corp.devpilot.global.error.exception.DockerfileException;
 
@@ -20,23 +23,74 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class DockerfileService {
 
-	public DockerfileResponseDto generateDockerfiles(DockerfileRequestDto dockerfileRequestDto) {
+	public Map<String, String> saveDockerfilesToFiles(DockerfileRequestDto requestDto, String baseDirectory) {
 		try {
-			validateRequest(dockerfileRequestDto);
+			validateAndSetDefaults(requestDto);
 
-			String backendDockerfile = generateBackendDockerfile(dockerfileRequestDto);
-			String frontendDockerfile = generateFrontendDockerfile(dockerfileRequestDto);
-			String dockerCompose = generateDockerCompose(dockerfileRequestDto);
-			String nginxConfigContent = dockerfileRequestDto.isUseNginx() ? generateNginxContent(dockerfileRequestDto) : null;
+			Map<String, String> generatedFilePaths = new HashMap<>();
 
-			return DockerfileResponseDto.success(
-				backendDockerfile,
-				frontendDockerfile,
-				dockerCompose,
-				nginxConfigContent
-			);
+			File baseDir = createDirectoryPath(baseDirectory);
+
+			File backendDir = createSubdirectory(baseDir, "backend");
+			File frontendDir = createSubdirectory(baseDir, "frontend");
+			File etcDir = createSubdirectory(baseDir, "etc");
+
+			String backendDockerfile = generateBackendDockerfile(requestDto);
+			String backendFilename =
+				requestDto.isUseMaven() ? "spring-maven-dockerfile.txt" : "spring-gradle-dockerfile.txt";
+			String backendFilePath = saveFileContent(backendDir, backendFilename, backendDockerfile);
+			generatedFilePaths.put("backendDockerfile", backendFilePath);
+
+			String frontendDockerfile = generateFrontendDockerfile(requestDto);
+			String frontendFilename =
+				requestDto.getDockerfileFrontendType().toString().toLowerCase() + "-dockerfile.txt";
+			String frontendFilePath = saveFileContent(frontendDir, frontendFilename, frontendDockerfile);
+			generatedFilePaths.put("frontendDockerfile", frontendFilePath);
+
+			String dockerCompose = generateDockerCompose(requestDto);
+			String dockerComposeFilePath = saveFileContent(baseDir, "docker-compose.txt", dockerCompose);
+			generatedFilePaths.put("dockerCompose", dockerComposeFilePath);
+
+			if (requestDto.isUseNginx()) {
+				String nginxConfig = generateNginxContent(requestDto);
+				String nginxConfigFilePath = saveFileContent(etcDir, "nginx.conf.txt", nginxConfig);
+				generatedFilePaths.put("nginxConfig", nginxConfigFilePath);
+
+				String nginxServiceTemplate = readTemplateFile("templates/dockerfile/etc/nginx-service.txt");
+				nginxServiceTemplate = nginxServiceTemplate.replace("##FRONTEND_PORT##",
+					String.valueOf(requestDto.getFrontendPort()));
+				nginxServiceTemplate = nginxServiceTemplate.replace("##PROJECT_NAME##", requestDto.getProjectName());
+
+				String nginxServiceFilePath = saveFileContent(etcDir, "nginx-service.txt", nginxServiceTemplate);
+				generatedFilePaths.put("nginxService", nginxServiceFilePath);
+			}
+
+			if (requestDto.isUseMySQL()) {
+				String mysqlTemplate = readTemplateFile("templates/dockerfile/etc/mysql-service.txt");
+				mysqlTemplate = mysqlTemplate.replace("##MYSQL_VERSION##", requestDto.getMysqlVersion());
+				mysqlTemplate = mysqlTemplate.replace("##MYSQL_ROOT_PASSWORD##", requestDto.getMysqlRootPassword());
+				mysqlTemplate = mysqlTemplate.replace("##MYSQL_DATABASE##", requestDto.getMysqlDatabase());
+				mysqlTemplate = mysqlTemplate.replace("##MYSQL_USER##", requestDto.getMysqlUser());
+				mysqlTemplate = mysqlTemplate.replace("##MYSQL_PASSWORD##", requestDto.getMysqlPassword());
+				mysqlTemplate = mysqlTemplate.replace("##PROJECT_NAME##", requestDto.getProjectName());
+
+				String mysqlServiceFilePath = saveFileContent(etcDir, "mysql-service.txt", mysqlTemplate);
+				generatedFilePaths.put("mysqlService", mysqlServiceFilePath);
+			}
+
+			if (requestDto.isUseRedis()) {
+				String redisTemplate = readTemplateFile("templates/dockerfile/etc/redis-service.txt");
+				redisTemplate = redisTemplate.replace("##PROJECT_NAME##", requestDto.getProjectName());
+
+				String redisServiceFilePath = saveFileContent(etcDir, "redis-service.txt", redisTemplate);
+				generatedFilePaths.put("redisService", redisServiceFilePath);
+			}
+
+			return generatedFilePaths;
 		} catch (IOException e) {
 			throw new DockerfileException(ErrorCode.DOCKER_TEMPLATE_ERROR);
+		} catch (DockerfileException e) {
+			throw e;
 		} catch (Exception e) {
 			throw new DockerfileException(ErrorCode.INTERNAL_SERVER_ERROR);
 		}
@@ -102,7 +156,8 @@ public class DockerfileService {
 		if (dockerfileRequestDto.isUseMySQL()) {
 			String mysqlTemplate = readTemplateFile("templates/dockerfile/etc/mysql-service.txt");
 			mysqlTemplate = mysqlTemplate.replace("##MYSQL_VERSION##", dockerfileRequestDto.getMysqlVersion());
-			mysqlTemplate = mysqlTemplate.replace("##MYSQL_ROOT_PASSWORD##", dockerfileRequestDto.getMysqlRootPassword());
+			mysqlTemplate = mysqlTemplate.replace("##MYSQL_ROOT_PASSWORD##",
+				dockerfileRequestDto.getMysqlRootPassword());
 			mysqlTemplate = mysqlTemplate.replace("##MYSQL_DATABASE##", dockerfileRequestDto.getMysqlDatabase());
 			mysqlTemplate = mysqlTemplate.replace("##MYSQL_USER##", dockerfileRequestDto.getMysqlUser());
 			mysqlTemplate = mysqlTemplate.replace("##MYSQL_PASSWORD##", dockerfileRequestDto.getMysqlPassword());
@@ -119,7 +174,8 @@ public class DockerfileService {
 
 		if (dockerfileRequestDto.isUseNginx()) {
 			String nginxTemplate = readTemplateFile("templates/dockerfile/etc/nginx-service.txt");
-			nginxTemplate = nginxTemplate.replace("##FRONTEND_PORT##", String.valueOf(dockerfileRequestDto.getFrontendPort()));
+			nginxTemplate = nginxTemplate.replace("##FRONTEND_PORT##",
+				String.valueOf(dockerfileRequestDto.getFrontendPort()));
 			nginxTemplate = nginxTemplate.replace("##PROJECT_NAME##", dockerfileRequestDto.getProjectName());
 
 			additionalServices.append(nginxTemplate).append("\n\n");
@@ -148,7 +204,7 @@ public class DockerfileService {
 		}
 	}
 
-	private void validateRequest(DockerfileRequestDto requestDto) {
+	private void validateAndSetDefaults(DockerfileRequestDto requestDto) {
 		if (requestDto == null) {
 			throw new DockerfileException(ErrorCode.INVALID_INPUT_VALUE);
 		}
@@ -173,8 +229,12 @@ public class DockerfileService {
 			throw new DockerfileException(ErrorCode.INVALID_ENUM_VALUE);
 		}
 
-		if (requestDto.getBackendPort() <= 0 || requestDto.getFrontendPort() <= 0) {
-			throw new DockerfileException(ErrorCode.DOCKER_INVALID_PORT);
+		if (requestDto.getBackendPort() <= 0) {
+			requestDto.setBackendPort(8080);
+		}
+
+		if (requestDto.getFrontendPort() <= 0) {
+			requestDto.setFrontendPort(3000);
 		}
 
 		if (requestDto.isUseMySQL()) {
@@ -188,4 +248,36 @@ public class DockerfileService {
 		}
 	}
 
+	private File createDirectoryPath(String directory) {
+		File dir;
+		if (directory.startsWith("./") || !directory.startsWith("/")) {
+			String projectRoot = new File("").getAbsolutePath();
+			dir = new File(projectRoot, directory.startsWith("./") ?
+				directory.substring(2) : directory);
+		} else {
+			dir = new File(directory);
+		}
+
+		if (!dir.exists() && !dir.mkdirs()) {
+			throw new DockerfileException(ErrorCode.DOCKER_DIRECTORY_CREATE_ERROR);
+		}
+
+		return dir;
+	}
+
+	private File createSubdirectory(File parentDir, String subdirName) {
+		File subdir = new File(parentDir, subdirName);
+		if (!subdir.exists() && !subdir.mkdirs()) {
+			throw new DockerfileException(ErrorCode.DOCKER_DIRECTORY_CREATE_ERROR);
+		}
+		return subdir;
+	}
+
+	private String saveFileContent(File directory, String filename, String content) throws IOException {
+		File file = new File(directory, filename);
+		try (FileWriter writer = new FileWriter(file)) {
+			writer.write(content);
+		}
+		return file.getAbsolutePath();
+	}
 }

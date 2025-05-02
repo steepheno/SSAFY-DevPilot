@@ -42,6 +42,10 @@ server:
     output:
       directory: ./result/jenkinsfile
 
+  dockerfile:
+    output:
+      directory: ./result/dockerfile
+
   logging:
     file-path: ${user.home}/.devpilot/logs
     keep-days: 7
