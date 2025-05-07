@@ -42,9 +42,9 @@ server:
       - credentials-binding
       - ssh-credentials
     github:
-      script-path: scripts/register_github_job.sh
+      script-path: ./scripts/register_github_job.sh
     gitlab:
-      script-path: scripts/register_gitlab_job.sh
+      script-path: ./scripts/register_gitlab_job.sh
 
   jenkinsfile:
     output:
@@ -94,3 +94,9 @@ springdoc:
   show-actuator: false
   default-consumes-media-type: application/json
   default-produces-media-type: application/json
+
+scripts:
+  main-path: ./scripts/main.sh
+
+ec2:
+  remote-base-dir: /home/ubuntu
