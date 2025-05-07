@@ -1,4 +1,4 @@
-interface DatabaseConfig {
+export interface DatabaseConfig {
   mysqlVersion: string;
   useRedis: boolean;
   useMySQL: boolean;
@@ -8,7 +8,7 @@ interface DatabaseConfig {
   mysqlPassword: string;
 }
 
-interface BackendConfig {
+export interface BackendConfig {
   javaVersion: string;
   jenkinsfileProjectType: string;
   backendPort: number;
@@ -16,18 +16,18 @@ interface BackendConfig {
   useMaven: boolean;
 }
 
-interface FrontendConfig {
+export interface FrontendConfig {
   frontendPort: number;
   dockerfileFrontendType: string;
   frontendDir: string;
 }
 
-interface ProjectConfig {
+export interface ProjectConfig {
   projectName: string;
   useNginx: boolean;
 }
 
-interface MattermostConfig {
+export interface MattermostConfig {
   mattermostNotification: boolean;
   mattermostWebhookUrl: string;
   mattermostChannel: string;

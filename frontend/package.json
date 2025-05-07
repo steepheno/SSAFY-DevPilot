@@ -10,11 +10,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "lucide-react": "^0.503.0",
-    "emblor": "^1.4.8",
     "@radix-ui/react-checkbox": "^1.2.3",
+    "axios": "^1.9.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "emblor": "^1.4.8",
+    "lucide-react": "^0.503.0",
     "path": "^0.12.7",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
