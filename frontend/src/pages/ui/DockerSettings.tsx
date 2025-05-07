@@ -1,4 +1,4 @@
-// import DockerfileConfig from '@/shared/types/DockerfileConfig.type';
+// import DockerfileConfig from '@/shared/types/DockerfileConfig';
 
 const DockerfileSettings = () => {
   return (

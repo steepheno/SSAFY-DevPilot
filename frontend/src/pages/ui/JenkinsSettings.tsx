@@ -5,7 +5,7 @@ import { Tag } from 'emblor';
 import { useFormData } from '@/pages/model/useFormData';
 import { ChevronRight } from 'lucide-react';
 import { generateJenkinsFile } from '@/features/api/generateJenkinsfile';
-import { JenkinsConfig } from '@/shared/types/JenkinsConfig.type';
+import { JenkinsConfig } from '@/shared/types/JenkinsConfig';
 import { useNavigate } from 'react-router-dom';
 
 const JenkinsSettings = () => {

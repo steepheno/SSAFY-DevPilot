@@ -1,4 +1,4 @@
-import { JenkinsConfig } from '@/shared/types/JenkinsConfig.type';
+import { JenkinsConfig } from '@/shared/types/JenkinsConfig';
 import axios from 'axios';
 
 interface GenerateFileResponse {
