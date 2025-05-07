@@ -6,6 +6,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.core.io.ClassPathResource;
@@ -177,6 +179,8 @@ public class JenkinsfileService {
 				writer.write(jenkinsfileContent);
 			}
 
+			uploadJenkinsfileToEc2(jenkinsfile.getAbsolutePath(), requestDto);
+
 			return jenkinsfile.getAbsolutePath();
 		} catch (IOException e) {
 			throw new JenkinsfileException(ErrorCode.JENKINS_TEMPLATE_ERROR);
@@ -184,4 +188,38 @@ public class JenkinsfileService {
 			throw new JenkinsfileException(ErrorCode.INTERNAL_SERVER_ERROR);
 		}
 	}
+
+	private void uploadJenkinsfileToEc2(String localPath, JenkinsfileRequestDto requestDto) {
+		try {
+			String scriptPath = "./scripts/upload_jenkinsfile.sh"; // 실제 경로로 조정
+
+			List<String> command = new ArrayList<>();
+			command.add("bash");
+			command.add(scriptPath);
+			command.add("--pem-path=" + requestDto.getPemPath());
+			command.add("--host=" + requestDto.getEc2Host());
+			command.add("--jenkinsfile-path=" + localPath);
+			command.add("--target-dir=" + requestDto.getRemoteTargetDir()); // null이면 default 처리됨
+
+			ProcessBuilder pb = new ProcessBuilder(command);
+			pb.redirectErrorStream(true);
+			Process process = pb.start();
+
+			try (BufferedReader reader = new BufferedReader(
+				new InputStreamReader(process.getInputStream()))) {
+				String line;
+				while ((line = reader.readLine()) != null) {
+					System.out.println("[upload_jenkinsfile.sh] " + line);
+				}
+			}
+
+			int exitCode = process.waitFor();
+			if (exitCode != 0) {
+				throw new JenkinsfileException(ErrorCode.JENKINS_FILE_UPLOAD_ERROR);
+			}
+		} catch (Exception e) {
+			throw new JenkinsfileException(ErrorCode.JENKINS_FILE_UPLOAD_ERROR);
+		}
+	}
+
 }

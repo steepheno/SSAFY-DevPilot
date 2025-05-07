@@ -12,7 +12,7 @@ import com.corp.devpilot.installation.dto.JenkinsInstallRequestDto;
 import com.corp.devpilot.installation.service.JenkinsInstallService;
 
 @RestController
-@RequestMapping("/api/jenkins")
+@RequestMapping("/api/initial-setting")
 @RequiredArgsConstructor
 @Tag(name = "Jenkins 설치", description = "Jenkins 자동 설치 실행")
 public class JenkinsInstallController {
