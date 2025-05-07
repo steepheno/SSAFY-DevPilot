@@ -25,6 +25,7 @@ public class JenkinsfileController {
 	private final JenkinsfileService jenkinsfileService;
 
 	@Value("${jenkinsfile.output.directory:./result/jenkinsfile}")
+	// 이 부분 application.yml에서 확인 필요 server 내부로 들어가있어서 인식 안 될 듯
 	private String outputDirectory;
 
 	@PostMapping(value = "/generate-file")

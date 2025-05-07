@@ -93,3 +93,6 @@ springdoc:
 
 scripts:
   main-path: ./scripts/main.sh
+
+ec2:
+  remote-base-dir: /home/ubuntu
