@@ -10,6 +10,13 @@ export interface RepositoryFormProps {
   setCredential: (value: string) => void;
 }
 
+const tagChoices: Tag[] = [
+  { id: 'dev', text: 'dev' },
+  { id: 'develop', text: 'develop' },
+  { id: 'main', text: 'main' },
+  { id: 'master', text: 'master' },
+];
+
 const FormField = ({ label, children }: { label: string; children: React.ReactNode }) => (
   <div className="space-y-2">
     <span className="block text-sm font-medium text-gray-700">{label}</span>
@@ -29,7 +36,8 @@ const RepositoryForm = ({
   const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null);
 
   return (
-    <div className="content-container">
+    <div>
+      <span className="text-xl font-bold">저장소 정보</span>
       <div className="flex gap-10">
         <FormField label="원격 저장소 주소">
           <input
@@ -48,12 +56,14 @@ const RepositoryForm = ({
             placeholder="브랜치 추가..."
             styleClasses={{
               input: 'w-full min-w-[200px] h-10 sm:max-w-[350px]',
-              inlineTagsContainer: 'bg-white py-0 gap-2',
+              inlineTagsContainer: 'w-[400px] bg-white py-0 gap-2',
               tag: {
-                body: 'bg-gray-100 p-2 text-gray-600',
+                body: 'bg-gray-100 p-1 rounded-md text-gray-600',
                 closeButton: 'text-gray-400',
               },
             }}
+            enableAutocomplete={true}
+            autocompleteOptions={tagChoices}
             activeTagIndex={activeTagIndex}
             setActiveTagIndex={setActiveTagIndex}
           />

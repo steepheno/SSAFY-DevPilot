@@ -1,9 +1,18 @@
+import { SetStateAction } from 'react';
 import CheckboxGroup, { CheckboxOption } from './CheckboxGroup';
 
 interface ProjectStructure {
   directory: string;
   portNo: string;
   selected: Record<string, boolean>;
+}
+
+interface SectionFormProps<T extends ProjectStructure> {
+  title: string;
+  options: CheckboxOption[];
+  data: T;
+  onChange: (newData: T) => void;
+  extraFields?: React.ReactNode;
 }
 
 export interface ScriptFormData {
@@ -17,15 +26,75 @@ export interface BuildScriptFormProps {
   setFormData: (value: ScriptFormData) => void;
 }
 
+const SectionForm = <T extends ProjectStructure>({
+  title,
+  // options,
+  data,
+  onChange,
+  extraFields,
+}: SectionFormProps<T>) => (
+  <section className="mb-8">
+    <span className="mb-2 text-xl font-bold">{title}</span>
+    {/* <CheckboxGroup options={options} onChange={(selected) => onChange({ ...data, selected })} /> */}
+    <div className="mt-2 flex space-x-8">
+      <div className="flex items-center space-x-2">
+        <p>경로</p>
+        <input
+          value={data.directory}
+          onChange={(e) => onChange({ ...data, directory: e.target.value })}
+          className="h-[25px] rounded border px-2"
+        />
+      </div>
+      <div className="flex items-center space-x-2">
+        <p>포트번호</p>
+        <input
+          value={data.portNo}
+          onChange={(e) => onChange({ ...data, portNo: e.target.value })}
+          className="h-[25px] rounded border px-2"
+        />
+      </div>
+    </div>
+    {extraFields && <div className="mt-2">{extraFields}</div>}
+  </section>
+);
+
+const EnvironmentSelector = ({
+  environments,
+  onChange,
+}: {
+  environments: Record<string, boolean>;
+  onChange: (newEnvs: Record<string, boolean>) => void;
+}) => {
+  const envList = ['gradle', 'maven', 'nginx', 'redis', 'mysql'] as const;
+  return (
+    <div className="mt-3 flex flex-col space-y-2">
+      {envList.map((env) => (
+        <label key={env} className="flex items-center space-x-2 capitalize">
+          <input
+            type="checkbox"
+            checked={environments[env]}
+            onChange={(e) => onChange({ ...environments, [env]: e.target.checked })}
+            className="cursor-pointer"
+          />
+          <span>{env}</span>
+        </label>
+      ))}
+    </div>
+  );
+};
+
 export const BuildScriptForm = ({ formData, setFormData }: BuildScriptFormProps) => {
-  // 프론트엔드 선택 항목
+  // 공통 업데이트 헬퍼
+  const updateSection = <K extends keyof ScriptFormData>(section: K, data: ScriptFormData[K]) => {
+    setFormData({ ...formData, [section]: data });
+  };
+
   const frontendOptions: CheckboxOption[] = [
     { id: 'frontend-react', label: 'React' },
     { id: 'frontend-vue', label: 'Vue' },
     { id: 'frontend-nextjs', label: 'Next.js' },
   ];
 
-  // 백엔드 선택 항목
   const backendOptions: CheckboxOption[] = [
     { id: 'backend-spring', label: 'Spring' },
     { id: 'backend-nodejs', label: 'Node.js' },
@@ -33,163 +102,54 @@ export const BuildScriptForm = ({ formData, setFormData }: BuildScriptFormProps)
     { id: 'backend-fastapi', label: 'FastApi' },
   ];
 
-  // 프론트엔드 선택 상태 업데이트
-  const frontendChange = (selected: Record<string, boolean>) => {
-    setFormData({
-      ...formData,
-      frontend: {
-        ...formData.frontend,
-        selected,
-      },
-    });
-  };
-
-  // 백엔드 선택 상태 업데이트
-  const backendChange = (selected: Record<string, boolean>) => {
-    setFormData({
-      ...formData,
-      backend: {
-        ...formData.backend,
-        selected,
-      },
-    });
-  };
-
-  // console.log(formData); // 추후 백엔드와 연결할 때 사용됨 (빌드 테스트를 위해 일단은 console.log로 적어둠)
-
   return (
-    <div className="content-container">
-      <div className="mt-5">
-        <h3 className="text-2xl font-bold">FrontEnd</h3>
-      </div>
-      <CheckboxGroup options={frontendOptions} onChange={frontendChange} />
-      <div className="mt-2 flex">
-        <div className="flex">
-          <p>폴더명</p>
-          <input
-            value={formData.frontend.directory}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                frontend: {
-                  ...formData.frontend,
-                  directory: e.target.value,
-                },
-              })
-            }
-            className="ml-5 h-[25px] rounded border px-2"
-          />
-        </div>
-        <div className="flex">
-          <p>포트번호</p>
-          <input
-            value={formData.frontend.portNo}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                frontend: {
-                  ...formData.frontend,
-                  portNo: e.target.value,
-                },
-              })
-            }
-            className="ml-5 h-[25px] rounded border px-2"
-          />
-        </div>
-      </div>
+    <>
+      {/* 프론트엔드 */}
+      <SectionForm
+        title="FrontEnd"
+        options={frontendOptions}
+        data={formData.frontend}
+        onChange={(data) => updateSection('frontend', data)}
+      />
 
-      <div className="mt-10">
-        <h3 className="text-2xl font-bold">BackEnd</h3>
-      </div>
-      <CheckboxGroup options={backendOptions} onChange={backendChange} />
-
-      <div className="mt-2 flex">
-        <div className="flex">
-          <p>폴더명</p>
-          <input
-            value={formData.backend.directory}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                backend: {
+      {/* 백엔드 */}
+      <SectionForm
+        title="BackEnd"
+        options={backendOptions}
+        data={formData.backend}
+        onChange={(data) => updateSection('backend', data)}
+        extraFields={
+          <div className="flex items-center space-x-2">
+            <p>Java 버전</p>
+            <select
+              value={formData.backend.javaVersion}
+              onChange={(e) =>
+                updateSection('backend', {
                   ...formData.backend,
-                  directory: e.target.value,
-                },
-              })
-            }
-            className="ml-5 h-[25px] rounded border px-2"
-          />
-        </div>
-        <div className="flex">
-          <p>포트번호</p>
-          <input
-            value={formData.backend.portNo}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                backend: {
-                  ...formData.backend,
-                  portNo: e.target.value,
-                },
-              })
-            }
-            className="ml-5 h-[25px] rounded border px-2"
-          />
-        </div>
-      </div>
+                  javaVersion: e.target.value,
+                })
+              }
+              className="h-[25px] rounded border px-2"
+            >
+              <option value="">선택하세요</option>
+              <option value="8">JDK 8</option>
+              <option value="11">JDK 11</option>
+              <option value="17">JDK 17</option>
+              <option value="21">JDK 21</option>
+            </select>
+          </div>
+        }
+      />
 
       {/* 프로젝트 환경 선택 */}
       <div className="mb-10">
         <p className="text-xl font-bold">프로젝트 환경 선택</p>
-        <div className="mt-3 flex flex-col space-y-2">
-          {['gradle', 'maven', 'nginx', 'redis', 'mysql'].map((env) => (
-            <div key={env} className="flex items-center space-x-2">
-              <input
-                id={env}
-                type="checkbox"
-                className="cursor-pointer"
-                checked={formData.projectEnvironments[env]}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    projectEnvironments: {
-                      ...formData.projectEnvironments,
-                      [env]: e.target.checked,
-                    },
-                  })
-                }
-              />
-              <label className="cursor-pointer capitalize" htmlFor={env}>
-                {env.charAt(0).toUpperCase() + env.slice(1)}
-              </label>
-            </div>
-          ))}
-        </div>
-
-        <div className="flex">
-          <p>Java 버전</p>
-          <select
-            className="ml-5 h-[25px] rounded border px-2"
-            value={formData.backend.javaVersion}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                backend: {
-                  ...formData.backend,
-                  javaVersion: e.target.value,
-                },
-              })
-            }
-          >
-            <option value="">선택하세요</option>
-            <option value="8">JDK 8</option>
-            <option value="11">JDK 11</option>
-            <option value="17">JDK 17</option>
-            <option value="21">JDK 21</option>
-          </select>
-        </div>
+        <EnvironmentSelector
+          environments={formData.projectEnvironments}
+          onChange={(envs) => setFormData({ ...formData, projectEnvironments: envs })}
+        />
       </div>
-    </div>
+    </>
   );
 };
 

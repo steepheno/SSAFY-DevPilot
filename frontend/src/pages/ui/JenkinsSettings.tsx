@@ -47,17 +47,22 @@ const JenkinsSettings = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div>
+    <>
+      <form onSubmit={handleSubmit} className="content-container">
+        {/* 프로젝트 이름 */}
         <div className="flex flex-col">
-          <label htmlFor="project-name">프로젝트 이름</label>
           <input
             value={projectName}
+            placeholder="프로젝트 이름"
+            className="border-none bg-transparent text-2xl font-bold placeholder:text-2xl focus:outline-none"
             onChange={(e) => setProjectName(e.target.value)}
-            name="project-name"
+            onKeyDown={(e) =>
+              ['Enter', 'Escape'].includes(e.key) ? e.currentTarget.blur() : undefined
+            }
           />
         </div>
 
+        {/* 저장소 폼 */}
         <RepositoryForm
           repository={data.repository}
           setRepository={(value: string) => setField('repository', value)}
@@ -66,18 +71,19 @@ const JenkinsSettings = () => {
           credential={data.credential}
           setCredential={(value) => setField('credential', value)}
         />
+
+        {/* 빌드 환경 설정 폼 */}
         <BuildScriptForm
           formData={data.script}
           setFormData={(scriptObj) => setField('script', scriptObj)}
         />
-      </div>
 
-      <button className="inline-flex cursor-pointer">
-        다음
-        <ChevronRight />
-      </button>
-      <button onClick={() => handleGenerateJenkinsFile()}>요청</button>
-    </form>
+        <button className="inline-flex cursor-pointer" onClick={() => handleGenerateJenkinsFile()}>
+          다음
+          <ChevronRight />
+        </button>
+      </form>
+    </>
   );
 };
 
