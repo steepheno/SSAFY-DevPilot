@@ -16,3 +16,5 @@ interface DockerfileConfig {
   mysqlUser: string;
   mysqlPassword: string;
 }
+
+export default DockerfileConfig;

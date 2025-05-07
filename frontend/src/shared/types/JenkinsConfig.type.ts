@@ -1,4 +1,4 @@
-interface JenkinsFileConfig {
+interface JenkinsConfig {
   jenkinsfileProjectType: string;
   projectName: string;
   gitRepositoryUrl: string;
