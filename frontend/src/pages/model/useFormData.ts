@@ -14,12 +14,22 @@ export function useFormData(
     repository: '',
     branches: [],
     credential: '',
-    script: { frontend: {}, backend: {} },
+    script: {
+      frontend: { directory: '', portNo: '', selected: {} },
+      backend: { directory: '', portNo: '', selected: {}, javaVersion: '' },
+      projectEnvironments: {
+        gradle: false,
+        maven: false,
+        nginx: false,
+        redis: false,
+        mysql: false,
+      },
+    },
   },
 ) {
   const [data, setData] = useState(initial);
 
-  const setField = <K extends keyof typeof initial>(key: K, value: (typeof initial)[K]) => {
+  const setField = <K extends keyof FormData>(key: K, value: (typeof initial)[K]) => {
     setData((prev) => ({ ...prev, [key]: value }));
   };
 
