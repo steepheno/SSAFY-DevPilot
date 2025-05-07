@@ -38,9 +38,9 @@ server:
       - credentials-binding
       - ssh-credentials
     github:
-      script-path: scripts/register_github_job.sh
+      script-path: ./scripts/register_github_job.sh
     gitlab:
-      script-path: scripts/register_gitlab_job.sh
+      script-path: ./scripts/register_gitlab_job.sh
 
   jenkinsfile:
     output:

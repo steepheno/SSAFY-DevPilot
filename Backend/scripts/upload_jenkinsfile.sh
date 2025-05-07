@@ -14,7 +14,7 @@ for arg in "$@"; do
     --pem-path=*) SERVER[pem_path]="${arg#*=}" ;;
     --host=*) SERVER[host]="${arg#*=}" ;;
     --jenkinsfile-path=*) LOCAL_PATH="${arg#*=}" ;;
-    --target-dir=*) TARGET_DIR="${arg#*=}" ;;
+    --remote-dir=*) TARGET_DIR="${arg#*=}" ;;
     *) echo "⚠️ 알 수 없는 옵션: $arg" ;;
   esac
 done

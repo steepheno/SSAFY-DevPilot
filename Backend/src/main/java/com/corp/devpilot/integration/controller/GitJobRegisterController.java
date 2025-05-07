@@ -17,10 +17,10 @@ import java.util.Map;
 public class GitJobRegisterController {
 	private final GitJobRegisterService gitJobRegisterService;
 
-	@Value("${jenkins.github.script-path}")
+	@Value("${jenkins.github.script-path:./scripts/register_github_job.sh}")
 	private String githubScriptPath;
 
-	@Value("${jenkins.gitlab.script-path}")
+	@Value("${jenkins.gitlab.script-path:./scripts/register_gitlab_job.sh}")
 	private String gitlabScriptPath;
 
 	@PostMapping("/register/github")
