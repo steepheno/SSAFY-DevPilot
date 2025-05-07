@@ -25,6 +25,7 @@ public enum ErrorCode {
 	JENKINS_FILE_UPLOAD_ERROR(500, "파일 업로드 중 오류가 발생했습니다"),
 	JENKINS_EMPTY_FILE(400, "빈 파일이 업로드되었습니다"),
 	JENKINS_DIRECTORY_CREATE_ERROR(400, "디렉토리 생성에 실패했습니다."),
+	JENKINS_JOB_CREATION_FAILED(400, "유효하지 않은 값입니다."),
 
 	// Dockerfile 관련
 	DOCKER_TEMPLATE_ERROR(500, "Docker 템플릿 파일 처리 중 오류가 발생했습니다."),
