@@ -8,6 +8,8 @@
 # SSH 연결 검증
 connect_ssh_server() {
   log "SSH 연결 테스트 중..."
+  whoami
+  log "${SERVER[pem_path]}"
 
   if ! ssh -i "${SERVER[pem_path]}" -o StrictHostKeyChecking=no -o ConnectTimeout=10 "${SERVER[host]}" "echo 연결 성공" > /dev/null 2>&1; then
     error_exit "SSH 연결 실패: PEM 키 또는 EC2 호스트를 확인해주세요."

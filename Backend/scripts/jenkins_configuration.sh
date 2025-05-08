@@ -20,7 +20,18 @@ install_jenkins_plugins() {
   ssh_exec "wget http://localhost:${SERVER[jenkins_port]}/jnlpJars/jenkins-cli.jar -O $cli_jar"
 
   local plugins=(
-    # 필요한 플러그인 리스트를 여기에 추가
+    "bootstrap5-api:5.3.3-2"
+    "gitlab-plugin:1.9.8"
+    "docker-api:3.5.0-108.v211cdd21c383"
+    "docker-compose-build-step:1.0"
+    "docker-workflow:611.v16e84da_6d3ff"
+    "docker-plugin:1274.vc0203fdf2e74"
+    "gitlab-api:5.6.0-100.v83f8f4b_f1129"
+    "gitlab-oauth:1.22"
+    "gitlab-branch-source:718.v40b_5f0e67cd3"
+    "multibranch-scan-webhook-trigger:1.0.11"
+    "workflow-aggregator:608.v67378e9d3db_1"
+    "workflow-multibranch:806.vb_b_688f609ee9"
   )
 
   for plugin in "${plugins[@]}"; do
