@@ -1,5 +1,4 @@
-import { SetStateAction } from 'react';
-import CheckboxGroup, { CheckboxOption } from './CheckboxGroup';
+import { CheckboxOption } from './CheckboxGroup';
 
 interface ProjectStructure {
   directory: string;
