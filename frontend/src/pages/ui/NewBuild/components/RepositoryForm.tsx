@@ -41,6 +41,7 @@ const RepositoryForm = ({
       <div className="flex gap-10">
         <FormField label="원격 저장소 주소">
           <input
+            required
             className="h-10 w-80"
             value={repository}
             onChange={(e) => setRepository(e.target.value)}
@@ -49,13 +50,14 @@ const RepositoryForm = ({
 
         <FormField label="빌드 브랜치">
           <TagInput
+            minTags={1}
             tags={branches}
             setTags={(newTags: any) => {
               setBranches(newTags);
             }}
             placeholder="브랜치 추가..."
             styleClasses={{
-              input: 'w-full min-w-[200px] h-10 sm:max-w-[350px]',
+              input: 'w-full min-w-[200px] h-10 md:max-w-[350px]',
               inlineTagsContainer: 'w-[400px] bg-white py-0 gap-2',
               tag: {
                 body: 'bg-gray-100 p-1 rounded-md text-gray-600',
@@ -74,6 +76,7 @@ const RepositoryForm = ({
         <input
           className="h-10 w-80"
           value={credential}
+          required
           onChange={(e) => setCredential(e.target.value)}
         />
       </FormField>
