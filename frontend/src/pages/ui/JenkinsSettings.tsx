@@ -11,6 +11,8 @@ import { useNavigate } from 'react-router-dom';
 const JenkinsSettings = () => {
   const { data, setField } = useFormData();
   const [projectName, setProjectName] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -38,20 +40,25 @@ const JenkinsSettings = () => {
 
   const navigate = useNavigate();
   const handleGenerateJenkinsFile = async () => {
+    setLoading(true);
+    setError(null);
     try {
       await generateJenkinsFile(request);
       navigate('/new/environment');
-    } catch (e) {
-      console.error(e);
+    } catch (e: any) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <>
-      <form onSubmit={handleSubmit} className="content-container">
+      <form onSubmit={handleSubmit}>
         {/* 프로젝트 이름 */}
         <div className="flex flex-col">
           <input
+            required
             value={projectName}
             placeholder="프로젝트 이름"
             className="border-none bg-transparent text-2xl font-bold placeholder:text-2xl focus:outline-none"
@@ -77,12 +84,13 @@ const JenkinsSettings = () => {
           formData={data.script}
           setFormData={(scriptObj) => setField('script', scriptObj)}
         />
-
-        <button className="inline-flex cursor-pointer" onClick={() => handleGenerateJenkinsFile()}>
-          다음
-          <ChevronRight />
-        </button>
       </form>
+
+      <button className="inline-flex cursor-pointer" onClick={() => handleGenerateJenkinsFile()}>
+        다음
+        <ChevronRight />
+      </button>
+      {error && <div>{error}</div>}
     </>
   );
 };

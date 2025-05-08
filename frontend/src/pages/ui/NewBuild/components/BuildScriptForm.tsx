@@ -39,6 +39,7 @@ const SectionForm = <T extends ProjectStructure>({
       <div className="flex items-center space-x-2">
         <p>경로</p>
         <input
+          required
           value={data.directory}
           onChange={(e) => onChange({ ...data, directory: e.target.value })}
           className="h-[25px] rounded border px-2"
@@ -47,7 +48,10 @@ const SectionForm = <T extends ProjectStructure>({
       <div className="flex items-center space-x-2">
         <p>포트번호</p>
         <input
+          required
           value={data.portNo}
+          type="number"
+          min="0"
           onChange={(e) => onChange({ ...data, portNo: e.target.value })}
           className="h-[25px] rounded border px-2"
         />
