@@ -23,7 +23,6 @@ for arg in "$@"; do
     --git-token=*) GIT_TOKEN="${arg#*=}" ;;
     --git-credentials-id=*) GIT_CREDENTIALS_ID="${arg#*=}" ;;
     --git-repo-url=*) GIT_REPO_URL="${arg#*=}" ;;
-    --git-branch=*) GIT_BRANCH="${arg#*=}" ;;
     --jenkins-job-name=*) JENKINS_JOB_NAME="${arg#*=}" ;;
     * ) echo "알 수 없는 옵션: $arg" ;;
   esac
