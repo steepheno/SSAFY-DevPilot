@@ -1,29 +1,54 @@
 package com.corp.devpilot.jenkinsapi.controller;
 
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import com.corp.devpilot.jenkinsapi.domain.dto.JenkinsInfoDto;
 import com.corp.devpilot.jenkinsapi.service.JenkinsApiService;
+import com.corp.devpilot.jenkinsapi.service.JenkinsEventService;
 import com.corp.devpilot.jenkinsapi.service.TokenManager;
 
 import lombok.RequiredArgsConstructor;
+import reactor.core.publisher.Flux;
 
 @RestController
 @RequestMapping("/api/jenkinsapi")
 @RequiredArgsConstructor
 public class JenkinsApiController {
 
-	private final JenkinsApiService svc;
+	private final JenkinsApiService jenkinsApiService;
 	private final TokenManager tokenManager;
+	private final JenkinsEventService jenkinsEventService;
 
 	@GetMapping("/info")
 	public ResponseEntity<JenkinsInfoDto> getInfo() {
-		return ResponseEntity.ok(svc.fetchInfo());
+		return ResponseEntity.ok(jenkinsApiService.fetchInfo());
+	}
+
+	@GetMapping(value = "/stream/{jobName}/{buildNumber}",
+		produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+	public Flux<ServerSentEvent<String>> streamLog(
+		@PathVariable String jobName,
+		@PathVariable int buildNumber
+	) {
+		return jenkinsEventService.streamLog(jobName, buildNumber);
+	}
+
+	/**
+	 * Jenkins 이벤트(job & pipeline) 실시간 스트리밍 (SSE)
+	 */
+	@GetMapping(value = "/events/stream/{clientId}",
+		produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+	public SseEmitter streamEvents(@PathVariable String clientId) {
+		return jenkinsEventService.streamBuildAndPipelineEvents(clientId);
 	}
 
 	// api token 테스트 용. 나중에 삭제

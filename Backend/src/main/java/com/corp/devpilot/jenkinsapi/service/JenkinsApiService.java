@@ -53,7 +53,7 @@ public class JenkinsApiService {
 	}
 
 	// 토큰 증명용
-	private WebClient authorizedClient() {
+	WebClient authorizedClient() {
 		String token = tokenManager.getToken().trim();
 		if (token.isEmpty()) {
 			throw new JenkinsApiException(ErrorCode.JENKINS_EMPTY_TOKEN);
