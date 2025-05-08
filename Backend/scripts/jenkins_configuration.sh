@@ -49,7 +49,7 @@ configure_jenkins_user() {
   log "[Jenkins] 사용자 설정 중..."
 
   if ssh_exec "[ -f ${SERVER[config_dir]}/jenkins_user ]"; then
-    export JENKINS_PASSWORD=$(ssh_exec "cat ${SERVER[config_dir]}/jenkins_user")
+    export JENKINS_PASSWORD=$(ssh_exec "sudo cat ${SERVER[config_dir]}/jenkins_user")
     log "[Jenkins] 기존 사용자 비밀번호 사용."
     return
   fi
@@ -140,56 +140,58 @@ EOF
 
 generate_job_config() {
   local repo_url="$1"
-  local branch_name="$2"
-  local cred_id="$3"
-  local provider="$4"
+  local cred_id="$2"
+  local provider="$3"
+  local project_name="$4"
 
   cat <<EOF > /tmp/${project_name}-job.xml
 <?xml version='1.1' encoding='UTF-8'?>
-<flow-definition plugin="workflow-job@2.40">
-  <description>자동 생성된 파이프라인</description>
-  <keepDependencies>false</keepDependencies>
-
-  <definition class="org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition" plugin="workflow-cps@2.94">
-    <scm class="hudson.plugins.git.GitSCM" plugin="git@5.2.1">
-      <userRemoteConfigs>
-        <hudson.plugins.git.UserRemoteConfig>
-          <url>${repo_url}</url>
+<org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject plugin="workflow-multibranch@2.26">
+  <description>${project_name} 멀티브랜치 파이프라인</description>
+  <displayName>${project_name}</displayName>
+  <sources class="jenkins.branch.MultiBranchProject\$BranchSourceList" plugin="branch-api@2.1046.v0ca_37783ecc5">
+    <data>
+      <jenkins.branch.BranchSource>
+        <source class="$(
+          if [[ "$provider" == "gitlab" ]]; then
+            echo "io.jenkins.plugins.gitlabbranchsource.GitLabSCMSource"
+          elif [[ "$provider" == "github" ]]; then
+            echo "org.jenkinsci.plugins.github_branch_source.GitHubSCMSource"
+          fi
+        )" plugin="$(
+          if [[ "$provider" == "gitlab" ]]; then
+            echo "gitlab-branch-source@718.v40b_5f0e67cd3"
+          elif [[ "$provider" == "github" ]]; then
+            echo "github-branch-source@1742.va_95fca_e5a_89c"
+          fi
+        )">
+          <id>$(uuidgen)</id>
           <credentialsId>${cred_id}</credentialsId>
-        </hudson.plugins.git.UserRemoteConfig>
-      </userRemoteConfigs>
-      <branches>
-        <hudson.plugins.git.BranchSpec>
-          <name>${branch_name}</name>
-        </hudson.plugins.git.BranchSpec>
-      </branches>
-    </scm>
+          <repoOwner>$(basename "$(dirname "$repo_url")")</repoOwner>
+          <repository>$(basename "$repo_url" .git)</repository>
+          <serverUrl>$(
+            if [[ "$provider" == "gitlab" ]]; then
+              echo "https://gitlab.com"
+            elif [[ "$provider" == "github" ]]; then
+              echo "https://github.com"
+            fi
+          )</serverUrl>
+        </source>
+        <strategy class="jenkins.branch.DefaultBranchPropertyStrategy">
+          <properties class="empty-list"/>
+        </strategy>
+      </jenkins.branch.BranchSource>
+    </data>
+    <owner class="org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject" reference="../../.."/>
+  </sources>
+  <factory class="org.jenkinsci.plugins.workflow.multibranch.WorkflowBranchProjectFactory">
+    <owner class="org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject" reference="../.."/>
     <scriptPath>Jenkinsfile</scriptPath>
-    <lightweight>true</lightweight>
-  </definition>
-
-  <triggers>
-    $(if [[ "$provider" == "gitlab" ]]; then cat <<GITLAB
-    <com.dabsquared.gitlabjenkins.GitLabPushTrigger plugin="gitlab-plugin@1.5.35">
-      <spec></spec>
-      <triggerOnPush>true</triggerOnPush>
-      <triggerOnMergeRequest>true</triggerOnMergeRequest>
-      <addVoteOnMergeRequest>true</addVoteOnMergeRequest>
-      <branchFilterType>All</branchFilterType>
-    </com.dabsquared.gitlabjenkins.GitLabPushTrigger>
-GITLAB
-    elif [[ "$provider" == "github" ]]; then cat <<GITHUB
-    <com.cloudbees.jenkins.GitHubPushTrigger plugin="github@1.37.3">
-      <spec></spec>
-    </com.cloudbees.jenkins.GitHubPushTrigger>
-GITHUB
-    fi)
-  </triggers>
-
-  <disabled>false</disabled>
-</flow-definition>
+  </factory>
+</org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject>
 EOF
 }
+
 
 create_job_in_jenkins() {
   local job_name="$1"

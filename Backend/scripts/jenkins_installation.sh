@@ -87,10 +87,21 @@ install_java_jenkins() {
     error_exit "[Jenkins] 지원되지 않는 OS: $OS"
   fi
 
-  # 젠킨스 설치 완료 후 포트 변경 적용
-  ssh_exec "sudo sed -i 's/^HTTP_PORT=.*/HTTP_PORT=${SERVER[jenkins_port]}/' /etc/default/jenkins"
+  # Systemd 포트 설정 적용
+    ssh_exec "sudo mkdir -p /etc/systemd/system/jenkins.service.d"
+#    ssh_exec "echo '[Service]' | sudo tee /etc/systemd/system/jenkins.service.d/override.conf > /dev/null"
+#    ssh_exec "echo 'ExecStart=' | sudo tee -a /etc/systemd/system/jenkins.service.d/override.conf > /dev/null"
+    ssh_exec "sudo bash -c \"cat > /etc/systemd/system/jenkins.service.d/override.conf <<EOF
+    [Service]
+    ExecStart=
+    ExecStart=/usr/bin/java -Djava.net.preferIPv4Stack=true -Djava.awt.headless=true -jar /usr/share/java/jenkins.war --webroot=/var/cache/jenkins/war --httpPort=${SERVER[jenkins_port]} --httpListenAddress=0.0.0.0
+    EOF\""
 
-  ssh_exec "sudo systemctl enable jenkins && sudo systemctl start jenkins && echo 'installed' | sudo tee ${SERVER[config_dir]}/jenkins_installed"
+    ssh_exec "sudo systemctl daemon-reexec"
+    ssh_exec "sudo systemctl daemon-reload"
+
+    # Jenkins 시작 및 상태 확인
+    ssh_exec "sudo systemctl enable jenkins && sudo systemctl start jenkins && echo 'installed' | sudo tee ${SERVER[config_dir]}/jenkins_installed"
 
   if ! check_service_status jenkins; then
     error_exit "[Jenkins] 서비스가 시작되지 않았습니다."

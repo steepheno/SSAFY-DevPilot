@@ -40,11 +40,11 @@ for arg in "$@"; do
     --jenkins-port=*)
       SERVER[jenkins_port]="${arg#*=}"
       ;;
-    --config-dir=*)
-      SERVER[config_dir]="${arg#*=}"
-      ;;
     --jenkins-password=*)
       export JENKINS_PASSWORD="${arg#*=}"
+      ;;
+    --config-dir=*)
+      SERVER[config_dir]="${arg#*=}"
       ;;
     *)
       echo "알 수 없는 옵션: $arg"
@@ -78,6 +78,18 @@ validate_server_info() {
   log "PEM 파일 권한을 400으로 설정했습니다."
 }
 
+ensure_uuidgen_installed() {
+  log "[필수 도구] uuidgen 설치 여부 확인 중..."
+
+  if ! ssh_exec "command -v uuidgen >/dev/null 2>&1"; then
+    log "[필수 도구] uuidgen이 설치되어 있지 않음. 설치 진행..."
+    ssh_exec "sudo apt-get update -y && sudo apt-get install -y uuid-runtime"
+  else
+    log "[필수 도구] uuidgen이 이미 설치되어 있음."
+  fi
+}
+
+
 # ========================================================
 # 메인 설치 프로세스
 # ========================================================
@@ -88,6 +100,8 @@ main() {
 
   validate_server_info
   connect_ssh_server
+
+  ensure_uuidgen_installed
 
 #  if check_jenkins_installed; then
   remove_existing_installations
@@ -110,7 +124,7 @@ main() {
   ssh_exec "java -jar /tmp/jenkins-cli.jar -s http://localhost:${SERVER[jenkins_port]} -auth admin:$JENKINS_PASSWORD groovy = < /tmp/setup_jenkins_system_config.groovy"
 
   log "[메인] Jenkins 설치 및 설정 완료!"
-  log "URL: http://${SERVER[host]}:${SERVER[jenkins_port]}"
+  log "URL: https://${SERVER[host]}:${SERVER[jenkins_port]}"
 }
 
 main

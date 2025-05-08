@@ -46,14 +46,9 @@ public class GitJobRegisterService {
 		List<String> command = new ArrayList<>();
 		command.add("bash");
 		command.add(scriptPath);
-		command.add("--pem-path=" + request.getPemPath());
-		command.add("--ec2-host=" + request.getEc2Host());
-		command.add("--jenkins-port=" + request.getJenkinsPort());
-		command.add("--jenkins-password=" + request.getJenkinsPassword());
 		command.add("--git-token=" + request.getGitToken());
 		command.add("--git-credentials-id=" + request.getGitCredentialsId());
 		command.add("--git-repo-url=" + request.getGitRepoUrl());
-		command.add("--git-branch=" + request.getGitBranch());
 		command.add("--jenkins-job-name=" + request.getJenkinsJobName());
 
 		ProcessBuilder processBuilder = new ProcessBuilder(command);
