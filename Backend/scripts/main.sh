@@ -40,11 +40,11 @@ for arg in "$@"; do
     --jenkins-port=*)
       SERVER[jenkins_port]="${arg#*=}"
       ;;
-    --config-dir=*)
-      SERVER[config_dir]="${arg#*=}"
-      ;;
     --jenkins-password=*)
       export JENKINS_PASSWORD="${arg#*=}"
+      ;;
+    --config-dir=*)
+      SERVER[config_dir]="${arg#*=}"
       ;;
     *)
       echo "알 수 없는 옵션: $arg"
@@ -110,7 +110,7 @@ main() {
   ssh_exec "java -jar /tmp/jenkins-cli.jar -s http://localhost:${SERVER[jenkins_port]} -auth admin:$JENKINS_PASSWORD groovy = < /tmp/setup_jenkins_system_config.groovy"
 
   log "[메인] Jenkins 설치 및 설정 완료!"
-  log "URL: http://${SERVER[host]}:${SERVER[jenkins_port]}"
+  log "URL: https://${SERVER[host]}:${SERVER[jenkins_port]}"
 }
 
 main

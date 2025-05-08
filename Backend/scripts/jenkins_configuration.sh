@@ -49,7 +49,7 @@ configure_jenkins_user() {
   log "[Jenkins] 사용자 설정 중..."
 
   if ssh_exec "[ -f ${SERVER[config_dir]}/jenkins_user ]"; then
-    export JENKINS_PASSWORD=$(ssh_exec "cat ${SERVER[config_dir]}/jenkins_user")
+    export JENKINS_PASSWORD=$(ssh_exec "sudo cat ${SERVER[config_dir]}/jenkins_user")
     log "[Jenkins] 기존 사용자 비밀번호 사용."
     return
   fi
