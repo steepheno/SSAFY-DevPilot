@@ -24,7 +24,10 @@ import java.util.Properties;
 public class JenkinsInstallService {
 
 	@Value("${scripts.main-path}")
-	private static String MAIN_SCRIPT_PATH; // 실제 경로로 변경 필요
+	private String MAIN_SCRIPT_PATH; // 실제 경로로 변경 필요
+
+	@Value("${ec2.remote-base-dir}")
+	private String HOME_PATH;
 
 	public void installJenkins(JenkinsInstallRequestDto request) {
 		saveEnvVariables(request);
@@ -36,7 +39,7 @@ public class JenkinsInstallService {
 		command.add("--ec2-host=" + request.getEc2Host());
 		command.add("--jenkins-port=" + request.getJenkinsPort());
 		command.add("--jenkins-password=" + request.getJenkinsPassword());
-		command.add("--config-dir=" + request.getConfigDir());
+		command.add("--config-dir=" + HOME_PATH + request.getConfigDir());
 
 		ProcessBuilder processBuilder = new ProcessBuilder(command);
 		processBuilder.redirectErrorStream(true);

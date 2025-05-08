@@ -43,6 +43,9 @@ for arg in "$@"; do
     --config-dir=*)
       SERVER[config_dir]="${arg#*=}"
       ;;
+    --jenkins-password=*)
+      export JENKINS_PASSWORD="${arg#*=}"
+      ;;
     *)
       echo "알 수 없는 옵션: $arg"
       ;;
@@ -64,6 +67,7 @@ error_exit() {
 }
 
 validate_server_info() {
+  log "----validate_server_info 시작"
   if [[ -z "${SERVER[pem_path]}" || -z "${SERVER[host]}" ]]; then
     error_exit "PEM 파일 경로와 EC2 호스트 주소가 필요합니다."
   fi
@@ -80,15 +84,23 @@ validate_server_info() {
 
 main() {
   log "[메인] Jenkins 설치 자동화 시작"
+  log "jenkins port: ${SERVER[jenkins_port]}"
 
   validate_server_info
   connect_ssh_server
 
-  if ! check_jenkins_installed; then
-    remove_existing_installations
-  fi
+#  if check_jenkins_installed; then
+  remove_existing_installations
+#  fi
   install_java_jenkins
-  install_docker
+
+  if ! ssh_exec "docker --version > /dev/null 2>&1"; then
+    log "[Docker] 설치되어 있지 않음. 설치를 시작합니다..."
+    install_docker
+  else
+    log "[Docker] 이미 설치되어 있음. 설치 건너뜀."
+  fi
+
   install_jenkins_plugins
 
   configure_jenkins_user
