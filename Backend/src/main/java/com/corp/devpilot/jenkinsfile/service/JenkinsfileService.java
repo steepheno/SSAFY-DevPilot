@@ -197,18 +197,14 @@ public class JenkinsfileService {
 	private void uploadJenkinsfileToEc2(String localPath, JenkinsfileRequestDto requestDto) {
 		try {
 			String scriptPath = "./scripts/upload_jenkinsfile.sh"; // 실제 경로로 조정
-
-			String pemPath = loadEnvValue("PEM_PATH");
-			String ec2Host = loadEnvValue("EC2_HOST");
+			String remoteDir = remoteBaseDir + "/" + requestDto.getProjectName();
 
 			List<String> command = new ArrayList<>();
 			command.add("bash");
 			command.add(scriptPath);
-			command.add("--pem-path=" + pemPath);
-			command.add("--host=" + ec2Host);
 			command.add("--jenkinsfile-path=" + localPath);
-			String remoteDir = remoteBaseDir + "/" + requestDto.getProjectName();
 			command.add("--remote-dir=" + remoteDir);
+			command.add("--job-name=" + requestDto.getProjectName());
 
 			ProcessBuilder pb = new ProcessBuilder(command);
 			pb.redirectErrorStream(true);
@@ -228,24 +224,6 @@ public class JenkinsfileService {
 			}
 		} catch (Exception e) {
 			throw new JenkinsfileException(ErrorCode.JENKINS_FILE_UPLOAD_ERROR);
-		}
-	}
-
-	private String loadEnvValue(String key) {
-		File envFile = new File(System.getProperty("user.home") + "/.devpilot/.env");
-
-		if (!envFile.exists()) {
-			throw new JenkinsfileException(ErrorCode.INVALID_INPUT_VALUE);
-		}
-
-		try (BufferedReader reader = new BufferedReader(new FileReader(envFile))) {
-			return reader.lines()
-				.filter(line -> line.startsWith(key + "="))
-				.map(line -> line.replaceFirst(key + "=", "").trim())
-				.findFirst()
-				.orElseThrow(() -> new JenkinsfileException(ErrorCode.INVALID_INPUT_VALUE));
-		} catch (IOException e) {
-			throw new JenkinsfileException(ErrorCode.INTERNAL_SERVER_ERROR);
 		}
 	}
 

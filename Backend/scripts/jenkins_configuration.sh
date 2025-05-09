@@ -48,42 +48,55 @@ install_jenkins_plugins() {
 configure_jenkins_user() {
   log "[Jenkins] 사용자 설정 중..."
 
-  if ssh_exec "[ -f ${SERVER[config_dir]}/jenkins_user ]"; then
-    export JENKINS_PASSWORD=$(ssh_exec "sudo cat ${SERVER[config_dir]}/jenkins_user")
-    log "[Jenkins] 기존 사용자 비밀번호 사용."
-    return
-  fi
-
   if [ -z "$JENKINS_PASSWORD" ]; then
     error_exit "[Jenkins] --jenkins-password 인자가 필요합니다."
   fi
 
+  # 1. 초기 비밀번호 가져오기
   local initial_pw
   initial_pw=$(ssh_exec "sudo cat /var/lib/jenkins/secrets/initialAdminPassword")
   if [ -z "$initial_pw" ]; then
     error_exit "[Jenkins] 초기 비밀번호를 가져올 수 없습니다."
   fi
 
+  # 2. Jenkins CLI 다운로드
   local cli_jar="/tmp/jenkins-cli.jar"
   ssh_exec "wget -q -O $cli_jar http://localhost:${SERVER[jenkins_port]}/jnlpJars/jenkins-cli.jar"
 
-  # 비밀번호 변경용 Groovy 스크립트 작성
+  # 3. 비밀번호 변경용 Groovy 작성
   cat <<EOF > /tmp/change_password.groovy
 import jenkins.model.*
 import hudson.security.*
 
-def instance = Jenkins.getInstance()
+def instance = Jenkins.get()
 def user = instance.getSecurityRealm().getUser("admin")
 user.addProperty(hudson.security.HudsonPrivateSecurityRealm.Details.fromPlainPassword("$JENKINS_PASSWORD"))
 instance.save()
+println("✅ 비밀번호 변경 완료")
 EOF
 
   upload_file "/tmp/change_password.groovy" "/tmp/change_password.groovy"
+
+  # 4. 초기 비밀번호로 Groovy 실행 (비밀번호 변경)
   ssh_exec "java -jar $cli_jar -s http://localhost:${SERVER[jenkins_port]} -auth admin:$initial_pw groovy = < /tmp/change_password.groovy"
 
+  # 5. 새로운 비밀번호 저장
   ssh_exec "echo '$JENKINS_PASSWORD' | sudo tee ${SERVER[config_dir]}/jenkins_user > /dev/null && sudo chmod 600 ${SERVER[config_dir]}/jenkins_user"
   log "[Jenkins] 사용자 비밀번호 설정 완료."
+
+  # 6. 변경된 비밀번호로 인증 테스트
+  if ssh_exec "java -jar $cli_jar -s http://localhost:${SERVER[jenkins_port]} -auth admin:$JENKINS_PASSWORD who-am-i"; then
+    log "[Jenkins] 변경된 비밀번호로 CLI 접속 성공 (검증 완료)"
+  else
+    error_exit "[Jenkins] 비밀번호 변경 후 검증 실패: $JENKINS_PASSWORD"
+  fi
 }
+
+
+
+
+
+
 
 # Jenkins 보안 설정 (CLI로 설정)
 setup_security_options() {
