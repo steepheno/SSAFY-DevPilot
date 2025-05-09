@@ -1,15 +1,12 @@
 import { createBrowserRouter } from 'react-router-dom';
-import Main from '@/pages/ui/Main';
-import JenkinsSettings from '@/pages/ui/JenkinsSettings';
-import DockerfileSettings from '@/pages/ui/DockerSettings';
-import Configure from '@/pages/ui/Configure';
-import NewBuildPage from '@/pages/ui/NewBuild/NewBuildPage';
+import { MainPage, NewBuildPage, DockerSettings, ConfigurePage } from '@/pages/';
+import JenkinsSettings from '@/features/jenkins-settings/ui/JenkinsSettings';
 
 const Router = createBrowserRouter([
   {
     path: '/',
     handle: { breadcrumb: '홈' },
-    element: <Main />,
+    element: <MainPage />,
   },
   {
     path: '/new',
@@ -22,11 +19,11 @@ const Router = createBrowserRouter([
       },
       {
         path: 'environment',
-        element: <DockerfileSettings />,
+        element: <DockerSettings />,
       },
       {
         path: 'configure',
-        element: <Configure />,
+        element: <ConfigurePage />,
       },
     ],
   },
