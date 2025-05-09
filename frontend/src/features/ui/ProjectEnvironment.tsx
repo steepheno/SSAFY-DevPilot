@@ -19,7 +19,7 @@ const ProjectEnvironment = ({ projectEnvironment }: ProjectEnvironmentProps) => 
   } = projectEnvironment;
 
   return (
-    <div className="mb-10">
+    <div className="mb-10 rounded-[10px] bg-gray-100 px-5 py-5">
       <p className="text-xl font-bold">프로젝트 환경 선택</p>
       <div className="mt-3 flex flex-col space-y-2">
         <div className="flex items-center space-x-2">

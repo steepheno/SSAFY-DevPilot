@@ -74,10 +74,10 @@ const DockerfileSettings = () => {
   };
 
   return (
-    <div className="bg-gray-200 px-10 py-10">
+    <div className="px-10 py-10">
       {/* 프로젝트 이름 입력 */}
-      <div className="mb-10">
-        <p className="text-xl font-bold">프로젝트 이름</p>
+      <div className="mb-10 rounded-[10px] bg-gray-100 px-5 py-5">
+        <p className="text-body font-bold">프로젝트 이름</p>
         <input
           className="mt-3 h-[30px] rounded border px-2"
           value={projectName}

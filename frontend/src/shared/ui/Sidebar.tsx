@@ -37,7 +37,7 @@ const Sidebar = () => {
   };
 
   return (
-    <div className="inset-y-0 flex w-14 flex-col md:w-60 md:min-w-[00px]">
+    <div className="inset-y-0 mt-5 flex w-14 flex-col md:w-60 md:min-w-[00px]">
       {sidebarItems.map((item, index) => (
         <SidebarItem key={index} item={item} onClick={() => navigateTo(item.path)} />
       ))}
