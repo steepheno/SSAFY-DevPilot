@@ -6,9 +6,11 @@ from langchain.schema.output_parser import StrOutputParser
 from app.core.pinecone_client import query_multiple_indexes
 from langchain.embeddings import HuggingFaceEmbeddings
 import os
+import torch
+from langsmith import traceable
 
 tokenizer = AutoTokenizer.from_pretrained(MODEL_ID)
-model = AutoModelForCausalLM.from_pretrained(MODEL_ID, device_map="auto")
+model = AutoModelForCausalLM.from_pretrained(MODEL_ID, device_map="auto", torch_dtype=torch.bfloat16 )
 generator_pipeline = pipeline(
     "text-generation",
     model=model,
@@ -43,6 +45,7 @@ prompt = PromptTemplate.from_template(template)
 chain = prompt | llm | StrOutputParser()
 
 # 4. 서비스 함수
+@traceable(name="generate_answer")
 def generate_answer(question: str) -> str:
     docs = query_multiple_indexes(query=question, embedding_model=embeddings)
     context = " ".join([doc['metadata']['text'] for doc in docs])
