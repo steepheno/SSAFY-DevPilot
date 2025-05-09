@@ -11,7 +11,7 @@ import { useNavigate } from 'react-router-dom';
 const JenkinsSettings = () => {
   const { data, setField } = useFormData();
   const [projectName, setProjectName] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {

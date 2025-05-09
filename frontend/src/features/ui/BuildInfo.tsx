@@ -21,7 +21,7 @@ const BuildInfo = ({ buildInfo }: BuildInfoProps) => {
   } = buildInfo;
 
   return (
-    <div className="mb-10">
+    <div className="mb-10 rounded-[10px] bg-gray-100 px-5 py-5">
       <p className="text-xl font-bold">빌드 정보</p>
       <p className="mt-5 font-bold">백엔드</p>
       <div className="mt-2 flex justify-between">

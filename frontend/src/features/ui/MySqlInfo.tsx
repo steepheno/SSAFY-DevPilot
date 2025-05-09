@@ -19,7 +19,7 @@ const MySqlInfo = ({ mySqlInfo }: MySqlInfoProps) => {
   } = mySqlInfo;
 
   return (
-    <div className="mb-10">
+    <div className="mb-10 rounded-[10px] bg-gray-100 px-5 py-5">
       <p className="text-xl font-bold">MySQL 설정</p>
       <div className="mt-3 flex">
         <p>버전</p>
