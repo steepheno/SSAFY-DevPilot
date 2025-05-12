@@ -26,7 +26,7 @@ const DockerfileSettings = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   // 응답 결과 상태 관리
-  const [result, setResult] = useState<DockerSuccessResponse | null>(null);
+  const [, setResult] = useState<DockerSuccessResponse | null>(null);
 
   const buildDockerfile = async () => {
     // 프로젝트 제목 검증
@@ -53,16 +53,18 @@ const DockerfileSettings = () => {
       ...mySqlInfo.getMySqlInfoConfig(),
     };
 
+    console.log('API 요청 데이터: ', dockerConfig);
+
     try {
       setIsLoading(true);
 
       // API 함수 호출
       const data = await generateDockerfile(dockerConfig);
-      console.log(data);
-      console.log(result); // 응답 결과 확인 (미사용 에러 제거용)
+      console.log('호출 직후 data: ', data);
 
       // 응답 결과 설정
       setResult(data);
+      console.log('setResult 직후 data: ', data);
 
       alert('Dockerfile이 성공적으로 생성되었습니다.');
     } catch (error) {
