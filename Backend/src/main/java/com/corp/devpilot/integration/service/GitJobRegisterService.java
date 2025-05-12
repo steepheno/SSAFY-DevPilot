@@ -44,7 +44,19 @@ public class GitJobRegisterService {
 
 	private ProcessBuilder buildProcess(GitJobRegisterRequest request, String scriptPath) {
 		List<String> command = new ArrayList<>();
-		command.add("bash");
+
+		String os = System.getProperty("os.name").toLowerCase();
+		boolean isWindows = os.contains("win");
+
+		if (isWindows) {
+			command.add("powershell.exe");
+			command.add("-ExecutionPolicy");
+			command.add("Bypass");
+			command.add("-File");
+		} else {
+			command.add("bash");
+		}
+
 		command.add(scriptPath);
 		command.add("--git-token=" + request.getGitToken());
 		command.add("--git-credentials-id=" + request.getGitCredentialsId());
@@ -55,5 +67,6 @@ public class GitJobRegisterService {
 		processBuilder.redirectErrorStream(true);
 		return processBuilder;
 	}
+
 
 }

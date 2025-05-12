@@ -287,17 +287,28 @@ public class DockerfileService {
 
 	public void uploadFiles(DockerfileRequestDto requestDto, Map<String, String> generatedPaths) {
 		try {
-			String uploadScript = "./scripts/deploy_project_files.sh";
+			String os = System.getProperty("os.name").toLowerCase();
+			boolean isWindows = os.contains("win");
+
+			String uploadScript = isWindows ? "./scripts/windows/deploy_project_files.ps1"
+				: "./scripts/linux/deploy_project_files.sh";
 
 			List<String> command = new ArrayList<>();
-			command.add("bash");
+			if (isWindows) {
+				command.add("powershell");
+				command.add("-ExecutionPolicy");
+				command.add("Bypass");
+				command.add("-File");
+			} else {
+				command.add("bash");
+			}
+
 			command.add(uploadScript);
 			command.add("--project-name=" + requestDto.getProjectName());
 			command.add("--backend-dockerfile=" + generatedPaths.get("backendDockerfile"));
 			command.add("--frontend-dockerfile=" + generatedPaths.get("frontendDockerfile"));
 			command.add("--docker-compose=" + generatedPaths.get("dockerCompose"));
 
-			// nginx.conf 있는 경우
 			if (generatedPaths.containsKey("nginxConfig")) {
 				command.add("--nginx-conf=" + generatedPaths.get("nginxConfig"));
 			}
@@ -309,7 +320,7 @@ public class DockerfileService {
 			try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
 				String line;
 				while ((line = reader.readLine()) != null) {
-					System.out.println("[deploy_project_files.sh] " + line);
+					System.out.println("[deploy_project_files] " + line);
 				}
 			}
 
@@ -324,5 +335,6 @@ public class DockerfileService {
 			throw new RuntimeException("❌ 스크립트 실행 중 오류 발생", e);
 		}
 	}
+
 
 }

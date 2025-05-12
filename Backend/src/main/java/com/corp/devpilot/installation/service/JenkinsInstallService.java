@@ -23,8 +23,11 @@ import java.util.Properties;
 @Service
 public class JenkinsInstallService {
 
-	@Value("${scripts.main-path}")
-	private String MAIN_SCRIPT_PATH; // 실제 경로로 변경 필요
+	@Value("${scripts.linux-main-path}")
+	private String linuxMainScriptPath;
+
+	@Value("${scripts.window-main-path}")
+	private String windowsMainScriptPath;
 
 	@Value("${ec2.remote-base-dir}")
 	private String HOME_PATH;
@@ -32,9 +35,20 @@ public class JenkinsInstallService {
 	public void installJenkins(JenkinsInstallRequestDto request) {
 		saveEnvVariables(request);
 
+		String os = System.getProperty("os.name").toLowerCase();
+		String scriptPath = os.contains("win") ? windowsMainScriptPath : linuxMainScriptPath;
+
 		List<String> command = new ArrayList<>();
-		command.add("bash");
-		command.add(MAIN_SCRIPT_PATH);
+		if (os.contains("win")) {
+			command.add("powershell");
+			command.add("-ExecutionPolicy");
+			command.add("Bypass");
+			command.add("-File");
+		} else {
+			command.add("bash");
+		}
+
+		command.add(scriptPath);
 		command.add("--pem-path=" + request.getPemPath());
 		command.add("--ec2-host=" + request.getEc2Host());
 		command.add("--jenkins-port=" + request.getJenkinsPort());
@@ -50,18 +64,18 @@ public class JenkinsInstallService {
 				new InputStreamReader(process.getInputStream()))) {
 				String line;
 				while ((line = reader.readLine()) != null) {
-					log.info("[main.sh] {}", line);
+					log.info("[main script] {}", line);
 				}
 			}
 
 			int exitCode = process.waitFor();
 			if (exitCode != 0) {
-				throw new BusinessException(ErrorCode.JENKINS_DEPLOY_ERROR, "main.sh 실행 실패: exitCode = " + exitCode);
+				throw new BusinessException(ErrorCode.JENKINS_DEPLOY_ERROR, "main script 실행 실패: exitCode = " + exitCode);
 			}
 
 		} catch (Exception e) {
 			log.error("Jenkins 설치 중 예외 발생", e);
-			throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR, "main.sh 실행 중 오류가 발생했습니다");
+			throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR, "main script 실행 중 오류가 발생했습니다");
 		}
 	}
 

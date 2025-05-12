@@ -196,11 +196,27 @@ public class JenkinsfileService {
 
 	private void uploadJenkinsfileToEc2(String localPath, JenkinsfileRequestDto requestDto) {
 		try {
-			String scriptPath = "./scripts/upload_jenkinsfile.sh"; // 실제 경로로 조정
+			String os = System.getProperty("os.name").toLowerCase();
+			String scriptPath;
+
+			if (os.contains("win")) {
+				scriptPath = "./scripts/window/upload_jenkinsfile.ps1";
+			} else {
+				scriptPath = "./scripts/linux/upload_jenkinsfile.sh";
+			}
+
 			String remoteDir = remoteBaseDir + "/" + requestDto.getProjectName();
 
 			List<String> command = new ArrayList<>();
-			command.add("bash");
+			if (os.contains("win")) {
+				command.add("powershell.exe");
+				command.add("-ExecutionPolicy");
+				command.add("Bypass");
+				command.add("-File");
+			} else {
+				command.add("bash");
+			}
+
 			command.add(scriptPath);
 			command.add("--jenkinsfile-path=" + localPath);
 			command.add("--remote-dir=" + remoteDir);
@@ -210,11 +226,10 @@ public class JenkinsfileService {
 			pb.redirectErrorStream(true);
 			Process process = pb.start();
 
-			try (BufferedReader reader = new BufferedReader(
-				new InputStreamReader(process.getInputStream()))) {
+			try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
 				String line;
 				while ((line = reader.readLine()) != null) {
-					System.out.println("[upload_jenkinsfile.sh] " + line);
+					System.out.println("[" + new File(scriptPath).getName() + "] " + line);
 				}
 			}
 
@@ -226,5 +241,6 @@ public class JenkinsfileService {
 			throw new JenkinsfileException(ErrorCode.JENKINS_FILE_UPLOAD_ERROR);
 		}
 	}
+
 
 }
