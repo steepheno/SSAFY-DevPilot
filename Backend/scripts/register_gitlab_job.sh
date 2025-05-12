@@ -6,6 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$SCRIPT_DIR/utils.sh"
 source "$SCRIPT_DIR/ssh_connection.sh"
 source "$SCRIPT_DIR/jenkins_configuration.sh"
+source "$SCRIPT_DIR/jenkins_pipeline.sh"
 
 # .env에서 환경 변수 로드
 ENV_PATH="$HOME/.devpilot/.env"
@@ -61,5 +62,20 @@ ensure_uuidgen_installed
 register_git_credentials "gitlab" "$GIT_TOKEN" "$GIT_CREDENTIALS_ID"
 
 # 2. Jenkins 멀티브랜치 Job XML 생성 및 등록
-generate_job_config "$GIT_REPO_URL" "$GIT_CREDENTIALS_ID" "gitlab" "$JENKINS_JOB_NAME"
-create_job_in_jenkins "$JENKINS_JOB_NAME"
+project_dir="/home/ubuntu/$JENKINS_JOB_NAME"
+jenkinsfile_path="$project_dir/Jenkinsfile"
+
+generate_pipeline_job_config "$JENKINS_JOB_NAME" "$project_dir" "$jenkinsfile_path"
+
+ssh_exec "java -jar /tmp/jenkins-cli.jar \
+  -s http://localhost:${SERVER[jenkins_port]} \
+  -auth admin:$JENKINS_PASSWORD \
+  create-job '$JENKINS_JOB_NAME' < $project_dir/${JENKINS_JOB_NAME}-job.xml"
+
+# 3. GitLab Webhook 등록
+WEBHOOK_SECRET=$(uuidgen)
+"$SCRIPT_DIR/register_gitlab_webhook.sh" \
+  --git-token="$GIT_TOKEN" \
+  --git-repo-url="$GIT_REPO_URL" \
+  --jenkins-url="http://${SERVER[host]}:${SERVER[jenkins_port]}" \
+  --webhook-secret="$WEBHOOK_SECRET"

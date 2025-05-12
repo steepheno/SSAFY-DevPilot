@@ -57,7 +57,7 @@ curl -s -o /dev/null -w "%{http_code}" -X POST "https://gitlab.com/api/v4/projec
   --header "PRIVATE-TOKEN: $GIT_TOKEN" \
   --data "url=$HOOK_URL" \
   --data "push_events=true" \
-  --data "token=$WEBHOOK_SECRET"
+#  --data "token=$WEBHOOK_SECRET"
 
 echo "✅ GitLab Webhook 등록 완료"
 echo "➡️  Secret: $WEBHOOK_SECRET"

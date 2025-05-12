@@ -29,11 +29,12 @@ create_jenkins_pipeline() {
 # EC2 내부에서 Jenkinsfile 경로 기준으로 Job XML을 생성
 generate_pipeline_job_config() {
   local job_name="$1"
-  local project_name="$2"
-  local remote_path="/home/ubuntu/${project_name}/Jenkinsfile"
-  local remote_job_path="/tmp/${job_name}-job.xml"
+  local remote_dir="$2"
+  local jenkinsfile_path="$3"
 
-  ssh_exec "pipeline_script=\$(cat $remote_path) && \
+  local remote_job_path="${remote_dir}/${job_name}-job.xml"
+
+  ssh_exec "pipeline_script=\$(cat $jenkinsfile_path) && \
     cat <<EOF > $remote_job_path
 <?xml version='1.1' encoding='UTF-8'?>
 <flow-definition plugin=\"workflow-job@2.40\">
@@ -49,6 +50,7 @@ generate_pipeline_job_config() {
 EOF
 "
 }
+
 
 # Jenkins 파이프라인 실행
 run_jenkins_pipeline() {

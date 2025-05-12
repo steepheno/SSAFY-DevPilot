@@ -10,7 +10,7 @@ check_jenkins_installed() {
   log "----check_jenkins_installed 시작"
   log "[Jenkins] 설치 여부 확인 중..."
 
-  if ssh -i "${SERVER[pem_path]}" "${SERVER[host]}" "[ -f ${SERVER[config_dir]}/jenkins_installed ]"; then
+  if ssh_exec "[ -f ${SERVER[config_dir]}/jenkins_installed ]"; then
     log "[Jenkins] 이미 설치되어 있음."
     return 0
   else

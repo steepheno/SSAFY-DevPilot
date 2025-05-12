@@ -32,6 +32,9 @@ install_jenkins_plugins() {
     "multibranch-scan-webhook-trigger:1.0.11"
     "workflow-aggregator:608.v67378e9d3db_1"
     "workflow-multibranch:806.vb_b_688f609ee9"
+    "credentials:1254.vb_a_60f3e5df75"
+    "plain-credentials:143.v1b_df8b_d3b_e48"
+    "credentials-binding:657.v2b_19db_7d6e6d"
   )
 
   for plugin in "${plugins[@]}"; do
@@ -91,12 +94,6 @@ EOF
     error_exit "[Jenkins] 비밀번호 변경 후 검증 실패: $JENKINS_PASSWORD"
   fi
 }
-
-
-
-
-
-
 
 # Jenkins 보안 설정 (CLI로 설정)
 setup_security_options() {
@@ -205,15 +202,12 @@ generate_job_config() {
 EOF
 }
 
-
 create_job_in_jenkins() {
   local job_name="$1"
-  local config_xml="/tmp/${job_name}-job.xml"
+  local job_dir="/home/ubuntu/$job_name"
+  local config_xml="$job_dir/${job_name}-job.xml"
 
-  # (1) EC2로 Job XML 업로드
-  upload_file "$config_xml" "$config_xml"
-
-  # (2) EC2에서 jenkins-cli로 job 생성 명령 실행
+  # ✅ EC2 내부 파일로 바로 Jenkins job 생성
   ssh_exec "java -jar /tmp/jenkins-cli.jar \
     -s http://localhost:${SERVER[jenkins_port]} \
     -auth admin:$JENKINS_PASSWORD \

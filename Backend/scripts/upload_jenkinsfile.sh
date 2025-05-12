@@ -39,7 +39,7 @@ for arg in "$@"; do
   esac
 done
 
-TARGET_DIR="${TARGET_DIR:-/home/ec2-user/jenkinsfiles}"
+TARGET_DIR="${TARGET_DIR:-/home/ubuntu/jenkinsfiles}"
 REMOTE_PATH="$TARGET_DIR/Jenkinsfile"
 
 # -----------------------------
