@@ -3,8 +3,9 @@ import { ReactNode } from 'react';
 import Header from './Header';
 import Sidebar from './Sidebar';
 import ChatbotButton from '@/widgets/chatbot/ChatbotButton';
+import { Outlet } from 'react-router-dom';
 
-const PageLayout = ({ children }: { children: ReactNode }) => {
+const PageLayout = () => {
   return (
     <div className="min-h-screen overflow-y-auto">
       <header className="fixed left-0 right-0 top-0 z-50 h-16 bg-white shadow">
@@ -16,7 +17,7 @@ const PageLayout = ({ children }: { children: ReactNode }) => {
         </aside>
 
         <main className="absolute bottom-0 left-14 right-0 top-16 overflow-auto p-6 md:left-60">
-          {children}
+          <Outlet />
         </main>
       </div>
       <ChatbotButton />
