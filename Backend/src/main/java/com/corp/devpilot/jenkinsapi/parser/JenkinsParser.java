@@ -52,13 +52,19 @@ public class JenkinsParser {
 		if (actions != null) {
 			for (int i = 0; i < actions.length(); i++) {
 				JSONObject action = actions.getJSONObject(i);
-				if (action.has("parameters")) {
-					JSONArray arr = action.getJSONArray("parameters");
-					for (int j = 0; j < arr.length(); j++) {
-						JSONObject jsonObject = arr.getJSONObject(j);
+				if (action.has("causes")) {
+					JSONArray causes = action.getJSONArray("causes");
+					for (int j = 0; j < causes.length(); j++) {
+						JSONObject jsonObject = causes.getJSONObject(j);
 						Map<String, Object> map = new HashMap<>();
-						for (String key : jsonObject.keySet()) {
-							map.put(key, jsonObject.get(key));
+						if (jsonObject.has("userId")) {
+							map.put("userId", jsonObject.optString("userId"));
+						}
+						if (jsonObject.has("userName")) {
+							map.put("userName", jsonObject.optString("userName"));
+						}
+						if (jsonObject.has("shortDescription")) {
+							map.put("shortDescription", jsonObject.optString("shortDescription"));
 						}
 						params.add(map);
 					}
