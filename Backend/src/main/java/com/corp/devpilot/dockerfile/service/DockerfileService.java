@@ -6,7 +6,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -280,4 +282,45 @@ public class DockerfileService {
 		}
 		return file.getAbsolutePath();
 	}
+
+	public void uploadFiles(DockerfileRequestDto requestDto, Map<String, String> generatedPaths) {
+		try {
+			String uploadScript = "./scripts/deploy_project_files.sh";
+
+			List<String> command = new ArrayList<>();
+			command.add("bash");
+			command.add(uploadScript);
+			command.add("--project-name=" + requestDto.getProjectName());
+			command.add("--backend-dockerfile=" + generatedPaths.get("backendDockerfile"));
+			command.add("--frontend-dockerfile=" + generatedPaths.get("frontendDockerfile"));
+			command.add("--docker-compose=" + generatedPaths.get("dockerCompose"));
+
+			// nginx.conf 있는 경우
+			if (generatedPaths.containsKey("nginxConfig")) {
+				command.add("--nginx-conf=" + generatedPaths.get("nginxConfig"));
+			}
+
+			ProcessBuilder pb = new ProcessBuilder(command);
+			pb.redirectErrorStream(true);
+
+			Process process = pb.start();
+			try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+				String line;
+				while ((line = reader.readLine()) != null) {
+					System.out.println("[deploy_project_files.sh] " + line);
+				}
+			}
+
+			int exitCode = process.waitFor();
+			if (exitCode != 0) {
+				throw new RuntimeException("❌ Dockerfile 업로드 실패: exitCode = " + exitCode);
+			}
+
+			System.out.println("✅ Dockerfile 및 설정 파일 업로드 완료");
+
+		} catch (IOException | InterruptedException e) {
+			throw new RuntimeException("❌ 스크립트 실행 중 오류 발생", e);
+		}
+	}
+
 }
