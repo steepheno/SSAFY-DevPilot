@@ -27,7 +27,8 @@ public class JenkinsApiService {
 	public JenkinsApiService(
 		TokenManager tokenManager,
 		@Value("${server.jenkins.url}") String url,
-		@Value("${server.jenkins.user}") String user
+		@Value("${server.jenkins.user}") String user,
+		@Value("${server.jenkins.default-port}") String port
 	) throws SSLException {
 
 		this.tokenManager = tokenManager;
@@ -42,7 +43,7 @@ public class JenkinsApiService {
 			.secure(spec -> spec.sslContext(sslContext));
 
 		this.client = WebClient.builder()
-			.baseUrl(url)
+			.baseUrl(url + ":" + port)
 			.clientConnector(new ReactorClientHttpConnector(httpClient))
 			.build();
 
