@@ -4,6 +4,7 @@ import PageLayout from '@/widgets/PageLayout';
 import { MainPage, NewBuildPage, DockerSettings, ConfigurePage } from '@/pages';
 import JenkinsSettings from '@/features/jenkins-settings/ui/JenkinsSettings';
 import BuildInfoPage from '@/pages/BuildInfoPage';
+import BuildList from '@/pages/buildLog/ui/BuildList';
 
 const router = createBrowserRouter([
   {
@@ -26,9 +27,14 @@ const router = createBrowserRouter([
         ],
       },
       {
-        path: 'build/:buildId',
+        path: 'builds/:buildId',
         handle: { breadcrumb: '대시보드' },
         element: <BuildInfoPage />,
+      },
+      {
+        path: 'builds',
+        handle: { breadcrumb: '빌드 기록' },
+        element: <BuildList />,
       },
     ],
   },
