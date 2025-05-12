@@ -1,56 +1,45 @@
-import { createBrowserRouter, Outlet } from 'react-router-dom';
-import { MainPage, NewBuildPage, DockerSettings, ConfigurePage } from '@/pages/';
-import JenkinsSettings from '@/features/jenkins-settings/ui/JenkinsSettings';
+import { createBrowserRouter } from 'react-router-dom';
 import PageLayout from '@/widgets/PageLayout';
+import { MainPage, NewBuildPage, DockerSettings, ConfigurePage, BuildInfoPage } from '@/pages';
+import JenkinsSettings from '@/features/jenkins-settings/ui/JenkinsSettings';
 import BuildList from '@/pages/buildLog/ui/BuildList';
 import BuildDetail from '@/pages/buildLog/ui/BuildDetail';
 
-const Router = createBrowserRouter([
+const router = createBrowserRouter([
   {
     path: '/',
-    handle: { breadcrumb: '홈' },
-    element: <MainPage />,
-  },
-  {
-    path: '/new',
-    handle: { breadcrumb: '새 빌드' },
-    element: <NewBuildPage />,
+    element: <PageLayout />,
     children: [
       {
-        path: 'repository',
-        element: <JenkinsSettings />,
+        index: true,
+        handle: { breadcrumb: '홈' },
+        element: <MainPage />,
       },
       {
-        path: 'environment',
-        element: <DockerSettings />,
+        path: 'new',
+        handle: { breadcrumb: '새 빌드' },
+        element: <NewBuildPage />,
+        children: [
+          { path: 'repository', element: <JenkinsSettings /> },
+          { path: 'environment', element: <DockerSettings /> },
+          { path: 'configure', element: <ConfigurePage /> },
+        ],
       },
       {
-        path: 'configure',
-        element: <ConfigurePage />,
-      },
-    ],
-  },
-  {
-    path: '/builds',
-    handle: { breadcrumb: '빌드 기록' },
-    element: (
-      <PageLayout>
-        <Outlet />
-      </PageLayout>
-    ),
-    children: [
-      {
-        path: '',
-        handle: { breadcrumb: '빌드 목록' },
+        path: 'builds',
+        handle: { breadcrumb: '빌드 기록' },
         element: <BuildList />,
-      },
-      {
-        path: 'detail',
-        handle: { breadcrumb: '빌드 상세' },
-        element: <BuildDetail />,
+        children: [
+          {
+            path: ':buildId',
+            handle: { breadcrumb: '대시보드' },
+            element: <BuildInfoPage />,
+          },
+          { path: 'detail', handle: { breadcrumb: '빌드 상세' }, element: <BuildDetail /> },
+        ],
       },
     ],
   },
 ]);
 
-export default Router;
+export default router;

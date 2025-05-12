@@ -14,7 +14,7 @@ const MainPage = () => {
   };
 
   return (
-    <PageLayout>
+    <>
       {!isEditMode ? (
         <div className="my-10 mr-5">
           {savedText && (
@@ -74,7 +74,7 @@ const MainPage = () => {
           </tr>
         </tbody>
       </table>
-    </PageLayout>
+    </>
   );
 };
 
