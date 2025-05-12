@@ -8,8 +8,12 @@ import { useProjectEnvironment } from '@/entities/dockerFile/model/useProjectEnv
 import { useMySqlInfo } from '@/entities/dockerFile/model/useMySqlInfo';
 import { generateDockerfile } from '@/entities/dockerFile/api';
 import { DockerSuccessResponse } from '@/entities/dockerFile/api';
+import { useNavigate } from 'react-router-dom';
 
 const DockerfileSettings = () => {
+  // Navigate
+  const navigate = useNavigate();
+
   // 프로젝트 제목 상태 관리
   const [projectName, setProjectName] = useState('');
 
@@ -23,7 +27,7 @@ const DockerfileSettings = () => {
   const mySqlInfo = useMySqlInfo();
 
   // 로딩 상태 관리
-  const [isLoading, setIsLoading] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false);
 
   // 응답 결과 상태 관리
   const [, setResult] = useState<DockerSuccessResponse | null>(null);
@@ -56,7 +60,7 @@ const DockerfileSettings = () => {
     console.log('API 요청 데이터: ', dockerConfig);
 
     try {
-      setIsLoading(true);
+      // setIsLoading(true);
 
       // API 함수 호출
       const data = await generateDockerfile(dockerConfig);
@@ -67,11 +71,12 @@ const DockerfileSettings = () => {
       console.log('setResult 직후 data: ', data);
 
       alert('Dockerfile이 성공적으로 생성되었습니다.');
+      navigate('/new/configure');
     } catch (error) {
       alert('Dockerfile 생성 중 오류 발생');
       console.error('오류 메시지: ', error);
     } finally {
-      setIsLoading(false);
+      // setIsLoading(false);
     }
   };
 
@@ -101,9 +106,9 @@ const DockerfileSettings = () => {
         <button
           className="rounded-[10px] bg-blue-500 px-4 py-2 text-white"
           onClick={buildDockerfile}
-          disabled={isLoading}
+          // disabled={isLoading}
         >
-          {isLoading ? '빌드 중...' : '빌드하기'}
+          다음
         </button>
       </div>
     </div>
