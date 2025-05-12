@@ -51,7 +51,6 @@ EOF
 "
 }
 
-
 # Jenkins 파이프라인 실행
 run_jenkins_pipeline() {
   local pipeline_name="$1"

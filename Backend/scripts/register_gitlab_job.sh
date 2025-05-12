@@ -67,14 +67,17 @@ jenkinsfile_path="$project_dir/Jenkinsfile"
 
 generate_pipeline_job_config "$JENKINS_JOB_NAME" "$project_dir" "$jenkinsfile_path"
 
-ssh_exec "java -jar /tmp/jenkins-cli.jar \
-  -s http://localhost:${SERVER[jenkins_port]} \
-  -auth admin:$JENKINS_PASSWORD \
-  create-job '$JENKINS_JOB_NAME' < $project_dir/${JENKINS_JOB_NAME}-job.xml"
+# ✅ 존재 여부 확인 후 create or update
+if ssh_exec "java -jar /tmp/jenkins-cli.jar -s http://localhost:${SERVER[jenkins_port]} -auth admin:$JENKINS_PASSWORD get-job '$JENKINS_JOB_NAME'" >/dev/null 2>&1; then
+  echo "ℹ️ Job이 이미 존재하여 update-job으로 대체합니다."
+  ssh_exec "java -jar /tmp/jenkins-cli.jar -s http://localhost:${SERVER[jenkins_port]} -auth admin:$JENKINS_PASSWORD update-job '$JENKINS_JOB_NAME' < $project_dir/${JENKINS_JOB_NAME}-job.xml"
+else
+  ssh_exec "java -jar /tmp/jenkins-cli.jar -s http://localhost:${SERVER[jenkins_port]} -auth admin:$JENKINS_PASSWORD create-job '$JENKINS_JOB_NAME' < $project_dir/${JENKINS_JOB_NAME}-job.xml"
+fi
 
 # 3. GitLab Webhook 등록
 WEBHOOK_SECRET=$(uuidgen)
-"$SCRIPT_DIR/register_gitlab_webhook.sh" \
+bash "$SCRIPT_DIR/register_gitlab_webhook.sh" \
   --git-token="$GIT_TOKEN" \
   --git-repo-url="$GIT_REPO_URL" \
   --jenkins-url="http://${SERVER[host]}:${SERVER[jenkins_port]}" \
