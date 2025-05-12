@@ -35,6 +35,7 @@ install_jenkins_plugins() {
     "credentials:1254.vb_a_60f3e5df75"
     "plain-credentials:143.v1b_df8b_d3b_e48"
     "credentials-binding:657.v2b_19db_7d6e6d"
+    "sse-gateway:1.28"
   )
 
   for plugin in "${plugins[@]}"; do

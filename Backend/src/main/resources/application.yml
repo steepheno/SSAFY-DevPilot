@@ -20,11 +20,11 @@ server:
   error:
     include-stacktrace: never
 
-  ssh:
-    connection-timeout: 30000
-    channel-timeout: 60000
-    default-port: 22
-    known-hosts-file: ${user.home}/.ssh/known_hosts
+ssh:
+  connection-timeout: 30000
+  channel-timeout: 60000
+  default-port: 22
+  known-hosts-file: ${user.home}/.ssh/known_hosts
 
   jenkins:
     url: https://localhost
@@ -41,10 +41,6 @@ server:
       - docker-workflow
       - credentials-binding
       - ssh-credentials
-    github:
-      script-path: ./scripts/register_github_job.sh
-    gitlab:
-      script-path: ./scripts/register_gitlab_job.sh
 
   jenkinsfile:
     output:
@@ -94,9 +90,3 @@ springdoc:
   show-actuator: false
   default-consumes-media-type: application/json
   default-produces-media-type: application/json
-
-scripts:
-  main-path: ./scripts/main.sh
-
-ec2:
-  remote-base-dir: /home/ubuntu
