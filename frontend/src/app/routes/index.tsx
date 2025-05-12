@@ -1,9 +1,8 @@
 // src/router.tsx
 import { createBrowserRouter } from 'react-router-dom';
 import PageLayout from '@/widgets/PageLayout';
-import { MainPage, NewBuildPage, DockerSettings, ConfigurePage } from '@/pages';
+import { MainPage, NewBuildPage, DockerSettings, ConfigurePage, BuildInfoPage } from '@/pages';
 import JenkinsSettings from '@/features/jenkins-settings/ui/JenkinsSettings';
-import BuildInfoPage from '@/pages/BuildInfoPage';
 import BuildList from '@/pages/buildLog/ui/BuildList';
 
 const router = createBrowserRouter([
