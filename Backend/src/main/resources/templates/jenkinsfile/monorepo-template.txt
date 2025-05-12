@@ -11,6 +11,7 @@ pipeline {
         GIT_REPO = '[(${gitRepositoryUrl})]'
         FRONTEND_DIR = '[(${frontendDir})]'
         BACKEND_DIR = '[(${backendDir})]'
+        BASE_PATH = "/home/ubuntu"
     }
 
     stages {
@@ -114,13 +115,13 @@ pipeline {
                 script {
                     // Docker 명령어 플랫폼에 따라 다르게 실행
                     if (isUnix()) {
-                        sh 'docker-compose down'
-                        sh 'docker-compose build'
-                        sh 'docker-compose up -d'
+                        sh "docker-compose ${BASE_PATH}/${PROJECT_NAME}/docker-compose.yml down"
+                        sh 'docker-compose ${BASE_PATH}/${PROJECT_NAME}/docker-compose.yml build'
+                        sh 'docker-compose ${BASE_PATH}/${PROJECT_NAME}/docker-compose.yml up -d'
                     } else {
-                        bat 'docker-compose down'
-                        bat 'docker-compose build'
-                        bat 'docker-compose up -d'
+                        bat 'docker-compose ${BASE_PATH}/${PROJECT_NAME}/docker-compose.yml down'
+                        bat 'docker-compose ${BASE_PATH}/${PROJECT_NAME}/docker-compose.yml build'
+                        bat 'docker-compose ${BASE_PATH}/${PROJECT_NAME}/docker-compose.yml up -d'
                     }
                 }
             }
