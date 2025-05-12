@@ -31,10 +31,10 @@ import reactor.util.retry.Retry;
 @Component
 public class JenkinsEventService {
 
-	private final WebClient client;
+	private final JenkinsApiService jenkinsApiService;
 
 	public JenkinsEventService(JenkinsApiService jenkinsApiService) {
-		this.client = jenkinsApiService.authorizedClient();
+		this.jenkinsApiService = jenkinsApiService;
 	}
 
 	/**
@@ -42,7 +42,7 @@ public class JenkinsEventService {
 	 */
 	public SseEmitter streamBuildAndPipelineEvents(String clientId) {
 		SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
-
+		WebClient client = jenkinsApiService.authorizedClient();
 		// 1) 구독 확인 메시지 전송
 		try {
 			emitter.send(SseEmitter.event()
@@ -134,6 +134,7 @@ public class JenkinsEventService {
 	public ProgressiveLogDto fetchProgressiveLog(
 		String jobName, int buildNumber, long offset
 	) {
+		WebClient client = jenkinsApiService.authorizedClient();
 		Mono<ResponseEntity<String>> mono = client.get()
 			.uri(uri -> uri
 				.path("/job/{job}/{build}/logText/progressiveText")
