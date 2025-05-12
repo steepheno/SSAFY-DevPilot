@@ -25,18 +25,21 @@ const router = createBrowserRouter([
           { path: 'configure', element: <ConfigurePage /> },
         ],
       },
+      // TODO: /builds페이지를 루트로 children 내에 하위 페이지 렌더
       {
         path: 'builds',
         handle: { breadcrumb: '빌드 기록' },
         element: <BuildList />,
-        children: [
-          {
-            path: ':buildId',
-            handle: { breadcrumb: '대시보드' },
-            element: <BuildInfoPage />,
-          },
-          { path: 'detail', handle: { breadcrumb: '빌드 상세' }, element: <BuildDetail /> },
-        ],
+      },
+      {
+        path: 'builds/:buildId',
+        handle: { breadcrumb: '대시보드' },
+        element: <BuildInfoPage />,
+      },
+      {
+        path: 'builds/:buildId/detail',
+        handle: { breadcrumb: '빌드 상세' },
+        element: <BuildDetail />,
       },
     ],
   },
