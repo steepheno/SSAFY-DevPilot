@@ -40,7 +40,8 @@ public class TokenManager {
 	public TokenManager(
 		@Value("${server.jenkins.url}") String url,
 		@Value("${server.jenkins.user}") String user,
-		@Value("${server.jenkins.tokenFile}") String tokenFilePath
+		@Value("${server.jenkins.tokenFile}") String tokenFilePath,
+		@Value("${server.jenkins.default-port}") String port
 	) throws SSLException {
 		this.user = user;
 		this.tokenFile = new File(tokenFilePath);
@@ -56,7 +57,7 @@ public class TokenManager {
 			.secure(spec -> spec.sslContext(sslContext));
 
 		this.webClientForAuth = WebClient.builder()
-			.baseUrl(url)
+			.baseUrl(url + ":" + port)
 			.clientConnector(new ReactorClientHttpConnector(httpClient))
 			.build();
 	}

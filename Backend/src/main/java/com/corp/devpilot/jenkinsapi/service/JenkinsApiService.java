@@ -1,5 +1,7 @@
 package com.corp.devpilot.jenkinsapi.service;
 
+import java.util.List;
+
 import javax.net.ssl.SSLException;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -9,6 +11,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import com.corp.devpilot.global.error.code.ErrorCode;
 import com.corp.devpilot.global.error.exception.JenkinsApiException;
+import com.corp.devpilot.jenkinsapi.domain.dto.BuildDetailDto;
+import com.corp.devpilot.jenkinsapi.domain.dto.BuildSummaryDto;
 import com.corp.devpilot.jenkinsapi.domain.dto.JenkinsInfoDto;
 import com.corp.devpilot.jenkinsapi.parser.JenkinsParser;
 
@@ -27,7 +31,8 @@ public class JenkinsApiService {
 	public JenkinsApiService(
 		TokenManager tokenManager,
 		@Value("${server.jenkins.url}") String url,
-		@Value("${server.jenkins.user}") String user
+		@Value("${server.jenkins.user}") String user,
+		@Value("${server.jenkins.default-port}") String port
 	) throws SSLException {
 
 		this.tokenManager = tokenManager;
@@ -42,7 +47,7 @@ public class JenkinsApiService {
 			.secure(spec -> spec.sslContext(sslContext));
 
 		this.client = WebClient.builder()
-			.baseUrl(url)
+			.baseUrl(url + ":" + port)
 			.clientConnector(new ReactorClientHttpConnector(httpClient))
 			.build();
 
@@ -74,5 +79,33 @@ public class JenkinsApiService {
 			.block();
 
 		return JenkinsParser.parseInfo(body);
+	}
+
+	public List<BuildSummaryDto> fetchBuildSummaries(String jobName) {
+		String json = authorizedClient()
+			.get()
+			.uri(uri -> uri
+				.path("/job/{jobName}/api/json")
+				.queryParam("tree", "builds[number,result,timestamp,duration]")
+				.build(jobName))
+			.retrieve()
+			.bodyToMono(String.class)
+			.block();  // 컨트롤러에서 동기 호출이므로 block() 사용
+
+		return JenkinsParser.parseBuildSummaries(json);
+	}
+
+	public BuildDetailDto fetchBuildDetail(String jobName, int buildNumber) {
+		String json = authorizedClient()
+			.get()
+			.uri(uri -> uri
+				.path("/job/{jobName}/{buildNumber}/api/json")
+				.queryParam("pretty", "true")
+				.build(jobName, buildNumber))
+			.retrieve()
+			.bodyToMono(String.class)
+			.block();
+
+		return JenkinsParser.parseBuildDetail(json);
 	}
 }
