@@ -3,8 +3,8 @@ version: '3.8'
 services:
   backend:
     build:
-      context: .
-      dockerfile: Dockerfile.backend
+      context: ./backend
+      dockerfile: Dockerfile
     container_name: ##PROJECT_NAME##-backend
     ports:
       - "##BACKEND_PORT##:##BACKEND_PORT##"
@@ -16,8 +16,8 @@ services:
 
   frontend:
     build:
-      context: .
-      dockerfile: Dockerfile.frontend
+      context: ./frontend
+      dockerfile: Dockerfile
     container_name: ##PROJECT_NAME##-frontend
     ports:
       - "##FRONTEND_PORT##:##FRONTEND_PORT##"

@@ -1,0 +1,15 @@
+mysql:
+    image: mysql:string
+    container_name: string-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: string
+      MYSQL_DATABASE: string
+      MYSQL_USER: string
+      MYSQL_PASSWORD: string
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - string-network
+    restart: always
