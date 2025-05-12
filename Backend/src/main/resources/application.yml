@@ -91,7 +91,8 @@ springdoc:
   default-produces-media-type: application/json
 
 scripts:
-  main-path: ./scripts/main.sh
+  linux-main-path: ./scripts/linux/main.sh
+  window-main-path: ./scripts/window/main.ps1
 
 ec2:
   remote-base-dir: /home/ubuntu

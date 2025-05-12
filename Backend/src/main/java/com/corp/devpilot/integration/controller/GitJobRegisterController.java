@@ -26,7 +26,12 @@ public class GitJobRegisterController {
 	@PostMapping("/register/github")
 	@Operation(summary = "GitHub 파이프라인 등록", description = "GitHub 저장소를 Jenkins Job으로 등록합니다.")
 	public ResponseEntity<Map<String, Object>> registerGithubJob(@RequestBody GitJobRegisterRequest requestDto) {
-		gitJobRegisterService.registerJob(requestDto, githubScriptPath);
+		String os = System.getProperty("os.name").toLowerCase();
+		String scriptPath = os.contains("win")
+			? githubScriptPath.replace(".sh", ".ps1").replace("/scripts/", "/scripts/window/")
+			: githubScriptPath.replace("/scripts/", "/scripts/linux/");
+
+		gitJobRegisterService.registerJob(requestDto, scriptPath);
 		Map<String, Object> response = new HashMap<>();
 		response.put("message", "GitHub Job 등록 성공");
 		return ResponseEntity.ok(response);
@@ -35,7 +40,12 @@ public class GitJobRegisterController {
 	@PostMapping("/register/gitlab")
 	@Operation(summary = "GitLab 파이프라인 등록", description = "GitLab 저장소를 Jenkins Job으로 등록합니다.")
 	public ResponseEntity<Map<String, Object>> registerGitlabJob(@RequestBody GitJobRegisterRequest requestDto) {
-		gitJobRegisterService.registerJob(requestDto, gitlabScriptPath);
+		String os = System.getProperty("os.name").toLowerCase();
+		String scriptPath = os.contains("win")
+			? gitlabScriptPath.replace(".sh", ".ps1").replace("/scripts/", "/scripts/window/")
+			: gitlabScriptPath.replace("/scripts/", "/scripts/linux/");
+
+		gitJobRegisterService.registerJob(requestDto, scriptPath);
 		Map<String, Object> response = new HashMap<>();
 		response.put("message", "GitLab Job 등록 성공");
 		return ResponseEntity.ok(response);
