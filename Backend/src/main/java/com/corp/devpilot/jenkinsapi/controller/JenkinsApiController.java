@@ -1,5 +1,7 @@
 package com.corp.devpilot.jenkinsapi.controller;
 
+import java.util.List;
+
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.ServerSentEvent;
@@ -11,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import com.corp.devpilot.jenkinsapi.domain.dto.BuildDetailDto;
+import com.corp.devpilot.jenkinsapi.domain.dto.BuildSummaryDto;
 import com.corp.devpilot.jenkinsapi.domain.dto.JenkinsInfoDto;
 import com.corp.devpilot.jenkinsapi.service.JenkinsApiService;
 import com.corp.devpilot.jenkinsapi.service.JenkinsEventService;
@@ -28,11 +32,17 @@ public class JenkinsApiController {
 	private final TokenManager tokenManager;
 	private final JenkinsEventService jenkinsEventService;
 
+	/**
+	 * Jenkins 기본 정보 불러오기
+	 */
 	@GetMapping("/info")
 	public ResponseEntity<JenkinsInfoDto> getInfo() {
 		return ResponseEntity.ok(jenkinsApiService.fetchInfo());
 	}
 
+	/**
+	 * Jenkins build log 실시간 스트리밍 (SSE)
+	 */
 	@GetMapping(value = "/stream/{jobName}/{buildNumber}",
 		produces = MediaType.TEXT_EVENT_STREAM_VALUE)
 	public Flux<ServerSentEvent<String>> streamLog(
@@ -49,6 +59,19 @@ public class JenkinsApiController {
 		produces = MediaType.TEXT_EVENT_STREAM_VALUE)
 	public SseEmitter streamEvents(@PathVariable String clientId) {
 		return jenkinsEventService.streamBuildAndPipelineEvents(clientId);
+	}
+
+	@GetMapping("/job/{jobName}")
+	public ResponseEntity<List<BuildSummaryDto>> getSummaries(@PathVariable String jobName) {
+		return ResponseEntity.ok(jenkinsApiService.fetchBuildSummaries(jobName));
+	}
+
+	@GetMapping("/job/{jobName}/{buildNumber}")
+	public ResponseEntity<BuildDetailDto> getDetail(
+		@PathVariable String jobName,
+		@PathVariable int buildNumber
+	) {
+		return ResponseEntity.ok(jenkinsApiService.fetchBuildDetail(jobName, buildNumber));
 	}
 
 	// api token 테스트 용. 나중에 삭제
