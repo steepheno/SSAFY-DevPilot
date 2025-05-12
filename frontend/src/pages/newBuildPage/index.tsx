@@ -1,12 +1,7 @@
-import PageLayout from '@/widgets/PageLayout';
 import { Outlet } from 'react-router-dom';
 
 const NewBuildPage = () => {
-  return (
-    <PageLayout>
-      <Outlet />
-    </PageLayout>
-  );
+  return <Outlet />;
 };
 
 export default NewBuildPage;
