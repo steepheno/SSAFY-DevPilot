@@ -14,8 +14,8 @@ const ProjectEnvironment = ({ projectEnvironment }: ProjectEnvironmentProps) => 
     setUseNginx,
     useRedis,
     setUseRedis,
-    useMysql,
-    setUseMysql,
+    useMySQL,
+    setUseMySQL,
   } = projectEnvironment;
 
   return (
@@ -74,11 +74,11 @@ const ProjectEnvironment = ({ projectEnvironment }: ProjectEnvironmentProps) => 
           <input
             className="cursor-pointer"
             type="checkbox"
-            id="mysql"
-            checked={useMysql}
-            onChange={() => setUseMysql(!useMysql)}
+            id="MySQL"
+            checked={useMySQL}
+            onChange={() => setUseMySQL(!useMySQL)}
           />
-          <label className="cursor-pointer" htmlFor="mysql">
+          <label className="cursor-pointer" htmlFor="MySQL">
             MySQL
           </label>
         </div>
