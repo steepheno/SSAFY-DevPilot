@@ -9,7 +9,7 @@ interface DockerfileConfig {
   frontendPort: number;
   useNginx: boolean;
   useRedis: boolean;
-  useMysql: boolean;
+  useMySQL: boolean;
   mysqlVersion: string;
   mysqlRootPassword: string;
   mysqlDatabase: string;
