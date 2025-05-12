@@ -32,6 +32,9 @@ install_jenkins_plugins() {
     "multibranch-scan-webhook-trigger:1.0.11"
     "workflow-aggregator:608.v67378e9d3db_1"
     "workflow-multibranch:806.vb_b_688f609ee9"
+    "credentials:1254.vb_a_60f3e5df75"
+    "plain-credentials:143.v1b_df8b_d3b_e48"
+    "credentials-binding:657.v2b_19db_7d6e6d"
   )
 
   for plugin in "${plugins[@]}"; do
@@ -48,41 +51,48 @@ install_jenkins_plugins() {
 configure_jenkins_user() {
   log "[Jenkins] 사용자 설정 중..."
 
-  if ssh_exec "[ -f ${SERVER[config_dir]}/jenkins_user ]"; then
-    export JENKINS_PASSWORD=$(ssh_exec "sudo cat ${SERVER[config_dir]}/jenkins_user")
-    log "[Jenkins] 기존 사용자 비밀번호 사용."
-    return
-  fi
-
   if [ -z "$JENKINS_PASSWORD" ]; then
     error_exit "[Jenkins] --jenkins-password 인자가 필요합니다."
   fi
 
+  # 1. 초기 비밀번호 가져오기
   local initial_pw
   initial_pw=$(ssh_exec "sudo cat /var/lib/jenkins/secrets/initialAdminPassword")
   if [ -z "$initial_pw" ]; then
     error_exit "[Jenkins] 초기 비밀번호를 가져올 수 없습니다."
   fi
 
+  # 2. Jenkins CLI 다운로드
   local cli_jar="/tmp/jenkins-cli.jar"
   ssh_exec "wget -q -O $cli_jar http://localhost:${SERVER[jenkins_port]}/jnlpJars/jenkins-cli.jar"
 
-  # 비밀번호 변경용 Groovy 스크립트 작성
+  # 3. 비밀번호 변경용 Groovy 작성
   cat <<EOF > /tmp/change_password.groovy
 import jenkins.model.*
 import hudson.security.*
 
-def instance = Jenkins.getInstance()
+def instance = Jenkins.get()
 def user = instance.getSecurityRealm().getUser("admin")
 user.addProperty(hudson.security.HudsonPrivateSecurityRealm.Details.fromPlainPassword("$JENKINS_PASSWORD"))
 instance.save()
+println("✅ 비밀번호 변경 완료")
 EOF
 
   upload_file "/tmp/change_password.groovy" "/tmp/change_password.groovy"
+
+  # 4. 초기 비밀번호로 Groovy 실행 (비밀번호 변경)
   ssh_exec "java -jar $cli_jar -s http://localhost:${SERVER[jenkins_port]} -auth admin:$initial_pw groovy = < /tmp/change_password.groovy"
 
+  # 5. 새로운 비밀번호 저장
   ssh_exec "echo '$JENKINS_PASSWORD' | sudo tee ${SERVER[config_dir]}/jenkins_user > /dev/null && sudo chmod 600 ${SERVER[config_dir]}/jenkins_user"
   log "[Jenkins] 사용자 비밀번호 설정 완료."
+
+  # 6. 변경된 비밀번호로 인증 테스트
+  if ssh_exec "java -jar $cli_jar -s http://localhost:${SERVER[jenkins_port]} -auth admin:$JENKINS_PASSWORD who-am-i"; then
+    log "[Jenkins] 변경된 비밀번호로 CLI 접속 성공 (검증 완료)"
+  else
+    error_exit "[Jenkins] 비밀번호 변경 후 검증 실패: $JENKINS_PASSWORD"
+  fi
 }
 
 # Jenkins 보안 설정 (CLI로 설정)
@@ -192,15 +202,12 @@ generate_job_config() {
 EOF
 }
 
-
 create_job_in_jenkins() {
   local job_name="$1"
-  local config_xml="/tmp/${job_name}-job.xml"
+  local job_dir="/home/ubuntu/$job_name"
+  local config_xml="$job_dir/${job_name}-job.xml"
 
-  # (1) EC2로 Job XML 업로드
-  upload_file "$config_xml" "$config_xml"
-
-  # (2) EC2에서 jenkins-cli로 job 생성 명령 실행
+  # ✅ EC2 내부 파일로 바로 Jenkins job 생성
   ssh_exec "java -jar /tmp/jenkins-cli.jar \
     -s http://localhost:${SERVER[jenkins_port]} \
     -auth admin:$JENKINS_PASSWORD \

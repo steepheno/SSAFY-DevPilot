@@ -1,0 +1,178 @@
+pipeline {
+    agent any
+
+    tools {
+        jdk 'string'
+        nodejs 'nodejs'
+    }
+
+    environment {
+        PROJECT_NAME = 'string'
+        GIT_REPO = 'string'
+        FRONTEND_DIR = 'string'
+        BACKEND_DIR = 'string'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout([$class: 'GitSCM',
+                    branches: [[name: '${BRANCH_NAME}']],
+                    doGenerateSubmoduleConfigurations: false,
+                    extensions: [],
+                    submoduleCfg: [],
+                    userRemoteConfigs: [[
+                        credentialsId: 'string',
+                        url: 'string'
+                    ]]
+                ])
+                echo "Checked out branch: ${BRANCH_NAME}"
+            }
+        }
+
+        stage('Frontend Build') {
+            when {
+                expression {
+                    def config = findBranchConfig('${BRANCH_NAME}')
+                    return config != null && config.buildEnabled
+                }
+            }
+            steps {
+                dir('string') {
+                    script {
+                        echo "Building frontend in directory: string"
+                        sh 'npm install'
+                        sh 'npm run build'
+
+                        // Package frontend artifacts if needed
+                        sh 'mkdir -p ./dist'
+                        sh 'cp -r build/* ./dist/ || cp -r dist/* ./dist/ || true'
+                    }
+                }
+            }
+        }
+
+        stage('Backend Build') {
+            when {
+                expression {
+                    def config = findBranchConfig('${BRANCH_NAME}')
+                    return config != null && config.buildEnabled
+                }
+            }
+            steps {
+                dir('string') {
+                    script {
+                        echo "Building backend in directory: string"
+                        // Check if it's Maven or Gradle project
+                        if (fileExists('pom.xml')) {
+                            sh 'mvn clean package -DskipTests'
+                        } else if (fileExists('build.gradle') || fileExists('build.gradle.kts')) {
+                            sh 'chmod +x ./gradlew || true'
+                            sh './gradlew clean build -x test'
+                        } else {
+                            error "Neither pom.xml nor build.gradle found in backend directory"
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Test') {
+            when {
+                expression {
+                    def config = findBranchConfig('${BRANCH_NAME}')
+                    return config != null && config.testEnabled
+                }
+            }
+            steps {
+                dir('string') {
+                    script {
+                        echo "Running tests in directory: string"
+                        // Check if it's Maven or Gradle project
+                        if (fileExists('pom.xml')) {
+                            sh 'mvn test'
+                            junit '**/target/surefire-reports/*.xml'
+                        } else if (fileExists('build.gradle') || fileExists('build.gradle.kts')) {
+                            sh './gradlew test'
+                            junit '**/build/test-results/test/*.xml'
+                        } else {
+                            error "Neither pom.xml nor build.gradle found in backend directory"
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Docker Build & Deploy') {
+            when {
+                expression {
+                    def config = findBranchConfig('${BRANCH_NAME}')
+                    return config != null && config.deployEnabled
+                }
+            }
+            steps {
+                script {
+                    // Docker 명령어 플랫폼에 따라 다르게 실행
+                    if (isUnix()) {
+                        sh 'docker-compose down'
+                        sh 'docker-compose build'
+                        sh 'docker-compose up -d'
+                    } else {
+                        bat 'docker-compose down'
+                        bat 'docker-compose build'
+                        bat 'docker-compose up -d'
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        
+        always {
+            mattermostSend channel: 'string',
+                           color: currentBuild.currentResult == 'SUCCESS' ? 'good' : 'danger',
+                           message: "Build ${currentBuild.currentResult}: ${env.JOB_NAME} #${env.BUILD_NUMBER}\nDetails: ${env.BUILD_URL}",
+                           endpoint: 'string'
+        }
+        
+        success {
+            echo "Pipeline for ${PROJECT_NAME} completed successfully!"
+        }
+        failure {
+            echo "Pipeline for ${PROJECT_NAME} failed!"
+        }
+    }
+}
+
+def findBranchConfig(branchName) {
+    def branchConfigs = [
+                    [branchName: 'string', buildEnabled: true, testEnabled: true, deployEnabled: true]
+        ]
+
+        // First try exact match
+        def exactMatch = branchConfigs.find { it.branchName == branchName }
+        if (exactMatch) {
+            return exactMatch
+        }
+
+    // Then try pattern matching for feature/* branches
+    if (branchName.startsWith('feature/')) {
+        def featureConfig = branchConfigs.find { it.branchName == 'feature/*' }
+        if (featureConfig) {
+            return featureConfig
+        }
+    }
+
+    // Special handling for main/master/develop branches if not explicitly defined
+    if (branchName == 'main' || branchName == 'master' || branchName == 'develop') {
+        def defaultConfig = [:]
+        defaultConfig.branchName = branchName
+        defaultConfig.buildEnabled = true
+        defaultConfig.testEnabled = true
+        defaultConfig.deployEnabled = branchName == 'main' || branchName == 'master'
+        return defaultConfig
+    }
+
+    return null
+}

@@ -26,6 +26,32 @@ create_jenkins_pipeline() {
   log "[Jenkins] 파이프라인 생성 완료: $pipeline_name"
 }
 
+# EC2 내부에서 Jenkinsfile 경로 기준으로 Job XML을 생성
+generate_pipeline_job_config() {
+  local job_name="$1"
+  local remote_dir="$2"
+  local jenkinsfile_path="$3"
+
+  local remote_job_path="${remote_dir}/${job_name}-job.xml"
+
+  ssh_exec "pipeline_script=\$(cat $jenkinsfile_path) && \
+    cat <<EOF > $remote_job_path
+<?xml version='1.1' encoding='UTF-8'?>
+<flow-definition plugin=\"workflow-job@2.40\">
+  <description>${job_name} 파이프라인</description>
+  <keepDependencies>false</keepDependencies>
+  <definition class=\"org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition\" plugin=\"workflow-cps@2.94\">
+    <script><![CDATA[\$pipeline_script]]></script>
+    <sandbox>true</sandbox>
+  </definition>
+  <triggers/>
+  <disabled>false</disabled>
+</flow-definition>
+EOF
+"
+}
+
+
 # Jenkins 파이프라인 실행
 run_jenkins_pipeline() {
   local pipeline_name="$1"
