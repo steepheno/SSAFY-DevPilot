@@ -88,6 +88,8 @@ public class DockerfileService {
 				generatedFilePaths.put("redisService", redisServiceFilePath);
 			}
 
+			uploadFiles(requestDto, generatedFilePaths);
+
 			return generatedFilePaths;
 		} catch (IOException e) {
 			throw new DockerfileException(ErrorCode.DOCKER_TEMPLATE_ERROR);
