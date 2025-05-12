@@ -5,7 +5,7 @@ export const useProjectEnvironment = () => {
   const [useMaven, setUseMaven] = useState(false);
   const [useNginx, setUseNginx] = useState(false);
   const [useRedis, setUseRedis] = useState(false);
-  const [useMysql, setUseMysql] = useState(false);
+  const [useMySQL, setUseMySQL] = useState(false);
 
   const getProjectEnvironmentConfig = () => {
     return {
@@ -13,7 +13,7 @@ export const useProjectEnvironment = () => {
       useMaven,
       useNginx,
       useRedis,
-      useMysql,
+      useMySQL,
     };
   };
 
@@ -26,8 +26,8 @@ export const useProjectEnvironment = () => {
     setUseNginx,
     useRedis,
     setUseRedis,
-    useMysql,
-    setUseMysql,
+    useMySQL,
+    setUseMySQL,
     getProjectEnvironmentConfig,
   };
 };

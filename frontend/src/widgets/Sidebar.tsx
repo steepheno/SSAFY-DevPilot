@@ -15,7 +15,7 @@ type SidebarItemProps = {
 const sidebarItems = [
   { name: '홈', icon: <Home />, path: '/' },
   { name: '빌드 생성', icon: <CreateBuild />, path: '/new/repository' },
-  { name: '빌드 기록', icon: <BuildLog />, path: '/' },
+  { name: '빌드 기록', icon: <BuildLog />, path: '/builds' },
   { name: '내 정보', icon: <MyInfo />, path: '/' },
   { name: '내 작업 목록', icon: <MyWork />, path: '/' },
   { name: '설정', icon: <Settings />, path: '/' },
