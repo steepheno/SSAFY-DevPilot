@@ -77,7 +77,6 @@ public class TokenManager {
 	 * 사용자가 입력한 초기 비밀번호(initialPassword)로
 	 * Crumb→토큰 발급→tokenFile 에 덮어쓰기
 	 */
-	@SuppressWarnings("checkstyle:OperatorWrap")
 	public void generateAndSaveToken(String initialPassword) throws IOException, NullPointerException {
 		// 1) Crumb 발급
 		// 1) Crumb 발급 (+ set-cookie 헤더 얻기)
