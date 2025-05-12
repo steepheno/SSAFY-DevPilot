@@ -1,8 +1,14 @@
 export interface BuildStatus {
-  id: string;
-  keepLog: boolean;
   number: number;
-  queueId: number;
   result: 'SUCCESS' | 'FAILURE' | 'UNSTABLE';
   timestamp: number;
+  duration: number;
+  fullDisplayName: string;
+  parameters: [
+    {
+      shortDescription: string;
+      userName: string;
+      userId: string;
+    },
+  ];
 }

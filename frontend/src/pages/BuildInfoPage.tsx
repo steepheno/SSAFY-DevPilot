@@ -1,17 +1,35 @@
-import { CircleCheck, CircleXIcon } from 'lucide-react';
-import { useState } from 'react';
+import { CircleCheck, CircleEllipsis, CircleXIcon } from 'lucide-react';
+import { BuildStatus } from '@/entities/build/types';
+import { useEffect, useState } from 'react';
+import { fetchBuildInfo } from '@/entities/build/api';
 
 const BuildInfoPage = () => {
-  const [buildStatus, setBuildStatus] = useState({
-    projectName: '프젝임',
-    isBuildSuccess: false,
-  });
+  const [buildStatus, setBuildStatus] = useState<BuildStatus>();
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const response = await fetchBuildInfo('test', '1');
+        setBuildStatus(response.data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    load(); // 함수 호출
+  }, []);
 
   return (
     <div className="flex flex-col gap-4 p-4">
       <div className="flex items-center gap-1">
-        {buildStatus.isBuildSuccess ? <CircleCheck color="green" /> : <CircleXIcon color="red" />}
-        <h2 className="">{buildStatus.projectName}</h2>
+        {buildStatus?.result === 'SUCCESS' ? (
+          <CircleCheck color="green" />
+        ) : buildStatus?.result === 'FAILURE' ? (
+          <CircleXIcon color="red" />
+        ) : (
+          <CircleEllipsis color="blue" />
+        )}
+        <h2 className="">{buildStatus?.fullDisplayName}</h2>
       </div>
 
       <h3 className="font-semibold">고정 링크</h3>
