@@ -60,11 +60,11 @@ You are an expert in CICD and Jenkins. Please answer the following question base
 prompt = PromptTemplate.from_template(template)
 chain = prompt | llm | StrOutputParser()
 
-# 4. 서비스 함수
 def generate_answer(question: str) -> str:
     docs = query_multiple_indexes(query=question, embedding_model=embeddings)
     context = " ".join([doc['metadata']['text'] for doc in docs])
     return chain.invoke({"context": context, "question": question})
 
-def generate_answer_NoRAG(question: str) -> str:
-    return chain.invoke({"context": '', "question": question})
+# RAG와 성능 비교용 (테스트)
+# def generate_answer_NoRAG(question: str) -> str:
+#     return chain.invoke({"context": '', "question": question})
