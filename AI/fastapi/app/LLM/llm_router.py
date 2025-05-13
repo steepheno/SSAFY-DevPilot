@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from AI.fastapi.app.LLM.schemas.llm_schema import QueryRequest, QueryResponse
+from app.LLM.schemas.llm_schema import QueryRequest, QueryResponse
 from app.LLM.service.generator import generate_answer
 
 router = APIRouter(prefix="/api/llm")

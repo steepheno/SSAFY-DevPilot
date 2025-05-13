@@ -1,5 +1,5 @@
 import requests
-from AI.fastapi.app.core.config import API_URL
+from app.core.config import API_URL
 
 API_PATHS = {
     "generate_with_rag": "/api/llm/generations",
