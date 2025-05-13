@@ -1,14 +1,12 @@
 package com.corp.devpilot.jenkinsapi.service;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.CookieManager;
-import java.net.CookiePolicy;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
-
-import javax.net.ssl.SSLException;
+import java.util.Properties;
 
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,37 +31,51 @@ import reactor.netty.http.client.HttpClient;
 @Component
 public class TokenManager {
 
-	private final WebClient webClientForAuth;
+	private WebClient webClientForAuth;
 	private final String user;
 	private final File tokenFile;
 
 	public TokenManager(
-		@Value("${server.jenkins.url}") String url,
 		@Value("${server.jenkins.user}") String user,
-		@Value("${server.jenkins.tokenFile}") String tokenFilePath,
-		@Value("${server.jenkins.default-port}") String port
-	) throws SSLException {
+		@Value("${server.jenkins.tokenFile}") String tokenFilePath
+	) {
 		this.user = user;
 		this.tokenFile = new File(tokenFilePath);
+	}
 
-		SslContext sslContext = SslContextBuilder.forClient()
-			.trustManager(InsecureTrustManagerFactory.INSTANCE)
-			.build();
+	public void isClient() throws JenkinsApiException {
+		if (webClientForAuth == null) {
+			try {
+				Properties props = new Properties();
+				props.load(new FileInputStream("/root/.devpilot/.env"));
 
-		CookieManager cookieManager = new CookieManager();
-		cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
+				SslContext sslContext = SslContextBuilder.forClient()
+					.trustManager(InsecureTrustManagerFactory.INSTANCE)
+					.build();
 
-		HttpClient httpClient = HttpClient.create()
-			.secure(spec -> spec.sslContext(sslContext));
+				HttpClient httpClient = HttpClient.create()
+					.secure(spec -> spec.sslContext(sslContext));
 
-		this.webClientForAuth = WebClient.builder()
-			.baseUrl(url + ":" + port)
-			.clientConnector(new ReactorClientHttpConnector(httpClient))
-			.build();
+				this.webClientForAuth = WebClient.builder()
+					.baseUrl("http://" + props.getProperty("EC2_HOST") + ":" + props.getProperty("JENKINS_PORT"))
+					.clientConnector(new ReactorClientHttpConnector(httpClient))
+					.build();
+
+				System.out.println(props.getProperty("EC2_HOST") + " " + props.getProperty("JENKINS_PORT"));
+
+				//        this.client = WebClient.builder()
+				//                .baseUrl(url)
+				//                .defaultHeaders(h -> h.setBasicAuth(user, token))
+				//                .build();
+			} catch (Exception e) {
+				throw new JenkinsApiException(ErrorCode.JENKINS_INVALID_TOKEN_FILE);
+			}
+		}
 	}
 
 	/** 파일에 저장된 토큰을 읽어 반환 (없으면 빈 문자열) */
 	public String getToken() {
+		isClient();
 		try {
 			if (!tokenFile.exists()) {
 				return "";
@@ -81,6 +93,7 @@ public class TokenManager {
 	public void generateAndSaveToken(String initialPassword) throws IOException, NullPointerException {
 		// 1) Crumb 발급
 		// 1) Crumb 발급 (+ set-cookie 헤더 얻기)
+		isClient();
 		ResponseEntity<String> crumbEntity = webClientForAuth.mutate()
 			.defaultHeaders(h -> h.setBasicAuth(user, initialPassword))
 			.build()
