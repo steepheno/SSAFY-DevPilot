@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useFormStore } from '@/shared/store';
 import BuildInfo from '@/features/dockerfile-settings/ui/BuildInfo';
 import { checkInpuValidation } from '@/features/dockerfile-settings/lib/checkInputValidation';
@@ -22,7 +23,7 @@ const DockerfileSettings = () => {
   // const [isLoading, setIsLoading] = useState(false);
 
   // 응답 결과 상태 관리
-  // const [, setResult] = useState<DockerSuccessResponse | null>(null);
+  const [, setResult] = useState(null);
 
   const buildDockerfile = async () => {
     // 빌드 정보 검증
@@ -53,7 +54,7 @@ const DockerfileSettings = () => {
       console.log('호출 직후 data: ', data);
 
       // 응답 결과 설정
-      setResult(data);
+      // setResult(data);
       console.log('setResult 직후 data: ', data);
 
       navigate('/new/configure');

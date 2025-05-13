@@ -3,14 +3,14 @@ import { ChevronRight } from 'lucide-react';
 import RepositoryForm from '@/pages/newBuildPage/ui/RepositoryForm';
 import { useNavigate } from 'react-router-dom';
 
-export default function JenkinsSettings() {
+export default function RepositorySettings() {
   const { projectConfig, setProjectConfig } = useFormStore();
 
   const navigate = useNavigate();
 
   return (
     <>
-      <h2>Jenkins 설정</h2>
+      <h2>저장소 설정</h2>
       <form onSubmit={(e) => e.preventDefault()} className="mt-5">
         <div className="mb-4 flex flex-col gap-2 rounded-[10px] bg-gray-100 px-5 py-5">
           {/* 프로젝트 이름 */}

@@ -27,6 +27,10 @@ interface FormStore {
 const defaultProject: ProjectConfig = {
   projectName: '',
   useNginx: false,
+  useMaven: false,
+  useMySQL: false,
+  useRedis: false,
+  useGradle: false,
 };
 
 const defaultRepository: RepositoryConfig = {

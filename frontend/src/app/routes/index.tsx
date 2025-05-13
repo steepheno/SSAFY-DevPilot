@@ -1,7 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom';
 import PageLayout from '@/widgets/PageLayout';
 import { MainPage, NewBuildPage, DockerSettings, ConfigurePage, BuildInfoPage } from '@/pages';
-import JenkinsSettings from '@/features/jenkins-settings/ui/JenkinsSettings';
+import RepositorySettings from '@/features/jenkins-settings/ui/RepositorySettings';
 import BuildList from '@/pages/buildLog/ui/BuildList';
 import BuildDetail from '@/pages/buildLog/ui/BuildDetail';
 
@@ -20,7 +20,11 @@ const router = createBrowserRouter([
         handle: { breadcrumb: '새 빌드' },
         element: <NewBuildPage />,
         children: [
-          { path: 'repository', handle: { breadcrumb: 'Git 설정' }, element: <JenkinsSettings /> },
+          {
+            path: 'repository',
+            handle: { breadcrumb: 'Git 설정' },
+            element: <RepositorySettings />,
+          },
           {
             path: 'environment',
             handle: { breadcrumb: '빌드 파일 생성' },
