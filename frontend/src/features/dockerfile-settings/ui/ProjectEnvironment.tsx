@@ -1,22 +1,13 @@
-import { useProjectEnvironment } from '../../../entities/dockerFile/model/useProjectEnvironment';
+import { useFormStore } from '@/shared/store';
+import React from 'react';
 
-type ProjectEnvironmentProps = {
-  projectEnvironment: ReturnType<typeof useProjectEnvironment>;
-};
+const ProjectEnvironment = () => {
+  const { projectConfig, setProjectConfig } = useFormStore();
 
-const ProjectEnvironment = ({ projectEnvironment }: ProjectEnvironmentProps) => {
-  const {
-    useGradle,
-    setUseGradle,
-    useMaven,
-    setUseMaven,
-    useNginx,
-    setUseNginx,
-    useRedis,
-    setUseRedis,
-    useMySQL,
-    setUseMySQL,
-  } = projectEnvironment;
+  const handleCheckbox =
+    (key: keyof typeof projectConfig) => (e: React.ChangeEvent<HTMLInputElement>) => {
+      setProjectConfig({ [key]: e.target.checked });
+    };
 
   return (
     <div className="mb-10 rounded-[10px] bg-gray-100 px-5 py-5">
@@ -24,61 +15,65 @@ const ProjectEnvironment = ({ projectEnvironment }: ProjectEnvironmentProps) => 
       <div className="mt-3 flex flex-col space-y-2">
         <div className="flex items-center space-x-2">
           <input
-            className="cursor-pointer"
-            type="checkbox"
             id="gradle"
-            checked={useGradle}
-            onChange={() => setUseGradle(!useGradle)}
+            type="checkbox"
+            className="cursor-pointer"
+            checked={projectConfig.useGradle}
+            onChange={handleCheckbox('useGradle')}
           />
-          <label className="cursor-pointer" htmlFor="gradle">
+          <label htmlFor="gradle" className="cursor-pointer">
             Gradle
           </label>
         </div>
+
         <div className="flex items-center space-x-2">
           <input
-            className="cursor-pointer"
-            type="checkbox"
             id="maven"
-            checked={useMaven}
-            onChange={() => setUseMaven(!useMaven)}
+            type="checkbox"
+            className="cursor-pointer"
+            checked={projectConfig.useMaven}
+            onChange={handleCheckbox('useMaven')}
           />
-          <label className="cursor-pointer" htmlFor="maven">
+          <label htmlFor="maven" className="cursor-pointer">
             Maven
           </label>
         </div>
+
         <div className="flex items-center space-x-2">
           <input
-            className="cursor-pointer"
-            type="checkbox"
             id="nginx"
-            checked={useNginx}
-            onChange={() => setUseNginx(!useNginx)}
+            type="checkbox"
+            className="cursor-pointer"
+            checked={projectConfig.useNginx}
+            onChange={handleCheckbox('useNginx')}
           />
-          <label className="cursor-pointer" htmlFor="nginx">
+          <label htmlFor="nginx" className="cursor-pointer">
             Nginx
           </label>
         </div>
+
         <div className="flex items-center space-x-2">
           <input
-            className="cursor-pointer"
-            type="checkbox"
             id="redis"
-            checked={useRedis}
-            onChange={() => setUseRedis(!useRedis)}
+            type="checkbox"
+            className="cursor-pointer"
+            checked={projectConfig.useRedis}
+            onChange={handleCheckbox('useRedis')}
           />
-          <label className="cursor-pointer" htmlFor="redis">
+          <label htmlFor="redis" className="cursor-pointer">
             Redis
           </label>
         </div>
+
         <div className="flex items-center space-x-2">
           <input
-            className="cursor-pointer"
+            id="mysql"
             type="checkbox"
-            id="MySQL"
-            checked={useMySQL}
-            onChange={() => setUseMySQL(!useMySQL)}
+            className="cursor-pointer"
+            checked={projectConfig.useMySQL}
+            onChange={handleCheckbox('useMySQL')}
           />
-          <label className="cursor-pointer" htmlFor="MySQL">
+          <label htmlFor="mysql" className="cursor-pointer">
             MySQL
           </label>
         </div>

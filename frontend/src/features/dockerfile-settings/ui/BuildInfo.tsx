@@ -1,24 +1,7 @@
-import { useBuildInfo } from '../../../entities/dockerFile/model/useBuildInfo';
+import { useFormStore } from '@/shared/store';
 
-type BuildInfoProps = {
-  buildInfo: ReturnType<typeof useBuildInfo>;
-};
-
-const BuildInfo = ({ buildInfo }: BuildInfoProps) => {
-  const {
-    backendDir,
-    setBackendDir,
-    backendPort,
-    setBackendPort,
-    javaVersion,
-    setJavaVersion,
-    frontendDir,
-    setFrontendDir,
-    frontendPort,
-    setFrontendPort,
-    dockerfileFrontendType,
-    setDockerfileFrontendType,
-  } = buildInfo;
+const BuildInfo = () => {
+  const { backendConfig, setBackendConfig, frontendConfig, setFrontendConfig } = useFormStore();
 
   return (
     <div className="mb-10 rounded-[10px] bg-gray-100 px-5 py-5">
@@ -29,8 +12,8 @@ const BuildInfo = ({ buildInfo }: BuildInfoProps) => {
           <p>폴더명</p>
           <input
             className="ml-5 h-[25px] rounded border px-2"
-            value={backendDir}
-            onChange={(e) => setBackendDir(e.target.value)}
+            value={backendConfig.backendDir}
+            onChange={(e) => setBackendConfig({ backendDir: e.target.value })}
           />
         </div>
         <div className="flex">
@@ -38,16 +21,16 @@ const BuildInfo = ({ buildInfo }: BuildInfoProps) => {
           <input
             className="ml-5 h-[25px] rounded border px-2"
             type="number"
-            value={backendPort}
-            onChange={(e) => setBackendPort(Number(e.target.value))}
+            value={backendConfig.backendPort}
+            onChange={(e) => setBackendConfig({ backendPort: Number(e.target.value) })}
           />
         </div>
         <div className="flex">
           <p>Java 버전</p>
           <select
             className="ml-5 h-[25px] rounded border px-2"
-            value={javaVersion}
-            onChange={(e) => setJavaVersion(e.target.value)}
+            value={backendConfig.javaVersion}
+            onChange={(e) => setBackendConfig({ javaVersion: e.target.value })}
           >
             <option value="option">선택하세요</option>
             <option value="8">JDK 8</option>
@@ -63,8 +46,8 @@ const BuildInfo = ({ buildInfo }: BuildInfoProps) => {
           <p>폴더명</p>
           <input
             className="ml-5 h-[25px] rounded border px-2"
-            value={frontendDir}
-            onChange={(e) => setFrontendDir(e.target.value)}
+            value={frontendConfig.frontendDir}
+            onChange={(e) => setFrontendConfig({ frontendDir: e.target.value })}
           />
         </div>
         <div className="flex">
@@ -72,16 +55,16 @@ const BuildInfo = ({ buildInfo }: BuildInfoProps) => {
           <input
             className="ml-5 h-[25px] rounded border px-2"
             type="number"
-            value={frontendPort}
-            onChange={(e) => setFrontendPort(Number(e.target.value))}
+            value={frontendConfig.frontendPort}
+            onChange={(e) => setFrontendConfig({ frontendPort: Number(e.target.value) })}
           />
         </div>
         <div className="flex">
           <p>프로젝트 환경</p>
           <select
             className="ml-5 h-[25px] rounded border px-2"
-            value={dockerfileFrontendType}
-            onChange={(e) => setDockerfileFrontendType(e.target.value)}
+            value={frontendConfig.dockerfileFrontendType}
+            onChange={(e) => setFrontendConfig({ dockerfileFrontendType: e.target.value })}
           >
             <option value="option">선택하세요</option>
             <option value="REACT">REACT</option>

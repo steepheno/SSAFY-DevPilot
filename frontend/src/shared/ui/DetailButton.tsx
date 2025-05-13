@@ -3,7 +3,7 @@ import { Pencil } from 'lucide-react';
 interface DetailButtonProps {
   isEditMode: boolean;
   setIsEditMode: (value: boolean) => void;
-  savedText: boolean;
+  savedText: string;
 }
 
 const DetailButton = ({ isEditMode, setIsEditMode, savedText }: DetailButtonProps) => {
