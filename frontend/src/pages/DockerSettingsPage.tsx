@@ -34,10 +34,10 @@ const DockerfileSettings = () => {
 
   const buildDockerfile = async () => {
     // 프로젝트 제목 검증
-    if (!projectName) {
-      alert('프로젝트 이름을 입력해주세요.');
-      return;
-    }
+    // if (!projectName) {
+    //   alert('프로젝트 이름을 입력해주세요.');
+    //   return;
+    // }
 
     // 빌드 정보 검증
     if (!buildInfo.validateBuildInfo()) {
@@ -81,16 +81,17 @@ const DockerfileSettings = () => {
   };
 
   return (
-    <div className="px-10 py-10">
+    <div className="">
+      <h2>Dockerfile 설정</h2>
       {/* 프로젝트 이름 입력 */}
-      <div className="mb-10 rounded-[10px] bg-gray-100 px-5 py-5">
-        <p className="text-body font-bold">프로젝트 이름</p>
-        <input
-          className="mt-3 h-[30px] rounded border px-2"
-          value={projectName}
-          onChange={(e) => setProjectName(e.target.value)}
-        />
-      </div>
+      {/* <div className="mb-10 rounded-[10px] bg-gray-100 px-5 py-5"> */}
+      {/*   <p className="text-body font-bold">프로젝트 이름</p> */}
+      {/*   <input */}
+      {/*     className="mt-3 h-[30px] rounded border px-2" */}
+      {/*     value={projectName} */}
+      {/*     onChange={(e) => setProjectName(e.target.value)} */}
+      {/*   /> */}
+      {/* </div> */}
 
       {/* 빌드 정보 입력 */}
       <BuildInfo buildInfo={buildInfo} />
