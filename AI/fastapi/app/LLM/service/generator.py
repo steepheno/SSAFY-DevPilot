@@ -18,32 +18,43 @@ generator_pipeline = pipeline(
     model=model,
     tokenizer=tokenizer,
     max_new_tokens=512,
-    temperature=0.1,
+    temperature=0.2,
     top_p=0.9,
     repetition_penalty=1.2,
-    eos_token_id=tokenizer.eos_token_id
+    eos_token_id=tokenizer.eos_token_id,
+    pad_token_id=tokenizer.pad_token_id,      
+    return_full_text=False       
 )
 
 llm = HuggingFacePipeline(pipeline=generator_pipeline)
 embeddings = HuggingFaceEmbeddings(model_name=EMBEDDING_ID)
 
 template = """
-당신은 CICD와 Jenkins에 특화된 전문가입니다. 아래 문서를 바탕으로 질문에 정확하게 답변해 주세요.
+You are an expert in CICD and Jenkins. Please answer the following question based strictly on the provided document.
 
-※ 조건
-- 문서에 포함된 정보를 최대한 활용하세요.
-- 문서를 그대로 복사하지 말고, 문서 내용을 기반으로 풀어서 설명하세요.
-- 답변하는 과정에서, 문서의 문장을 활용해 논리적으로 추론하는 과정을 거치세요.
-- CICD나 젠킨스와 관련없는 질문은 '해당 내용은 답변할 수 없습니다'라고 하세요.
-- 영어로 생각하는 추론 과정을 거친 후, 반드시 한글로 답변하세요.
+※ ABSOLUTE RULES (Must Follow Without Exception):
+- You MUST use only the information contained in the document. Do NOT generate any information that is not clearly present or directly inferred from the document.
+- You MUST NOT hallucinate or guess. If the document or RAG retrieval result does NOT contain relevant information, you MUST answer exactly:
+  > "죄송합니다. 해당 내용을 찾을 수 없습니다."
+- DO NOT answer from prior knowledge or assumptions. ONLY use what is in the document.
+- Then, write the final answer in **Korean**, based on your reasoning.
 
-[문서]
+※ Detailed Answering Guidelines:
+- You MUST write a **multi-sentence answer**, not a single sentence. Provide enough explanation to help the user clearly understand.
+- Actively utilize and expand on multiple parts of the document when constructing your answer.
+- Rephrase the document content in your own words and logically explain the reasoning behind your answer.
+- If needed, provide examples or elaborate on specific terms mentioned in the document.
+- Keep your explanation **as simple and detailed as possible**, so that even beginners can understand.
+- First, perform step-by-step reasoning in English using the document as evidence.
+
+
+[Document]
 {context}
 
-[질문]
+[Question]
 {question}
 
-[답변]
+[Answer]
 """
 
 prompt = PromptTemplate.from_template(template)
