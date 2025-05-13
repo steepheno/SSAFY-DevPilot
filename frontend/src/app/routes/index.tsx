@@ -5,7 +5,7 @@ import RepositorySettings from '@/features/jenkins-settings/ui/RepositorySetting
 import BuildList from '@/pages/buildLog/ui/BuildList';
 import BuildDetail from '@/pages/buildLog/ui/BuildDetail';
 
-const router = createBrowserRouter([
+const Router = createBrowserRouter([
   {
     path: '/',
     element: <PageLayout />,
@@ -53,4 +53,4 @@ const router = createBrowserRouter([
   },
 ]);
 
-export default router;
+export default Router;

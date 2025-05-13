@@ -1,7 +1,13 @@
 import { useFormStore } from '@/shared/store';
+import React from 'react';
 
 const ProjectEnvironment = () => {
   const { projectConfig, setProjectConfig } = useFormStore();
+
+  const handleCheckbox =
+    (key: keyof typeof projectConfig) => (e: React.ChangeEvent<HTMLInputElement>) => {
+      setProjectConfig({ [key]: e.target.checked });
+    };
 
   return (
     <div className="mb-10 rounded-[10px] bg-gray-100 px-5 py-5">
@@ -9,61 +15,65 @@ const ProjectEnvironment = () => {
       <div className="mt-3 flex flex-col space-y-2">
         <div className="flex items-center space-x-2">
           <input
-            className="cursor-pointer"
-            type="checkbox"
             id="gradle"
+            type="checkbox"
+            className="cursor-pointer"
             checked={projectConfig.useGradle}
-            onChange={(prev) => setProjectConfig({ useGradle: !prev })}
+            onChange={handleCheckbox('useGradle')}
           />
-          <label className="cursor-pointer" htmlFor="gradle">
+          <label htmlFor="gradle" className="cursor-pointer">
             Gradle
           </label>
         </div>
+
         <div className="flex items-center space-x-2">
           <input
-            className="cursor-pointer"
-            type="checkbox"
             id="maven"
+            type="checkbox"
+            className="cursor-pointer"
             checked={projectConfig.useMaven}
-            onChange={(prev) => setProjectConfig({ useMaven: !prev })}
+            onChange={handleCheckbox('useMaven')}
           />
-          <label className="cursor-pointer" htmlFor="maven">
+          <label htmlFor="maven" className="cursor-pointer">
             Maven
           </label>
         </div>
+
         <div className="flex items-center space-x-2">
           <input
-            className="cursor-pointer"
-            type="checkbox"
             id="nginx"
+            type="checkbox"
+            className="cursor-pointer"
             checked={projectConfig.useNginx}
-            onChange={(prev) => setProjectConfig({ useNginx: !prev })}
+            onChange={handleCheckbox('useNginx')}
           />
-          <label className="cursor-pointer" htmlFor="nginx">
+          <label htmlFor="nginx" className="cursor-pointer">
             Nginx
           </label>
         </div>
+
         <div className="flex items-center space-x-2">
           <input
-            className="cursor-pointer"
-            type="checkbox"
             id="redis"
+            type="checkbox"
+            className="cursor-pointer"
             checked={projectConfig.useRedis}
-            onChange={(prev) => setProjectConfig({ useRedis: !prev })}
+            onChange={handleCheckbox('useRedis')}
           />
-          <label className="cursor-pointer" htmlFor="redis">
+          <label htmlFor="redis" className="cursor-pointer">
             Redis
           </label>
         </div>
+
         <div className="flex items-center space-x-2">
           <input
-            className="cursor-pointer"
+            id="mysql"
             type="checkbox"
-            id="MySQL"
+            className="cursor-pointer"
             checked={projectConfig.useMySQL}
-            onChange={(prev) => setProjectConfig({ useMySQL: !prev })}
+            onChange={handleCheckbox('useMySQL')}
           />
-          <label className="cursor-pointer" htmlFor="MySQL">
+          <label htmlFor="mysql" className="cursor-pointer">
             MySQL
           </label>
         </div>

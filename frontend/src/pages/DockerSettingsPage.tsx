@@ -77,7 +77,7 @@ const DockerfileSettings = () => {
       <ProjectEnvironment />
 
       {/* MySQL 설정 */}
-      <MySqlInfo mySqlInfo={mySqlInfo} />
+      <MySqlInfo />
 
       {/* 빌드 버튼 */}
       <div className="flex justify-center">
