@@ -1,15 +1,19 @@
 package com.corp.devpilot.installation.controller;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
 import java.util.Map;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.corp.devpilot.installation.dto.JenkinsInstallRequestDto;
 import com.corp.devpilot.installation.service.JenkinsInstallService;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/initial-setting")
@@ -24,5 +28,11 @@ public class JenkinsInstallController {
 	public ResponseEntity<Map<String, Object>> install(@RequestBody JenkinsInstallRequestDto requestDto) {
 		jenkinsInstallService.installJenkins(requestDto);
 		return ResponseEntity.ok(Map.of("message", "Jenkins 설치 스크립트 실행 완료"));
+	}
+
+	@PostMapping("/test")
+	public boolean test(@RequestBody JenkinsInstallRequestDto requestDto) {
+		jenkinsInstallService.confirmJenkins(requestDto);
+		return true;
 	}
 }
