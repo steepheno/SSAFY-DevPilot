@@ -290,51 +290,90 @@ public class DockerfileService {
 			String os = System.getProperty("os.name").toLowerCase();
 			boolean isWindows = os.contains("win");
 
-			String uploadScript = isWindows ? "./scripts/windows/deploy_project_files.ps1"
-				: "./scripts/linux/deploy_project_files.sh";
+			// 로깅 추가
+			System.out.println("운영체제: " + os);
+			System.out.println("Windows 환경: " + isWindows);
 
+			// 절대 경로 사용
+			String projectRoot = "C:\\Users\\SSAFY\\Dev\\DevPilot\\Backend";
+			String uploadScript = isWindows ? projectRoot + "\\scripts\\window\\deploy_projects_files.ps1"
+				: projectRoot + "/scripts/linux/deploy_project_files.sh";
+
+			// 스크립트 존재 여부 확인
+			File scriptFile = new File(uploadScript);
+			if (!scriptFile.exists()) {
+				System.err.println("❌ 스크립트 파일이 존재하지 않습니다: " + uploadScript);
+				throw new RuntimeException("스크립트 파일이 존재하지 않습니다: " + uploadScript);
+			}
+			System.out.println("✅ 스크립트 파일 확인: " + uploadScript);
+
+			// 명령어 구성
 			List<String> command = new ArrayList<>();
 			if (isWindows) {
 				command.add("powershell");
 				command.add("-ExecutionPolicy");
 				command.add("Bypass");
 				command.add("-File");
+				command.add(uploadScript);
+
+				// PowerShell 매개변수 추가
+				command.add("-ProjectName");
+				command.add(requestDto.getProjectName());
+
+				command.add("-BackendDockerfile");
+				command.add(generatedPaths.get("backendDockerfile"));
+
+				command.add("-FrontendDockerfile");
+				command.add(generatedPaths.get("frontendDockerfile"));
+
+				command.add("-DockerCompose");
+				command.add(generatedPaths.get("dockerCompose"));
+
+				if (generatedPaths.containsKey("nginxConfig")) {
+					command.add("-NginxConf");
+					command.add(generatedPaths.get("nginxConfig"));
+				} else {
+					// nginx.conf가 없는 경우 빈 파일 생성해서 전달
+					File tempNginxConf = File.createTempFile("nginx", ".conf");
+					command.add("-NginxConf");
+					command.add(tempNginxConf.getAbsolutePath());
+				}
 			} else {
+				// Linux 환경 명령어 구성 (필요한 경우)
 				command.add("bash");
+				command.add(uploadScript);
+				// 매개변수 추가...
 			}
 
-			command.add(uploadScript);
-			command.add("--project-name=" + requestDto.getProjectName());
-			command.add("--backend-dockerfile=" + generatedPaths.get("backendDockerfile"));
-			command.add("--frontend-dockerfile=" + generatedPaths.get("frontendDockerfile"));
-			command.add("--docker-compose=" + generatedPaths.get("dockerCompose"));
-
-			if (generatedPaths.containsKey("nginxConfig")) {
-				command.add("--nginx-conf=" + generatedPaths.get("nginxConfig"));
-			}
+			// 명령어 로깅
+			System.out.println("실행할 명령어: " + String.join(" ", command));
 
 			ProcessBuilder pb = new ProcessBuilder(command);
 			pb.redirectErrorStream(true);
 
 			Process process = pb.start();
+			StringBuilder output = new StringBuilder();
 			try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
 				String line;
 				while ((line = reader.readLine()) != null) {
 					System.out.println("[deploy_project_files] " + line);
+					output.append(line).append("\n");
 				}
 			}
 
 			int exitCode = process.waitFor();
+			System.out.println("스크립트 종료 코드: " + exitCode);
 			if (exitCode != 0) {
-				throw new RuntimeException("❌ Dockerfile 업로드 실패: exitCode = " + exitCode);
+				System.err.println("❌ Dockerfile 업로드 실패. 출력: \n" + output.toString());
+				throw new RuntimeException("❌ Dockerfile 업로드 실패: exitCode = " + exitCode + "\n" + output.toString());
 			}
 
 			System.out.println("✅ Dockerfile 및 설정 파일 업로드 완료");
 
 		} catch (IOException | InterruptedException e) {
-			throw new RuntimeException("❌ 스크립트 실행 중 오류 발생", e);
+			e.printStackTrace(); // 상세 에러 정보 출력
+			throw new RuntimeException("❌ 스크립트 실행 중 오류 발생: " + e.getMessage(), e);
 		}
 	}
-
 
 }
