@@ -2,7 +2,6 @@ package com.corp.devpilot.jenkinsfile.service;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -20,7 +19,6 @@ import com.corp.devpilot.global.error.code.ErrorCode;
 import com.corp.devpilot.global.error.exception.JenkinsfileException;
 import com.corp.devpilot.jenkinsfile.domain.dto.JenkinsfileBranchConfig;
 import com.corp.devpilot.jenkinsfile.domain.dto.JenkinsfileRequestDto;
-import com.corp.devpilot.jenkinsfile.domain.dto.JenkinsfileResponseDto;
 
 import lombok.RequiredArgsConstructor;
 
@@ -32,23 +30,6 @@ public class JenkinsfileService {
 
 	@Value("${ec2.remote-base-dir}")
 	private String remoteBaseDir;
-
-	public JenkinsfileResponseDto generateJenkinsfile(JenkinsfileRequestDto requestDto) {
-		try {
-			validateRequest(requestDto);
-
-			String templateContent = readTemplateFile("templates/jenkinsfile/monorepo-template.txt");
-
-			String jenkinsfileContent = replaceVariables(templateContent, requestDto);
-
-			return JenkinsfileResponseDto.success(jenkinsfileContent,
-				requestDto.getJenkinsfileProjectType().toString());
-		} catch (IOException e) {
-			throw new JenkinsfileException(ErrorCode.JENKINS_TEMPLATE_ERROR);
-		} catch (Exception e) {
-			throw new JenkinsfileException(ErrorCode.INTERNAL_SERVER_ERROR);
-		}
-	}
 
 	private String readTemplateFile(String path) throws IOException {
 		try (BufferedReader reader = new BufferedReader(
@@ -241,6 +222,4 @@ public class JenkinsfileService {
 			throw new JenkinsfileException(ErrorCode.JENKINS_FILE_UPLOAD_ERROR);
 		}
 	}
-
-
 }
