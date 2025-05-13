@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { generateJenkinsFile } from '@/entities/jenkinsFile/api/generateJenkinsfile';
-import type { JenkinsConfig } from '@/entities/jenkinsFile/types/';
+import { generateJenkinsFile } from '@/entities/jenkins/api/generateJenkinsfile';
+import type { JenkinsConfig } from '@/entities/jenkins/types';
 
 export function useGenerateJenkinsFile() {
   const navigate = useNavigate();

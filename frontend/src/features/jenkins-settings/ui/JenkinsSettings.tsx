@@ -4,7 +4,7 @@ import { ChevronRight } from 'lucide-react';
 import BuildScriptForm from '@/pages/newBuildPage/ui/BuildScriptForm';
 import RepositoryForm from '@/pages/newBuildPage/ui/RepositoryForm';
 import { useFormData } from '@/pages/newBuildPage/model/useFormData';
-import { useGenerateJenkinsFile } from '../lib/useGenerateJenkinsFile';
+import { useGenerateJenkinsFile } from '../model/useGenerateJenkinsFile';
 import type { JenkinsConfig } from '@/entities/jenkinsFile/types/JenkinsConfig';
 
 export default function JenkinsSettings() {
