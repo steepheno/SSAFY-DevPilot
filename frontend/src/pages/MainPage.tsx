@@ -1,6 +1,5 @@
 import DetailButton from '@/shared/ui/DetailButton';
 import DetailInput from '@/shared/ui/DetailInput';
-import PageLayout from '@/widgets/PageLayout';
 import { useState } from 'react';
 
 const MainPage = () => {
@@ -26,7 +25,7 @@ const MainPage = () => {
             <DetailButton
               isEditMode={isEditMode}
               setIsEditMode={setIsEditMode}
-              savedText={!!savedText}
+              savedText={savedText}
             />
           </div>
         </div>

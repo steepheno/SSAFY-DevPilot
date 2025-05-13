@@ -22,7 +22,7 @@ const BuildDetail = () => {
           <DetailButton
             isEditMode={isEditMode}
             setIsEditMode={setIsEditMode}
-            savedText={!!savedText}
+            savedText={savedText}
           />
         </div>
 
