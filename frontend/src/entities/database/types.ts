@@ -1,7 +1,8 @@
 export interface DatabaseConfig {
-  mysqlVersion: string;
   useRedis: boolean;
+
   useMySQL: boolean;
+  mysqlVersion: string;
   mysqlRootPassword: string;
   mysqlDatabase: string;
   mysqlUser: string;

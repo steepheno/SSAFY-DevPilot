@@ -1,15 +1,17 @@
 import { CircleCheck, CircleEllipsis, CircleXIcon } from 'lucide-react';
+import { useParams } from 'react-router-dom';
 import { BuildStatus } from '@/entities/build/types';
 import { useEffect, useState } from 'react';
 import { fetchBuildInfo } from '@/entities/build/api';
 
 const BuildInfoPage = () => {
   const [buildStatus, setBuildStatus] = useState<BuildStatus>();
+  const { buildId } = useParams<{ buildId: string }>();
 
   useEffect(() => {
     const load = async () => {
       try {
-        const response = await fetchBuildInfo('test', '1');
+        const response = await fetchBuildInfo('test', buildId || '');
         setBuildStatus(response.data);
       } catch (err) {
         console.error(err);
