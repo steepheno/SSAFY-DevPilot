@@ -1,9 +1,17 @@
-import { createBrowserRouter } from 'react-router-dom';
+import { createBrowserRouter, Outlet, redirect } from 'react-router-dom';
 import PageLayout from '@/widgets/PageLayout';
 import { MainPage, NewBuildPage, DockerSettings, ConfigurePage, BuildInfoPage } from '@/pages';
 import RepositorySettings from '@/features/jenkins-settings/ui/RepositorySettings';
 import BuildList from '@/pages/buildLog/ui/BuildList';
 import BuildDetail from '@/pages/buildLog/ui/BuildDetail';
+
+async function buildInfoLoader(params: any) {
+  const { buildId } = params;
+  if (!/^\d+$/.test(buildId || '')) {
+    throw redirect('/404');
+  }
+  return null;
+}
 
 const Router = createBrowserRouter([
   {
@@ -33,21 +41,30 @@ const Router = createBrowserRouter([
           { path: 'configure', element: <ConfigurePage /> },
         ],
       },
-      // TODO: /builds페이지를 루트로 children 내에 하위 페이지 렌더
       {
         path: 'builds',
+        element: <Outlet />, // 하위 라우트만 렌더
         handle: { breadcrumb: '빌드 기록' },
-        element: <BuildList />,
-      },
-      {
-        path: 'builds/:buildId',
-        handle: { breadcrumb: '대시보드' },
-        element: <BuildInfoPage />,
-      },
-      {
-        path: 'builds/:buildId/detail',
-        handle: { breadcrumb: '빌드 상세' },
-        element: <BuildDetail />,
+        children: [
+          {
+            index: true,
+            element: <BuildList />,
+          },
+          {
+            path: ':buildId',
+
+            loader: buildInfoLoader,
+            element: <BuildInfoPage />,
+            handle: { breadcrumb: '대시보드' },
+            children: [
+              {
+                path: 'detail',
+                element: <BuildDetail />,
+                handle: { breadcrumb: '빌드 상세' },
+              },
+            ],
+          },
+        ],
       },
     ],
   },
