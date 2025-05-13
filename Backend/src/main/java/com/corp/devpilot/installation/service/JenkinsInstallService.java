@@ -1,14 +1,5 @@
 package com.corp.devpilot.installation.service;
 
-import com.corp.devpilot.global.error.code.ErrorCode;
-import com.corp.devpilot.global.error.exception.BusinessException;
-import com.corp.devpilot.installation.dto.JenkinsInstallRequestDto;
-
-import lombok.extern.slf4j.Slf4j;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -18,6 +9,15 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import com.corp.devpilot.global.error.code.ErrorCode;
+import com.corp.devpilot.global.error.exception.BusinessException;
+import com.corp.devpilot.installation.dto.JenkinsInstallRequestDto;
+
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -31,6 +31,9 @@ public class JenkinsInstallService {
 
 	@Value("${ec2.remote-base-dir}")
 	private String HOME_PATH;
+
+	@Value("${scripts.linux-confirm-path}")
+	private String linuxConfirmPath;
 
 	public void installJenkins(JenkinsInstallRequestDto request) {
 		saveEnvVariables(request);
@@ -70,7 +73,8 @@ public class JenkinsInstallService {
 
 			int exitCode = process.waitFor();
 			if (exitCode != 0) {
-				throw new BusinessException(ErrorCode.JENKINS_DEPLOY_ERROR, "main script 실행 실패: exitCode = " + exitCode);
+				throw new BusinessException(ErrorCode.JENKINS_DEPLOY_ERROR,
+					"main script 실행 실패: exitCode = " + exitCode);
 			}
 
 		} catch (Exception e) {
@@ -82,7 +86,8 @@ public class JenkinsInstallService {
 	public void saveEnvVariables(JenkinsInstallRequestDto request) {
 		File envFile = new File(System.getProperty("user.home") + "/.devpilot/.env");
 		File parent = envFile.getParentFile();
-		if (!parent.exists()) parent.mkdirs();
+		if (!parent.exists())
+			parent.mkdirs();
 
 		Properties props = new Properties();
 
@@ -126,6 +131,44 @@ public class JenkinsInstallService {
 				.orElseThrow(() -> new BusinessException(ErrorCode.INVALID_INPUT_VALUE, "PEM 경로 없음"));
 		} catch (IOException e) {
 			throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR, "PEM 경로 불러오기 실패");
+		}
+	}
+
+	public void confirmJenkins(JenkinsInstallRequestDto request) {
+		saveEnvVariables(request);
+
+		List<String> command = new ArrayList<>();
+		command.add("bash");
+
+		command.add(linuxConfirmPath);
+		command.add("--pem-path=" + request.getPemPath());
+		command.add("--ec2-host=" + request.getEc2Host());
+		command.add("--jenkins-port=" + request.getJenkinsPort());
+		command.add("--jenkins-password=" + request.getJenkinsPassword());
+		command.add("--config-dir=" + HOME_PATH + request.getConfigDir());
+
+		ProcessBuilder processBuilder = new ProcessBuilder(command);
+		processBuilder.redirectErrorStream(true);
+
+		try {
+			Process process = processBuilder.start();
+			try (BufferedReader reader = new BufferedReader(
+				new InputStreamReader(process.getInputStream()))) {
+				String line;
+				while ((line = reader.readLine()) != null) {
+					log.info("[confirm script] {}", line);
+				}
+			}
+
+			int exitCode = process.waitFor();
+			if (exitCode != 0) {
+				throw new BusinessException(ErrorCode.JENKINS_DEPLOY_ERROR,
+					"main script 실행 실패: exitCode = " + exitCode);
+			}
+
+		} catch (Exception e) {
+			log.error("Jenkins 설치 중 예외 발생", e);
+			throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR, "main script 실행 중 오류가 발생했습니다");
 		}
 	}
 

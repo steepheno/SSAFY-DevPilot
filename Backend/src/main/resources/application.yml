@@ -93,6 +93,7 @@ springdoc:
 scripts:
   linux-main-path: ./scripts/linux/main.sh
   window-main-path: ./scripts/window/main.ps1
+  linux-confirm-path: ./scripts/linux/confirm.sh
 
 ec2:
   remote-base-dir: /home/ubuntu
