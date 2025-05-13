@@ -1,17 +1,9 @@
-import { createBrowserRouter, Outlet, redirect } from 'react-router-dom';
+import { createBrowserRouter, Outlet } from 'react-router-dom';
 import PageLayout from '@/widgets/PageLayout';
 import { MainPage, NewBuildPage, DockerSettings, ConfigurePage, BuildInfoPage } from '@/pages';
 import RepositorySettings from '@/features/jenkins-settings/ui/RepositorySettings';
 import BuildList from '@/pages/buildLog/ui/BuildList';
 import BuildDetail from '@/pages/buildLog/ui/BuildDetail';
-
-async function buildInfoLoader(params: any) {
-  const { buildId } = params;
-  if (!/^\d+$/.test(buildId || '')) {
-    throw redirect('/404');
-  }
-  return null;
-}
 
 const Router = createBrowserRouter([
   {
@@ -52,8 +44,6 @@ const Router = createBrowserRouter([
           },
           {
             path: ':buildId',
-
-            loader: buildInfoLoader,
             element: <BuildInfoPage />,
             handle: { breadcrumb: '대시보드' },
             children: [
