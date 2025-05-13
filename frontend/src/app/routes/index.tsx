@@ -20,8 +20,12 @@ const router = createBrowserRouter([
         handle: { breadcrumb: '새 빌드' },
         element: <NewBuildPage />,
         children: [
-          { path: 'repository', element: <JenkinsSettings /> },
-          { path: 'environment', element: <DockerSettings /> },
+          { path: 'repository', handle: { breadcrumb: 'Git 설정' }, element: <JenkinsSettings /> },
+          {
+            path: 'environment',
+            handle: { breadcrumb: '빌드 파일 생성' },
+            element: <DockerSettings />,
+          },
           { path: 'configure', element: <ConfigurePage /> },
         ],
       },

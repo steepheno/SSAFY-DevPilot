@@ -4,7 +4,6 @@ import { checkInpuValidation } from '@/features/dockerfile-settings/lib/checkInp
 import ProjectEnvironment from '@/features/dockerfile-settings/ui/ProjectEnvironment';
 import MySqlInfo from '@/features/dockerfile-settings/ui/MySqlInfo';
 import DockerfileConfig from '@/entities/dockerFile/types';
-import { useMySqlInfo } from '@/entities/dockerFile/model/useMySqlInfo';
 import { generateDockerfile } from '@/entities/dockerFile/api';
 import { useNavigate } from 'react-router-dom';
 
@@ -14,11 +13,10 @@ const DockerfileSettings = () => {
 
   const { projectConfig, frontendConfig, backendConfig, databaseConfig } = useFormStore();
 
-  // // 프로젝트 환경 체크박스 상태 관리
+  // 프로젝트 환경 체크박스 상태 관리
   // const projectEnvironment = useProjectEnvironment();
 
   // MySQL 설정 상태 관리
-  const mySqlInfo = useMySqlInfo();
 
   // 로딩 상태 관리
   // const [isLoading, setIsLoading] = useState(false);
@@ -27,15 +25,15 @@ const DockerfileSettings = () => {
   // const [, setResult] = useState<DockerSuccessResponse | null>(null);
 
   const buildDockerfile = async () => {
-    //   // 빌드 정보 검증
-    //   // if (!buildInfo.validateBuildInfo()) {
-    //   //   return;
-    //   // }
-    //
-    //   // MySQL 설정 검증
-    //   // if (!mySqlInfo.validateMySqlInfo()) {
-    //   //   return;
-    //   // }
+    // 빌드 정보 검증
+    // if (!buildInfo.validateBuildInfo()) {
+    //   return;
+    // }
+
+    // MySQL 설정 검증
+    // if (!mySqlInfo.validateMySqlInfo()) {
+    //   return;
+    // }
 
     // API 요청 데이터 구성
     const dockerConfig: DockerfileConfig = {
@@ -58,7 +56,6 @@ const DockerfileSettings = () => {
       setResult(data);
       console.log('setResult 직후 data: ', data);
 
-      alert('Dockerfile이 성공적으로 생성되었습니다.');
       navigate('/new/configure');
     } catch (error) {
       alert('Dockerfile 생성 중 오류 발생');

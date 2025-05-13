@@ -11,7 +11,7 @@ export default function JenkinsSettings() {
   return (
     <>
       <h2>Jenkins 설정</h2>
-      <form onSubmit={(e) => e.preventDefault()}>
+      <form onSubmit={(e) => e.preventDefault()} className="mt-5">
         <div className="mb-4 flex flex-col gap-2 rounded-[10px] bg-gray-100 px-5 py-5">
           {/* 프로젝트 이름 */}
           <div>

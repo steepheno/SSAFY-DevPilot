@@ -11,7 +11,7 @@ const tagChoices: Tag[] = [
 ];
 
 const FormField = ({ label, children }: { label: string; children: React.ReactNode }) => (
-  <div className="space-y-2">
+  <div className="mt-3 space-y-2">
     <span className="block text-sm font-medium text-gray-700">{label}</span>
     <div className="w-full">{children}</div>
   </div>
@@ -38,7 +38,7 @@ const RepositoryForm: React.FC = () => {
   };
 
   return (
-    <div>
+    <div className="mt-5">
       <span className="text-xl font-bold">저장소 정보</span>
       <div className="flex gap-10">
         <FormField label="원격 저장소 주소">
