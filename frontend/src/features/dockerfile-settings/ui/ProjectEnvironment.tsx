@@ -1,22 +1,7 @@
-import { useProjectEnvironment } from '../../../entities/dockerFile/model/useProjectEnvironment';
+import { useFormStore } from '@/shared/store';
 
-type ProjectEnvironmentProps = {
-  projectEnvironment: ReturnType<typeof useProjectEnvironment>;
-};
-
-const ProjectEnvironment = ({ projectEnvironment }: ProjectEnvironmentProps) => {
-  const {
-    useGradle,
-    setUseGradle,
-    useMaven,
-    setUseMaven,
-    useNginx,
-    setUseNginx,
-    useRedis,
-    setUseRedis,
-    useMySQL,
-    setUseMySQL,
-  } = projectEnvironment;
+const ProjectEnvironment = () => {
+  const { projectConfig, setProjectConfig } = useFormStore();
 
   return (
     <div className="mb-10 rounded-[10px] bg-gray-100 px-5 py-5">
@@ -27,8 +12,8 @@ const ProjectEnvironment = ({ projectEnvironment }: ProjectEnvironmentProps) => 
             className="cursor-pointer"
             type="checkbox"
             id="gradle"
-            checked={useGradle}
-            onChange={() => setUseGradle(!useGradle)}
+            checked={projectConfig.useGradle}
+            onChange={(prev) => setProjectConfig({ useGradle: !prev })}
           />
           <label className="cursor-pointer" htmlFor="gradle">
             Gradle
@@ -39,8 +24,8 @@ const ProjectEnvironment = ({ projectEnvironment }: ProjectEnvironmentProps) => 
             className="cursor-pointer"
             type="checkbox"
             id="maven"
-            checked={useMaven}
-            onChange={() => setUseMaven(!useMaven)}
+            checked={projectConfig.useMaven}
+            onChange={(prev) => setProjectConfig({ useMaven: !prev })}
           />
           <label className="cursor-pointer" htmlFor="maven">
             Maven
@@ -51,8 +36,8 @@ const ProjectEnvironment = ({ projectEnvironment }: ProjectEnvironmentProps) => 
             className="cursor-pointer"
             type="checkbox"
             id="nginx"
-            checked={useNginx}
-            onChange={() => setUseNginx(!useNginx)}
+            checked={projectConfig.useNginx}
+            onChange={(prev) => setProjectConfig({ useNginx: !prev })}
           />
           <label className="cursor-pointer" htmlFor="nginx">
             Nginx
@@ -63,8 +48,8 @@ const ProjectEnvironment = ({ projectEnvironment }: ProjectEnvironmentProps) => 
             className="cursor-pointer"
             type="checkbox"
             id="redis"
-            checked={useRedis}
-            onChange={() => setUseRedis(!useRedis)}
+            checked={projectConfig.useRedis}
+            onChange={(prev) => setProjectConfig({ useRedis: !prev })}
           />
           <label className="cursor-pointer" htmlFor="redis">
             Redis
@@ -75,8 +60,8 @@ const ProjectEnvironment = ({ projectEnvironment }: ProjectEnvironmentProps) => 
             className="cursor-pointer"
             type="checkbox"
             id="MySQL"
-            checked={useMySQL}
-            onChange={() => setUseMySQL(!useMySQL)}
+            checked={projectConfig.useMySQL}
+            onChange={(prev) => setProjectConfig({ useMySQL: !prev })}
           />
           <label className="cursor-pointer" htmlFor="MySQL">
             MySQL

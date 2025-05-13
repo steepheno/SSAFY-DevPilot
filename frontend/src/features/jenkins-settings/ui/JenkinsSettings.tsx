@@ -34,6 +34,11 @@ export default function JenkinsSettings() {
       <button
         className="inline-flex cursor-pointer"
         onClick={() => {
+          // 프로젝트 제목 검증
+          if (!projectConfig.projectName) {
+            alert('프로젝트 이름을 입력해주세요.');
+            return;
+          }
           navigate('/new/environment');
         }}
       >
