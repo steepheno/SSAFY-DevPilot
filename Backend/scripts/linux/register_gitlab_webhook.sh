@@ -103,6 +103,7 @@ curl -s -o /dev/null -w "%{http_code}" -X POST "https://lab.ssafy.com/api/v4/pro
   --header "PRIVATE-TOKEN: $GIT_TOKEN" \
   --data "url=$HOOK_URL" \
   --data "push_events=true" \
+  --secret ""
 #  --data "token=$WEBHOOK_SECRET"
 
 echo "✅ GitLab Webhook 등록 완료"
