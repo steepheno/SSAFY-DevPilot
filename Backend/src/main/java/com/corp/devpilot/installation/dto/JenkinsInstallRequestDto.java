@@ -2,10 +2,12 @@ package com.corp.devpilot.installation.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
+@NoArgsConstructor
 @Schema(description = "Jenkins 설치 요청 DTO")
 public class JenkinsInstallRequestDto {
 
@@ -15,12 +17,12 @@ public class JenkinsInstallRequestDto {
 	@Schema(description = "EC2 호스트 주소", example = "ec2-user@1.2.3.4")
 	private String ec2Host;
 
-	@Schema(description = "Jenkins 포트", example = "7070")
-	private String jenkinsPort;
+	@Schema(description = "Jenkins 포트", defaultValue = "8080")
+	private String jenkinsPort = "8080";
 
 	@Schema(description = "Jenkins 관리자 비밀번호", example = "admin1234")
 	private String jenkinsPassword;
 
-	@Schema(description = "Jenkins 구성 디렉토리", example = "/opt/jenkins_config")
-	private String configDir;
+	@Schema(description = "Jenkins 구성 디렉토리", defaultValue = "/opt/jenkins_config")
+	private String configDir = "/opt/jenkins_config";
 }

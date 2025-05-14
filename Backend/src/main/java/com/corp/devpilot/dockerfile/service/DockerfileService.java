@@ -294,9 +294,9 @@ public class DockerfileService {
 			System.out.println("운영체제: " + os);
 			System.out.println("Windows 환경: " + isWindows);
 
-			// 절대 경로 사용
-			String projectRoot = "C:\\Users\\SSAFY\\Dev\\DevPilot\\Backend";
-			String uploadScript = isWindows ? projectRoot + "\\scripts\\window\\deploy_projects_files.ps1"
+			// 상대 경로 사용
+			String projectRoot = new File("").getAbsolutePath();
+			String uploadScript = isWindows ? projectRoot + "/scripts/window/deploy_projects_files.ps1"
 				: projectRoot + "/scripts/linux/deploy_project_files.sh";
 
 			// 스크립트 존재 여부 확인

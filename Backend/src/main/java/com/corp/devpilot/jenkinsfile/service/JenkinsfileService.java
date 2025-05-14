@@ -177,12 +177,26 @@ public class JenkinsfileService {
 
 	private void uploadJenkinsfileToEc2(String localPath, JenkinsfileRequestDto requestDto) {
 		try {
-			// 로컬 파일 존재 확인
-			File localFile = new File(localPath);
-			if (!localFile.exists()) {
-				System.err.println("❌ 로컬 Jenkinsfile이 존재하지 않습니다: " + localPath);
-				throw new JenkinsfileException(ErrorCode.JENKINS_FILE_NOT_FOUND);
+			String os = System.getProperty("os.name").toLowerCase();
+			boolean isWindows = os.contains("win");
+
+			// 로깅 추가
+			System.out.println("운영체제: " + os);
+			System.out.println("Windows 환경: " + isWindows);
+
+			// 상대 경로 사용
+			String projectRoot = new File("").getAbsolutePath();
+			String scriptPath = isWindows ?
+				projectRoot + "/scripts/window/upload_jenkinsfile.ps1" :
+				projectRoot + "/scripts/linux/upload_jenkinsfile.sh";
+
+			// 스크립트 존재 여부 확인
+			File scriptFile = new File(scriptPath);
+			if (!scriptFile.exists()) {
+				System.err.println("❌ 스크립트 파일이 존재하지 않습니다: " + scriptPath);
+				throw new RuntimeException("스크립트 파일이 존재하지 않습니다: " + scriptPath);
 			}
+			System.out.println("✅ 스크립트 파일 확인: " + scriptPath);
 
 			System.out.println("로컬 Jenkinsfile 확인: " + localPath + " (" + localFile.length() + " bytes)");
 
@@ -213,8 +227,8 @@ public class JenkinsfileService {
 			System.out.println("원격 디렉토리: " + remoteDir);
 
 			List<String> command = new ArrayList<>();
-			if (os.contains("win")) {
-				command.add("powershell.exe");
+			if (isWindows) {
+				command.add("powershell");
 				command.add("-ExecutionPolicy");
 				command.add("Bypass");
 				command.add("-File");
@@ -228,7 +242,8 @@ public class JenkinsfileService {
 			command.add("--remote-dir=" + remoteDir);
 			command.add("--job-name=" + requestDto.getProjectName());
 
-			System.out.println("실행 명령어: " + String.join(" ", command));
+			// 명령어 로깅
+			System.out.println("실행할 명령어: " + String.join(" ", command));
 
 			ProcessBuilder pb = new ProcessBuilder(command);
 			pb.redirectErrorStream(true);
@@ -244,24 +259,25 @@ public class JenkinsfileService {
 			try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
 				String line;
 				while ((line = reader.readLine()) != null) {
-					System.out.println("[" + new File(scriptPath).getName() + "] " + line);
+					System.out.println("[upload_jenkinsfile] " + line);
 					output.append(line).append("\n");
 				}
 			}
 
 			int exitCode = process.waitFor();
 			System.out.println("스크립트 종료 코드: " + exitCode);
-
 			if (exitCode != 0) {
-				System.err.println("❌ Jenkinsfile 업로드 실패: " + output.toString());
+				System.err.println("❌ Jenkinsfile 업로드 실패. 출력: \n" + output.toString());
 				throw new JenkinsfileException(ErrorCode.JENKINS_FILE_UPLOAD_ERROR);
 			}
 
-			System.out.println("✅ Jenkinsfile 업로드 성공: " + remoteDir + "/Jenkinsfile");
+			System.out.println("✅ Jenkinsfile 업로드 완료");
 
+		} catch (IOException | InterruptedException e) {
+			e.printStackTrace(); // 상세 에러 정보 출력
+			throw new JenkinsfileException(ErrorCode.JENKINS_FILE_UPLOAD_ERROR);
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.err.println("❌ 예외 발생: " + e.getMessage());
 			throw new JenkinsfileException(ErrorCode.JENKINS_FILE_UPLOAD_ERROR);
 		}
 	}
