@@ -1,8 +1,8 @@
 package com.corp.devpilot.jenkinsapi.service;
 
+import java.io.FileInputStream;
 import java.util.List;
-
-import javax.net.ssl.SSLException;
+import java.util.Properties;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
@@ -24,41 +24,21 @@ import reactor.netty.http.client.HttpClient;
 @Service
 public class JenkinsApiService {
 
-	private final WebClient client;
+	private WebClient client;
 	private final String user;
 	private final TokenManager tokenManager;
 
 	public JenkinsApiService(
 		TokenManager tokenManager,
-		@Value("${server.jenkins.url}") String url,
-		@Value("${server.jenkins.user}") String user,
-		@Value("${server.jenkins.default-port}") String port
-	) throws SSLException {
-
+		@Value("${server.jenkins.user}") String user
+	) {
 		this.tokenManager = tokenManager;
 		this.user = user;
-
-		// 모든 인증서 신뢰(임시용)
-		SslContext sslContext = SslContextBuilder.forClient()
-			.trustManager(InsecureTrustManagerFactory.INSTANCE)
-			.build();
-
-		HttpClient httpClient = HttpClient.create()
-			.secure(spec -> spec.sslContext(sslContext));
-
-		this.client = WebClient.builder()
-			.baseUrl(url + ":" + port)
-			.clientConnector(new ReactorClientHttpConnector(httpClient))
-			.build();
-
-		//        this.client = WebClient.builder()
-		//                .baseUrl(url)
-		//                .defaultHeaders(h -> h.setBasicAuth(user, token))
-		//                .build();
 	}
 
 	// 토큰 증명용
 	WebClient authorizedClient() {
+		tokenManager.isClient();
 		String token = tokenManager.getToken().trim();
 		if (token.isEmpty()) {
 			throw new JenkinsApiException(ErrorCode.JENKINS_EMPTY_TOKEN);
@@ -68,8 +48,37 @@ public class JenkinsApiService {
 			.build();
 	}
 
+	public void isClient() throws JenkinsApiException {
+		if (client == null) {
+			try {
+				Properties props = new Properties();
+				props.load(new FileInputStream("/root/.devpilot/.env"));
+
+				SslContext sslContext = SslContextBuilder.forClient()
+					.trustManager(InsecureTrustManagerFactory.INSTANCE)
+					.build();
+
+				HttpClient httpClient = HttpClient.create()
+					.secure(spec -> spec.sslContext(sslContext));
+
+				this.client = WebClient.builder()
+					.baseUrl("http://" + props.getProperty("EC2_HOST") + ":" + props.getProperty("JENKINS_PORT"))
+					.clientConnector(new ReactorClientHttpConnector(httpClient))
+					.build();
+
+				//        this.client = WebClient.builder()
+				//                .baseUrl(url)
+				//                .defaultHeaders(h -> h.setBasicAuth(user, token))
+				//                .build();
+			} catch (Exception e) {
+				throw new JenkinsApiException(ErrorCode.JENKINS_INVALID_TOKEN_FILE);
+			}
+		}
+	}
+
 	public JenkinsInfoDto fetchInfo() {
 		// GET 요청이므로 Crumb 없이 바로 호출
+		isClient();
 		String body = authorizedClient().get()
 			.uri(uri -> uri.path("/api/json")
 				.queryParam("pretty", "true")
@@ -82,6 +91,7 @@ public class JenkinsApiService {
 	}
 
 	public List<BuildSummaryDto> fetchBuildSummaries(String jobName) {
+		isClient();
 		String json = authorizedClient()
 			.get()
 			.uri(uri -> uri
@@ -96,6 +106,7 @@ public class JenkinsApiService {
 	}
 
 	public BuildDetailDto fetchBuildDetail(String jobName, int buildNumber) {
+		isClient();
 		String json = authorizedClient()
 			.get()
 			.uri(uri -> uri
