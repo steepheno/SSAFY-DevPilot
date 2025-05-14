@@ -77,9 +77,24 @@ $hook_body = @{
   token = $webhook_secret
 }
 
+# ========================================================
+# Crumb 값 로드 및 GitLab Webhook 등록 요청에 포함
+# ========================================================
+
+# Crumb 파일 경로 정의
+$crumbPath = Join-Path -Path (Split-Path $envPath) -ChildPath "jenkins_api_token.txt"
+
+if (-Not (Test-Path $crumbPath)) {
+  throw "❌ Crumb 토큰 파일이 존재하지 않습니다: $crumbPath"
+}
+
+# Crumb 값 로드
+$jenkins_crumb = Get-Content $crumbPath -Raw
+Write-Host "🔐 Crumb 로드 완료: $jenkins_crumb"
+
 Invoke-RestMethod -Uri "https://lab.ssafy.com/api/v4/projects/$project_id/hooks" `
   -Method Post `
-  -Headers @{"PRIVATE-TOKEN" = $git_token} `
+  -Headers @{"PRIVATE-TOKEN" = $jenkins_crumb} `
   -Body $hook_body
 
 Write-Host "✅ GitLab Webhook 등록 완료"
