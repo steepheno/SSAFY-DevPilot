@@ -19,6 +19,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "emblor": "^1.4.8",
+    "lottie-react": "^2.4.1",
     "lucide-react": "^0.503.0",
     "path": "^0.12.7",
     "react": "^18.3.1",
