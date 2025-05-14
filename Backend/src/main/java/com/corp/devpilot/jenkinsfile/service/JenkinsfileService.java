@@ -198,33 +198,7 @@ public class JenkinsfileService {
 			}
 			System.out.println("✅ 스크립트 파일 확인: " + scriptPath);
 
-			System.out.println("로컬 Jenkinsfile 확인: " + localPath + " (" + localFile.length() + " bytes)");
-
-			String os = System.getProperty("os.name").toLowerCase();
-			System.out.println("운영체제: " + os);
-
-			// 스크립트 경로를 절대 경로로 변경
-			String projectRoot = new File("").getAbsolutePath();
-			System.out.println("프로젝트 루트 경로: " + projectRoot);
-
-			String scriptPath;
-			if (os.contains("win")) {
-				scriptPath = projectRoot + "/scripts/window/upload_jenkinsfile.ps1";
-			} else {
-				scriptPath = projectRoot + "/scripts/linux/upload_jenkinsfile.sh";
-			}
-
-			// 스크립트 파일 존재 확인
-			File scriptFile = new File(scriptPath);
-			if (!scriptFile.exists()) {
-				System.err.println("❌ 스크립트 파일이 존재하지 않습니다: " + scriptPath);
-				throw new JenkinsfileException(ErrorCode.JENKINS_SCRIPT_NOT_FOUND);
-			}
-
-			System.out.println("스크립트 파일 확인: " + scriptPath);
-
 			String remoteDir = remoteBaseDir + "/" + requestDto.getProjectName();
-			System.out.println("원격 디렉토리: " + remoteDir);
 
 			List<String> command = new ArrayList<>();
 			if (isWindows) {
@@ -247,12 +221,6 @@ public class JenkinsfileService {
 
 			ProcessBuilder pb = new ProcessBuilder(command);
 			pb.redirectErrorStream(true);
-
-			// 환경 변수 확인
-			System.out.println("환경 변수:");
-			System.out.println("PEM_PATH: " + System.getenv("PEM_PATH"));
-			System.out.println("EC2_HOST: " + System.getenv("EC2_HOST"));
-
 			Process process = pb.start();
 
 			StringBuilder output = new StringBuilder();
