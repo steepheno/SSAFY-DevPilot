@@ -1,15 +1,25 @@
 import { createBrowserRouter, Outlet } from 'react-router-dom';
 import PageLayout from '@/widgets/PageLayout';
+import LoginPage from '@/pages/LoginPage';
+import InitialPage from '@/pages/InitialPage';
 import { MainPage, NewBuildPage, DockerSettings, ConfigurePage, BuildInfoPage } from '@/pages';
 import RepositorySettings from '@/features/jenkins-settings/ui/RepositorySettings';
 import BuildList from '@/pages/buildLog/ui/BuildList';
 import BuildDetail from '@/pages/buildLog/ui/BuildDetail';
-import LoginPage from '@/pages/LoginPage';
 
 const Router = createBrowserRouter([
   {
     path: '/login',
-    element: <LoginPage />,
+    children: [
+      {
+        path: '',
+        element: <LoginPage />,
+      },
+      {
+        path: 'new',
+        element: <InitialPage />,
+      },
+    ],
   },
   {
     path: '/',
