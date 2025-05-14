@@ -1,6 +1,6 @@
 # ========================================================
-# jenkins_pipeline.ps1
-# Jenkins 파이프라인 생성/실행/확인 PowerShell 스크립트
+# docker_helper.ps1
+# Docker 관리 및 레지스트리 로그인 PowerShell 스크립트
 # ========================================================
 
 param (
@@ -18,11 +18,13 @@ param (
 
 # Load environment
 $envPath = "$HOME\.devpilot\.env"
-if (-not (Test-Path $envPath)) {
+if (-not (Test-Path $envPath))
+{
     throw "❌ .env 파일이 없습니다: $envPath"
 }
 Get-Content $envPath | ForEach-Object {
-    if ($_ -match "^(.*?)=(.*)$") {
+    if ($_ -match "^(.*?)=(.*)$")
+    {
         $key = $matches[1]
         $value = $matches[2]
         Set-Item -Path "env:$key" -Value $value
@@ -31,26 +33,32 @@ Get-Content $envPath | ForEach-Object {
 
 # EC2 접속 변수
 $PemPath = $env:PEM_PATH
-$Host = $env:EC2_HOST
+$EC2Host = $env:EC2_HOST
 $JenkinsPort = $env:JENKINS_PORT
 $JenkinsPassword = $env:JENKINS_PASSWORD
 
-function Invoke-Remote($command) {
-    ssh -i $PemPath -o StrictHostKeyChecking=no "ubuntu@$Host" $command
+function Invoke-Remote($command)
+{
+    ssh -i $PemPath -o StrictHostKeyChecking=no "ubuntu@$EC2Host" $command
 }
 
-function Upload-File($localPath, $remotePath) {
-    scp -i $PemPath -o StrictHostKeyChecking=no $localPath "ubuntu@$Host:$remotePath"
-    if ($LASTEXITCODE -ne 0) {
+function Upload-File($localPath, $remotePath)
+{
+    $remoteDestination = "ubuntu@${EC2Host}:${remotePath}"
+    scp -i $PemPath -o StrictHostKeyChecking=no $localPath $remoteDestination
+    if ($LASTEXITCODE -ne 0)
+    {
         throw "❌ 파일 업로드 실패: $localPath"
     }
 }
 
-function Log($msg) {
+function Log($msg)
+{
     Write-Host "[INFO] $msg"
 }
 
-function Create-Pipeline() {
+function Create-Pipeline()
+{
     Log "파이프라인 생성 준비 중: $PipelineName"
 
     $remotePath = "/tmp/${PipelineName}_create_pipeline.groovy"
@@ -62,51 +70,65 @@ function Create-Pipeline() {
     Log "파이프라인 생성 완료: $PipelineName"
 }
 
-function Run-Pipeline() {
+function Run-Pipeline()
+{
     Log "파이프라인 실행: $PipelineName"
     Invoke-Remote "curl -X POST http://localhost:$JenkinsPort/job/$PipelineName/build --user admin:$JenkinsPassword"
 }
 
-function Check-BuildStatus() {
+function Check-BuildStatus()
+{
     Log "빌드 상태 확인: $PipelineName #$BuildNumber"
     Invoke-Remote "curl -s http://localhost:$JenkinsPort/job/$PipelineName/$BuildNumber/api/json --user admin:$JenkinsPassword | grep result"
 }
 
-function List-Pipelines() {
+function List-Pipelines()
+{
     Log "파이프라인 목록 조회"
     Invoke-Remote "curl -s http://localhost:$JenkinsPort/api/json?tree=jobs[name] --user admin:$JenkinsPassword | grep name"
 }
 
-function Docker-RegistryLogin() {
+function Docker-RegistryLogin()
+{
     Log "Docker 레지스트리 로그인 중: $DockerRegistry"
     Invoke-Remote "echo '$DockerPassword' | docker login $DockerRegistry -u $DockerUser --password-stdin"
-    if ($LASTEXITCODE -eq 0) {
+    if ($LASTEXITCODE -eq 0)
+    {
         Log "Docker 레지스트리 로그인 성공."
-    } else {
+    }
+    else
+    {
         throw "Docker 레지스트리 로그인 실패."
     }
 }
 
 # 실행 분기
-if ($Create) {
-    if (-not $GroovyFilePath) {
+if ($Create)
+{
+    if (-not $GroovyFilePath)
+    {
         throw "Groovy 파일 경로가 필요합니다."
     }
     Create-Pipeline
 }
-elseif ($Run) {
+elseif ($Run)
+{
     Run-Pipeline
 }
-elseif ($Status) {
+elseif ($Status)
+{
     Check-BuildStatus
 }
-elseif ($List) {
+elseif ($List)
+{
     List-Pipelines
 }
-elseif ($DockerRegistry -and $DockerUser -and $DockerPassword) {
+elseif ($DockerRegistry -and $DockerUser -and $DockerPassword)
+{
     Docker-RegistryLogin
 }
-else {
+else
+{
     Write-Host "⚠️ 사용 방법: "
     Write-Host "  -Create -PipelineName xxx -GroovyFilePath xxx"
     Write-Host "  -Run -PipelineName xxx"

@@ -8,7 +8,8 @@ function Invoke-Remote($cmd) {
 }
 
 function Upload-File($localPath, $remotePath) {
-    scp -i $env:PEM_PATH -o StrictHostKeyChecking=no $localPath "ubuntu@$env:EC2_HOST:$remotePath"
+    $remoteDestination = "ubuntu@$env:EC2_HOST:$remotePath"
+    scp -i $env:PEM_PATH -o StrictHostKeyChecking=no $localPath $remoteDestination
 }
 
 function Log($msg) {
@@ -31,28 +32,27 @@ function Create-JenkinsPipeline($localGroovyPath, $pipelineName) {
 function Generate-PipelineJobConfig($jobName, $remoteDir, $jenkinsfilePath) {
     $remoteJobPath = "$remoteDir/${jobName}-job.xml"
 
-    $script = @"
-#!/bin/bash
-pipeline_script=\$(cat $jenkinsfilePath)
-cat <<EOF > $remoteJobPath
+    # bash 스크립트 대신 직접 XML 생성 및 업로드
+    $scriptContent = Get-Content $jenkinsfilePath -Raw
+    $escapedScriptContent = [System.Security.SecurityElement]::Escape($scriptContent)
+
+    $xml = @"
 <?xml version='1.1' encoding='UTF-8'?>
-<flow-definition plugin=\"workflow-job@2.40\">
+<flow-definition plugin="workflow-job@2.40">
   <description>$jobName 파이프라인</description>
   <keepDependencies>false</keepDependencies>
-  <definition class=\"org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition\" plugin=\"workflow-cps@2.94\">
-    <script><![CDATA[\$pipeline_script]]></script>
+  <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.94">
+    <script>$escapedScriptContent</script>
     <sandbox>true</sandbox>
   </definition>
   <triggers/>
   <disabled>false</disabled>
 </flow-definition>
-EOF
 "@
-    $tempPath = "$env:TEMP\gen_job_xml.sh"
-    $script | Out-File -FilePath $tempPath -Encoding utf8
-    Upload-File -localPath $tempPath -remotePath "/tmp/gen_job_xml.sh"
-    Invoke-Remote "bash /tmp/gen_job_xml.sh"
-    Invoke-Remote "rm -f /tmp/gen_job_xml.sh"
+
+    $tempXmlPath = "$env:TEMP\${jobName}-job.xml"
+    $xml | Out-File -FilePath $tempXmlPath -Encoding utf8
+    Upload-File -localPath $tempXmlPath -remotePath $remoteJobPath
 }
 
 function Run-JenkinsPipeline($pipelineName) {

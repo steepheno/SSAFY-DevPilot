@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -36,10 +35,13 @@ public class JenkinsInstallService {
 	private String linuxConfirmPath;
 
 	public void installJenkins(JenkinsInstallRequestDto request) {
+		log.info("Jenkins 설치 프로세스 시작");
 		saveEnvVariables(request);
+		log.info("환경 변수 저장 완료");
 
 		String os = System.getProperty("os.name").toLowerCase();
 		String scriptPath = os.contains("win") ? windowsMainScriptPath : linuxMainScriptPath;
+		log.info("스크립트 경로: {}", scriptPath);
 
 		List<String> command = new ArrayList<>();
 		if (os.contains("win")) {
@@ -52,17 +54,26 @@ public class JenkinsInstallService {
 		}
 
 		command.add(scriptPath);
-		command.add("--pem-path=" + request.getPemPath());
-		command.add("--ec2-host=" + request.getEc2Host());
-		command.add("--jenkins-port=" + request.getJenkinsPort());
-		command.add("--jenkins-password=" + request.getJenkinsPassword());
-		command.add("--config-dir=" + HOME_PATH + request.getConfigDir());
+		command.add("-pem_path");
+		command.add(request.getPemPath());
+		command.add("-ec2_host");
+		command.add(request.getEc2Host());
+		command.add("-jenkins_password");
+		command.add(request.getJenkinsPassword());
+		command.add("-jenkins_port");
+		command.add(request.getJenkinsPort());
+		command.add("-config_dir");
+		command.add(request.getConfigDir());
 
 		ProcessBuilder processBuilder = new ProcessBuilder(command);
 		processBuilder.redirectErrorStream(true);
 
+		log.info("실행할 명령어: {}", String.join(" ", command));
+
 		try {
+			log.info("Jenkins 설치 스크립트 실행 시작");
 			Process process = processBuilder.start();
+
 			try (BufferedReader reader = new BufferedReader(
 				new InputStreamReader(process.getInputStream()))) {
 				String line;
@@ -72,6 +83,8 @@ public class JenkinsInstallService {
 			}
 
 			int exitCode = process.waitFor();
+			log.info("Jenkins 설치 스크립트 종료: exitCode={}", exitCode);
+
 			if (exitCode != 0) {
 				throw new BusinessException(ErrorCode.JENKINS_DEPLOY_ERROR,
 					"main script 실행 실패: exitCode = " + exitCode);
@@ -81,6 +94,8 @@ public class JenkinsInstallService {
 			log.error("Jenkins 설치 중 예외 발생", e);
 			throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR, "main script 실행 중 오류가 발생했습니다");
 		}
+
+		log.info("Jenkins 설치 프로세스 완료");
 	}
 
 	public void saveEnvVariables(JenkinsInstallRequestDto request) {
@@ -89,27 +104,17 @@ public class JenkinsInstallService {
 		if (!parent.exists())
 			parent.mkdirs();
 
-		Properties props = new Properties();
+		// 값 전처리
+		String pemPath = request.getPemPath().replace("\\", "/");  // 백슬래시를 슬래시로 변환
+		String ec2Host = request.getEc2Host().trim();  // 앞뒤 공백 제거
 
-		// 기존 내용 로드
-		if (envFile.exists()) {
-			try (BufferedReader reader = new BufferedReader(new FileReader(envFile))) {
-				props.load(reader);
-			} catch (IOException e) {
-				throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR, ".env 파일 읽기 실패");
-			}
-		}
-
-		// 값 설정 또는 덮어쓰기
-		props.setProperty("PEM_PATH", request.getPemPath());
-		props.setProperty("EC2_HOST", request.getEc2Host());
-		props.setProperty("JENKINS_PORT", String.valueOf(request.getJenkinsPort()));
-		props.setProperty("JENKINS_PASSWORD", request.getJenkinsPassword());
-		props.setProperty("CONFIG_DIR", request.getConfigDir());
-
-		// 전체 저장
 		try (FileWriter writer = new FileWriter(envFile, false)) {
-			props.store(writer, null);
+			writer.write("PEM_PATH=" + pemPath + "\n");
+			writer.write("EC2_HOST=" + ec2Host + "\n");
+			writer.write("JENKINS_PORT=" + request.getJenkinsPort() + "\n");
+			writer.write("JENKINS_PASSWORD=" + request.getJenkinsPassword() + "\n");
+			writer.write("CONFIG_DIR=" + request.getConfigDir() + "\n");
+
 			log.info(".env 파일에 설치 관련 정보 저장 완료: {}", envFile.getAbsolutePath());
 		} catch (IOException e) {
 			throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR, ".env 저장 실패");
