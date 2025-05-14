@@ -1,11 +1,26 @@
 import { createBrowserRouter, Outlet } from 'react-router-dom';
 import PageLayout from '@/widgets/PageLayout';
+import LoginPage from '@/pages/LoginPage';
+import InitialPage from '@/pages/InitialPage';
 import { MainPage, NewBuildPage, DockerSettings, ConfigurePage, BuildInfoPage } from '@/pages';
 import RepositorySettings from '@/features/jenkins-settings/ui/RepositorySettings';
 import BuildList from '@/pages/buildLog/ui/BuildList';
 import BuildDetail from '@/pages/buildLog/ui/BuildDetail';
 
 const Router = createBrowserRouter([
+  {
+    path: '/login',
+    children: [
+      {
+        path: '',
+        element: <LoginPage />,
+      },
+      {
+        path: 'new',
+        element: <InitialPage />,
+      },
+    ],
+  },
   {
     path: '/',
     element: <PageLayout />,
@@ -22,12 +37,12 @@ const Router = createBrowserRouter([
         children: [
           {
             path: 'repository',
-            handle: { breadcrumb: 'Git 설정' },
+            handle: { breadcrumb: '저장소 설정' },
             element: <RepositorySettings />,
           },
           {
-            path: 'environment',
-            handle: { breadcrumb: '빌드 파일 생성' },
+            path: 'project',
+            handle: { breadcrumb: '프로젝트 설정' },
             element: <DockerSettings />,
           },
           { path: 'configure', element: <ConfigurePage /> },
@@ -35,7 +50,7 @@ const Router = createBrowserRouter([
       },
       {
         path: 'builds',
-        element: <Outlet />, // 하위 라우트만 렌더
+        element: <Outlet />, // 하위 라우트만 렌더링
         handle: { breadcrumb: '빌드 기록' },
         children: [
           {
