@@ -65,8 +65,8 @@ const DockerfileSettings = () => {
   // };
 
   return (
-    <div className="">
-      <h2>Dockerfile 설정</h2>
+    <div>
+      <h2 className="mb-5">Dockerfile 설정</h2>
 
       {/* 빌드 정보 입력 */}
       <BuildInfo />

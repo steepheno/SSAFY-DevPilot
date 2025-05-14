@@ -1,8 +1,13 @@
 import { createBrowserRouter, Outlet } from 'react-router-dom';
 import PageLayout from '@/widgets/PageLayout';
-import LoginPage from '@/pages/LoginPage';
-import InitialPage from '@/pages/InitialPage';
-import { MainPage, NewBuildPage, DockerSettings, ConfigurePage, BuildInfoPage } from '@/pages';
+import {
+  MainPage,
+  LoginPage,
+  InitialPage,
+  NewBuildPage,
+  DockerSettings,
+  BuildInfoPage,
+} from '@/pages';
 import RepositorySettings from '@/features/jenkins-settings/ui/RepositorySettings';
 import BuildList from '@/pages/buildLog/ui/BuildList';
 import BuildDetail from '@/pages/buildLog/ui/BuildDetail';
@@ -45,7 +50,6 @@ const Router = createBrowserRouter([
             handle: { breadcrumb: '프로젝트 설정' },
             element: <DockerSettings />,
           },
-          { path: 'configure', element: <ConfigurePage /> },
         ],
       },
       {
