@@ -62,6 +62,9 @@ chain = prompt | llm | StrOutputParser()
 
 def generate_answer(question: str) -> str:
     docs = query_multiple_indexes(query=question, embedding_model=embeddings)
+    if not docs:
+        return "죄송합니다. 해당 내용을 찾을 수 없습니다."
+
     context = " ".join([doc['metadata']['text'] for doc in docs])
     return chain.invoke({"context": context, "question": question})
 
