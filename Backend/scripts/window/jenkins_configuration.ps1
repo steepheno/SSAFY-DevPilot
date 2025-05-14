@@ -13,7 +13,8 @@ function Invoke-Remote($cmd) {
 }
 
 function Upload-File($localPath, $remotePath) {
-    scp -i $env:PEM_PATH -o StrictHostKeyChecking=no $localPath "ubuntu@$env:EC2_HOST:$remotePath"
+    $remoteDestination = "ubuntu@$env:EC2_HOST:$remotePath"
+    scp -i $env:PEM_PATH -o StrictHostKeyChecking=no $localPath $remoteDestination
 }
 
 function Log($msg) {
