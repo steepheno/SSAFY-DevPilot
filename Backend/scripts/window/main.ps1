@@ -91,6 +91,31 @@ function Validate-ServerInfo
     }
 }
 
+function Ensure-SSHInstalled
+{
+    Log "[필수 도구] ssh 설치 여부 확인 중..."
+    try
+    {
+        $sshCheck = Invoke-Expression "where.exe ssh" 2>$null
+        if (-not $sshCheck)
+        {
+            Log "ssh가 설치되어 있지 않음. 설치 시도..."
+            # Windows 10 이후 OpenSSH 클라이언트는 Optional Feature로 제공됨
+            Add-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0
+            Log "ssh 클라이언트 설치 완료"
+        }
+        else
+        {
+            Log "ssh가 이미 설치되어 있음: $sshCheck"
+        }
+    }
+    catch
+    {
+        Log "ssh 설치 확인 중 오류 발생: $_"
+        Log "오류를 무시하고 계속 진행합니다."
+    }
+}
+
 function Ensure-UUIDGenInstalled
 {
     Log "[필수 도구] uuidgen 설치 여부 확인 중..."
@@ -242,6 +267,10 @@ function Main
         Log "서버 정보 유효성 검사 시작"
         Validate-ServerInfo
         Log "서버 정보 유효성 검사 완료"
+
+        Log "SSH 설치 확인"
+        Ensure-SSHInstalled
+        Log "SSH 설치 완료"
 
         Log "SSH 연결 시작"
         Connect-SSHServer

@@ -52,6 +52,51 @@ function Remove-ExistingInstallations
     Log "[Jenkins] 제거 완료"
 }
 
+function Install-Java
+{
+    Log "[Java] 단독 설치 시작..."
+    $javaVersion = 17
+
+    # OS 식별
+    $osCheck = Invoke-Remote "cat /etc/os-release | grep -E '^ID='"
+    Log "OS 정보: $osCheck"
+
+    $os = ""
+    if ($osCheck -match "ID=ubuntu" -or $osCheck -match "ID=debian")
+    {
+        $os = "ubuntu"
+    }
+    elseif ($osCheck -match "ID=centos" -or $osCheck -match "ID=rhel" -or $osCheck -match "ID=fedora" -or $osCheck -match "ID=amzn")
+    {
+        $os = "rhel"
+    }
+    else
+    {
+        $os = "unknown"
+    }
+    Log "식별된 OS: $os"
+
+    if ($os -eq "ubuntu")
+    {
+        Invoke-Remote "sudo apt-get update -y"
+        Invoke-Remote "sudo apt-get install -y openjdk-${javaVersion}-jdk"
+    }
+    elseif ($os -eq "rhel")
+    {
+        $pkg = Invoke-Remote "command -v dnf || command -v yum"
+        Invoke-Remote "sudo $pkg update -y"
+        Invoke-Remote "sudo $pkg install -y java-${javaVersion}-openjdk"
+    }
+    else
+    {
+        ErrorExit "[Java] 지원되지 않는 OS: $os"
+    }
+
+    $verify = Invoke-Remote "java -version 2>&1"
+    Log "[Java] 설치 확인 결과: $verify"
+    Log "[Java] 단독 설치 완료"
+}
+
 function Install-JavaJenkins
 {
     Log "[Jenkins] Java + Jenkins 설치 중..."
