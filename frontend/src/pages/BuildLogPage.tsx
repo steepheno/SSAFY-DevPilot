@@ -1,8 +1,11 @@
 import LoadingSpinner from '@/shared/ui/LoadingSpinner';
+import { CircleCheckIcon, CirclePlayIcon, CircleXIcon } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 
 const BuildLogPage = () => {
-  const [isBuildInProgress, setIsBuildInProgress] = useState(false);
+  const [buildStatus, setBuildStatus] = useState<'pending' | 'progress' | 'complete' | 'error'>(
+    'pending',
+  );
   type LogEntry = {
     message: string;
     isError: boolean;
@@ -45,11 +48,11 @@ const BuildLogPage = () => {
         //   console.log(payload);
         //   break;
         case 'job_run_started':
-          setIsBuildInProgress(true);
+          setBuildStatus('progress');
           setLog((prev) => [...prev, { message: payload as string, isError: false }]);
           break;
         case 'job_run_ended':
-          setIsBuildInProgress(false);
+          setBuildStatus('complete');
           setLog((prev) => [...prev, { message: payload as string, isError: false }]);
           eventSource.close();
           break;
@@ -77,7 +80,7 @@ const BuildLogPage = () => {
 
   useEffect(() => {
     // 빌드끝나면 setTimeout => 빌드완료시의 로직
-  }, [isBuildInProgress]);
+  }, [buildStatus]);
 
   // 로그 갱신시마다 스크롤 맨밑으로
   const containerRef = useRef<HTMLDivElement>(null);
@@ -89,16 +92,24 @@ const BuildLogPage = () => {
   }, [log]);
 
   return (
-    <div className="flex h-full w-full flex-col gap-4">
+    <div className="">
       <h2>빌드 로그</h2>
       <div className="flex items-center gap-2">
-        {isBuildInProgress ? <LoadingSpinner /> : <div className="h-8 w-8">빌드중아닌데요</div>}
+        {buildStatus === 'progress' ? (
+          <LoadingSpinner />
+        ) : buildStatus === 'complete' ? (
+          <CircleCheckIcon size={24} color="green" />
+        ) : buildStatus === 'error' ? (
+          <CircleXIcon size={24} color="red" />
+        ) : (
+          <CirclePlayIcon size={24} color="gray" />
+        )}
         <h3>{'buildNo.'}</h3>
       </div>
 
       <div
         ref={containerRef}
-        className="h-1/3 max-h-full min-h-48 overflow-y-auto whitespace-pre-wrap rounded-sm bg-gray-200 p-4 font-mono text-sm"
+        className="h-1/3 max-h-full min-h-48 overflow-y-auto overscroll-none whitespace-pre-wrap rounded-sm bg-gray-200 p-2 font-mono text-sm"
       >
         {/* 라인넘버와 로그 표시 */}
         {log.map((line, idx) => (
