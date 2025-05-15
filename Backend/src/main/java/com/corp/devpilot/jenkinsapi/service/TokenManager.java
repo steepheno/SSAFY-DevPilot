@@ -104,9 +104,12 @@ public class TokenManager {
 			.block();
 
 		if (crumbEntity == null
-			|| !crumbEntity.getStatusCode().is2xxSuccessful()
 			|| crumbEntity.getBody() == null) {
 			throw new JenkinsApiException(ErrorCode.JENKINS_EMPTY_CRUMB);
+		}
+
+		if (!crumbEntity.getStatusCode().is2xxSuccessful()) {
+			throw new JenkinsApiException(ErrorCode.JENKINS_API_UNSUCCESSFULL);
 		}
 
 		CrumbDto crumb = JenkinsParser.parseCrumb(crumbEntity.getBody());
