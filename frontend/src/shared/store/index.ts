@@ -36,6 +36,7 @@ const defaultProject: ProjectConfig = {
 const defaultRepository: RepositoryConfig = {
   gitRepositoryUrl: '',
   gitCredentialsId: '',
+  gitToken: '',
   jenkinsfileBranchConfigs: [
     { branchName: '', buildEnabled: true, testEnabled: true, deployEnabled: true } as BranchConfig,
   ],
