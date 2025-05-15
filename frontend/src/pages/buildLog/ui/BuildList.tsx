@@ -1,4 +1,4 @@
-import { Play } from 'lucide-react';
+import { LogIn } from 'lucide-react';
 
 const BuildList = () => {
   return (
@@ -23,7 +23,7 @@ const BuildList = () => {
               broken since this build
             </td>
             <td className="border border-gray-300 p-2 text-center">
-              <Play size={20} color="rgb(0, 200, 0)" className="mx-auto cursor-pointer" />
+              <LogIn size={25} className="mx-auto cursor-pointer" />
             </td>
           </tr>
           <tr>
@@ -32,7 +32,7 @@ const BuildList = () => {
             <td className="border border-gray-300 p-2 text-center">5 min</td>
             <td className="border border-gray-300 p-2 text-center">stable</td>
             <td className="border border-gray-300 p-2 text-center">
-              <Play size={20} color="rgb(0, 200, 0)" className="mx-auto cursor-pointer" />
+              <LogIn size={25} className="mx-auto cursor-pointer" />
             </td>
           </tr>
         </tbody>

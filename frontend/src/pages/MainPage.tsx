@@ -62,7 +62,7 @@ const MainPage = () => {
             <td className="border border-gray-300 p-2 text-center">8.5 sec</td>
             <td className="border border-gray-300 p-2 text-center">43ms</td>
             <td className="border border-gray-300 p-2 text-center">
-              <Play size={20} color="rgb(0, 200, 0)" className="mx-auto cursor-pointer" />
+              <Play size={25} color="rgb(0, 200, 0)" className="mx-auto cursor-pointer" />
             </td>
           </tr>
           <tr>
@@ -73,7 +73,7 @@ const MainPage = () => {
             <td className="border border-gray-300 p-2 text-center">--</td>
             <td className="border border-gray-300 p-2 text-center">43ms</td>
             <td className="border border-gray-300 p-2 text-center">
-              <Play size={20} color="rgb(0, 200, 0)" className="mx-auto cursor-pointer" />
+              <Play size={25} color="rgb(0, 200, 0)" className="mx-auto cursor-pointer" />
             </td>
           </tr>
         </tbody>
