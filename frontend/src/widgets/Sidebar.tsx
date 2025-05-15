@@ -1,7 +1,6 @@
 import Home from '@/assets/icons/home.svg?react';
 import CreateBuild from '@/assets/icons/createbuild.svg?react';
 import BuildLog from '@/assets/icons/buildlog.svg?react';
-import MyInfo from '@/assets/icons/myinfo.svg?react';
 import MyWork from '@/assets/icons/mywork.svg?react';
 import Settings from '@/assets/icons/settings.svg?react';
 import { useNavigate } from 'react-router-dom';
@@ -16,7 +15,6 @@ const sidebarItems = [
   { name: '홈', icon: <Home />, path: '/' },
   { name: '빌드 생성', icon: <CreateBuild />, path: '/new/repository' },
   { name: '빌드 기록', icon: <BuildLog />, path: '/builds' },
-  { name: '내 정보', icon: <MyInfo />, path: '/' },
   { name: '내 작업 목록', icon: <MyWork />, path: '/' },
   { name: '설정', icon: <Settings />, path: '/' },
 ];
