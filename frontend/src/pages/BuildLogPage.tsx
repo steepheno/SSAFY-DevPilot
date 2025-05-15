@@ -13,23 +13,23 @@ const BuildLogPage = () => {
 
   const [log, setLog] = useState<LogEntry[]>([]);
 
-  type Event =
-    | 'job_run_queue_enter'
-    | 'job_run_queue_buildable'
-    | 'job_run_queue_left'
-    | 'job_run_started'
-    | 'job_run_ended'
-    | 'job_run_queue_task_complete';
+  // type Event =
+  //   | 'job_run_queue_enter'
+  //   | 'job_run_queue_buildable'
+  //   | 'job_run_queue_left'
+  //   | 'job_run_started'
+  //   | 'job_run_ended'
+  //   | 'job_run_queue_task_complete';
 
-  interface Job {
-    event: Event;
-    data: {
-      eventType: Event;
-      name: string;
-      buildNumber: number;
-      timestamp: number;
-    };
-  }
+  // interface Job {
+  //   event: Event;
+  //   data: {
+  //     eventType: Event;
+  //     name: string;
+  //     buildNumber: number;
+  //     timestamp: number;
+  //   };
+  // }
 
   const sse_url = import.meta.env.VITE_SSE_URL;
   useEffect(() => {
@@ -68,8 +68,8 @@ const BuildLogPage = () => {
       // 'new_thread' 이벤트가 오면 할 동작
     });
 
-    eventSource.onerror = (error) => {
-      setLog((prev) => [...prev, { message: 'Stream error', isError: true }]);
+    eventSource.onerror = (error: any) => {
+      setLog((prev) => [...prev, { message: error as string, isError: true }]);
       eventSource.close();
     };
 
