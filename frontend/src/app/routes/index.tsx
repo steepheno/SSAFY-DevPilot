@@ -8,7 +8,7 @@ import {
   DockerSettings,
   BuildInfoPage,
 } from '@/pages';
-import RepositorySettings from '@/features/jenkins-settings/ui/RepositorySettings';
+import RepositorySettings from '@/features/jenkinsSettings/ui/RepositorySettings';
 import BuildList from '@/pages/buildLog/ui/BuildList';
 import BuildDetail from '@/pages/buildLog/ui/BuildDetail';
 
