@@ -122,7 +122,7 @@ function Install-JavaJenkins
     }
     Log "식별된 OS: $os"
 
-    Invoke-Remote "mkdir -p /opt/jenkins_config"
+    Invoke-Remote "sudo mkdir -p /opt/jenkins_config"
 
     if ($os -eq "ubuntu" -or $os -eq "debian")
     {

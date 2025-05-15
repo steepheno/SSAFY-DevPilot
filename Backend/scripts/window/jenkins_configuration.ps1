@@ -62,32 +62,124 @@ function Install-JenkinsPlugins() {
     Log "[Jenkins] 플러그인 설치 완료"
 }
 
-function Configure-JenkinsUser() {
-    if (-not $JenkinsPassword) { ErrorExit "--jenkins-password 인자가 필요합니다." }
+function Configure-JenkinsUser
+{
+    Log "[Jenkins] 사용자 구성 시작"
 
-    $initial_pw = Invoke-Remote "sudo cat /var/lib/jenkins/secrets/initialAdminPassword"
+    # Jenkins가 완전히 시작될 때까지 대기
+    $retries = 30
+    $ready = $false
+    for ($i = 0; $i -lt $retries; $i++)
+    {
+        try
+        {
+            $status = Invoke-Remote "curl -s -o /dev/null -w '%{http_code}' http://localhost:$( $Server.jenkins_port )/login" -Silent
+            if ($status -eq "200" -or $status -eq "403")
+            {
+                $ready = $true
+                break
+            }
+        }
+        catch {}
 
-    $groovyScript = @"
+        Log "Jenkins가 아직 준비되지 않았습니다. 10초 후 다시 시도합니다. ($i/$retries)"
+        Start-Sleep -Seconds 10
+    }
+
+    if (-not $ready)
+    {
+        Log "[Jenkins] 시간 초과: Jenkins UI에 접근할 수 없습니다. 수동 설정이 필요할 수 있습니다."
+        return
+    }
+
+    # 초기 비밀번호 가져오기
+    Log "[Jenkins] 초기 비밀번호 확인 중..."
+    $initialPassword = Invoke-Remote "sudo cat /var/lib/jenkins/secrets/initialAdminPassword 2>/dev/null || echo ''" -Silent
+
+    if (-not $initialPassword)
+    {
+        Log "[Jenkins] 초기 비밀번호를 찾을 수 없습니다. 이미 초기 설정이 완료되었거나 파일 위치가 다를 수 있습니다."
+
+        # 대체 방법: 환경 변수로 설정된 비밀번호를 사용해 로그인 시도
+        Log "[Jenkins] 제공된 비밀번호로 로그인을 시도합니다..."
+        $loginResult = Invoke-Remote "curl -s -I -u admin:$env:JENKINS_PASSWORD http://localhost:$( $Server.jenkins_port )/api/json" -Silent
+
+        if ($loginResult -match "200 OK")
+        {
+            Log "[Jenkins] 제공된 비밀번호로 로그인 성공. 추가 설정이 필요하지 않습니다."
+            return
+        }
+        else
+        {
+            Log "[Jenkins] 제공된 비밀번호로 로그인 실패. 웹 UI를 통해 초기 설정을 완료해주세요."
+            Log "[Jenkins] URL: http://$( $Server.host ):$( $Server.jenkins_port )"
+            return
+        }
+    }
+
+    Log "[Jenkins] 초기 비밀번호 찾음: $initialPassword"
+
+    # 초기 설정 건너뛰기 시도 (jenkins.install.runSetupWizard=false)
+    Log "[Jenkins] 초기 설정 마법사 건너뛰기 시도..."
+    Invoke-Remote "curl -s -X POST -d 'script=jenkins.model.Jenkins.instance.setInstallState(jenkins.install.InstallState.INITIAL_SETUP_COMPLETED)' http://localhost:$( $Server.jenkins_port )/scriptText --user admin:$initialPassword" -Silent
+
+    # 새 관리자 비밀번호 설정
+    Log "[Jenkins] 새 관리자 비밀번호 설정 중..."
+
+    # CLI JAR 파일 경로 확인
+    $cliPath = Invoke-Remote "find /tmp -name jenkins-cli.jar 2>/dev/null || echo ''" -Silent
+    if (-not $cliPath)
+    {
+        Log "[Jenkins] jenkins-cli.jar 파일을 찾을 수 없습니다. 다운로드합니다..."
+        Invoke-Remote "wget -q -O /tmp/jenkins-cli.jar http://localhost:$( $Server.jenkins_port )/jnlpJars/jenkins-cli.jar" -Silent
+        $cliPath = "/tmp/jenkins-cli.jar"
+    }
+
+    # Groovy 스크립트 생성
+    Log "[Jenkins] 비밀번호 변경 스크립트 생성..."
+    Invoke-Remote @"
+cat > /tmp/change_password.groovy << 'EOL'
 import jenkins.model.*
 import hudson.security.*
 
-def instance = Jenkins.get()
-def user = instance.getSecurityRealm().getUser("admin")
-user.addProperty(hudson.security.HudsonPrivateSecurityRealm.Details.fromPlainPassword("$JenkinsPassword"))
+def instance = Jenkins.getInstance()
+def hudsonRealm = new HudsonPrivateSecurityRealm(false)
+hudsonRealm.createAccount('admin', '$env:JENKINS_PASSWORD')
+instance.setSecurityRealm(hudsonRealm)
 instance.save()
-println("✅ 비밀번호 변경 완료")
+println('Admin user created with new password')
+EOL
 "@
 
-    $tempFile = "$env:TEMP\change_password.groovy"
-    $groovyScript | Out-File -FilePath $tempFile -Encoding utf8
-    Upload-File -localPath $tempFile -remotePath "/tmp/change_password.groovy"
+    # Groovy 스크립트 실행
+    Log "[Jenkins] 비밀번호 변경 스크립트 실행..."
+    $changeResult = Invoke-Remote "java -jar $cliPath -s http://localhost:$( $Server.jenkins_port ) -auth admin:$initialPassword groovy = < /tmp/change_password.groovy" -Silent
 
-    Invoke-Remote "java -jar $CliJarPath -s http://localhost:$JenkinsPort -auth admin:$initial_pw groovy = < /tmp/change_password.groovy"
+    if ($changeResult -match "Admin user created")
+    {
+        Log "[Jenkins] 관리자 비밀번호 변경 성공: $changeResult"
+    }
+    else
+    {
+        Log "[Jenkins] 관리자 비밀번호 변경 시도 결과: $changeResult"
+        Log "[Jenkins] 비밀번호 변경에 실패했을 수 있습니다. 웹 UI를 통해 직접 설정해주세요."
+    }
 
-    Invoke-Remote "echo '$JenkinsPassword' | sudo tee /opt/jenkins_config/jenkins_user > /dev/null && sudo chmod 600 /opt/jenkins_config/jenkins_user"
-    Log "[Jenkins] 사용자 비밀번호 설정 완료"
+    # 인증 확인
+    Log "[Jenkins] 새 비밀번호로 인증 확인 중..."
+    $authCheck = Invoke-Remote "curl -s -I -u admin:$env:JENKINS_PASSWORD http://localhost:$( $Server.jenkins_port )/api/json" -Silent
 
-    Invoke-Remote "java -jar $CliJarPath -s http://localhost:$JenkinsPort -auth admin:$JenkinsPassword who-am-i"
+    if ($authCheck -match "200 OK")
+    {
+        Log "[Jenkins] 새 관리자 비밀번호로 인증 성공"
+    }
+    else
+    {
+        Log "[Jenkins] 새 관리자 비밀번호로 인증 실패: $authCheck"
+        Log "[Jenkins] 웹 UI를 통해 직접 초기 설정을 완료해주세요."
+    }
+
+    Log "[Jenkins] 사용자 구성 완료"
 }
 
 function Setup-SecurityOptions() {
