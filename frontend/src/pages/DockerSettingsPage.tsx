@@ -1,8 +1,8 @@
 import { useFormStore } from '@/shared/store';
-import BuildInfo from '@/features/dockerfileSettings/ui/BuildInfo';
-import { checkInpuValidation } from '@/features/dockerfileSettings/lib/checkInputValidation';
-import ProjectEnvironment from '@/features/dockerfileSettings/ui/ProjectEnvironment';
-import MySqlInfo from '@/features/dockerfileSettings/ui/MySqlInfo';
+import BuildInfo from '@/features/dockerfileSettings/ui/BuildInfo.tsx';
+import { checkInpuValidation } from '@/features/dockerfileSettings/lib/checkInputValidation.ts';
+import ProjectEnvironment from '@/features/dockerfileSettings/ui/ProjectEnvironment.tsx';
+import MySqlInfo from '@/features/dockerfileSettings/ui/MySqlInfo.tsx';
 // import DockerfileConfig from '@/entities/dockerFile/types';
 // import { generateDockerfile } from '@/entities/dockerFile/api';
 // import { useNavigate } from 'react-router-dom';

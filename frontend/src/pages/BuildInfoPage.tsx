@@ -2,7 +2,7 @@ import { CircleCheck, CircleEllipsis, CircleXIcon } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 import { BuildStatus } from '@/entities/build/types';
 import { useEffect, useState } from 'react';
-import { fetchBuildInfo } from '@/entities/build/api';
+import { fetchBuildInfo } from '@/entities/build/api.ts';
 
 const BuildInfoPage = () => {
   const [buildStatus, setBuildStatus] = useState<BuildStatus>();

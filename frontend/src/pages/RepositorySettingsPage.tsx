@@ -1,9 +1,9 @@
 import { useFormStore } from '@/shared/store';
 import { ChevronRight } from 'lucide-react';
-import RepositoryForm from '@/pages/newBuildPage/ui/RepositoryForm';
+import RepositoryForm from '@/pages/newBuildPage/ui/RepositoryForm.tsx';
 import { useNavigate } from 'react-router-dom';
 
-export default function RepositorySettings() {
+export default function RepositorySettingsPage() {
   const { projectConfig, setProjectConfig } = useFormStore();
 
   const navigate = useNavigate();

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Tag } from 'emblor';
-import { BuildScriptFormData } from '../ui/BuildScriptForm';
+import { BuildScriptFormData } from '../ui/BuildScriptForm.tsx';
 
 interface FormData {
   repository: string;

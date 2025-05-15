@@ -1,5 +1,5 @@
 import { useLottie } from 'lottie-react';
-import rollingLoadingAnimation from '@/assets/loading-in-progress.json';
+import rollingLoadingAnimation from './loading-in-progress.json';
 
 const LoadingSpinner = () => {
   const options = {

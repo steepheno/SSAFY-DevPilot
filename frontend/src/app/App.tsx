@@ -9,8 +9,8 @@ import {
   ConfigurePage,
   BuildInfoPage,
   BuildLogPage,
+  RepositorySettingsPage,
 } from '@/pages';
-import RepositorySettings from '@/features/jenkinsSettings/ui/RepositorySettings';
 import BuildList from '@/pages/buildLog/ui/BuildList';
 import BuildDetail from '@/pages/buildLog/ui/BuildDetail';
 
@@ -32,7 +32,7 @@ const Router = createBrowserRouter([
           {
             path: 'repository',
             handle: { breadcrumb: 'Git 설정' },
-            element: <RepositorySettings />,
+            element: <RepositorySettingsPage />,
           },
           {
             path: 'environment',

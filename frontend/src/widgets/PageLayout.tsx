@@ -1,6 +1,6 @@
-import Header from './Header';
-import Sidebar from './Sidebar';
-import ChatbotButton from '@/widgets/chatbot/ChatbotButton';
+import Header from './Header.tsx';
+import Sidebar from './Sidebar.tsx';
+import ChatbotButton from '@/widgets/chatbot/ChatbotButton.tsx';
 import { Outlet } from 'react-router-dom';
 
 const PageLayout = () => {
