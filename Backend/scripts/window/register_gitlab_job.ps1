@@ -2,6 +2,15 @@
 # register_gitlab_pipeline.ps1
 # GitLab 기반 Jenkins 멀티브랜치 파이프라인 자동 등록 스크립트 (PowerShell)
 # ========================================================
+# ========================================================
+# 인자 파싱
+# ========================================================
+param (
+    [string]$git_token,
+    [string]$git_credentials_id,
+    [string]$git_repo_url,
+    [string]$jenkins_job_name
+)
 
 # 스크립트 경로
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -13,13 +22,27 @@ $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 . "$ScriptDir\jenkins_pipeline.ps1"
 
 # .env 파일 로드
-$envPath = "$HOME/.devpilot/.env"
+$homeDir = [Environment]::GetFolderPath("UserProfile")
+$envPath = "$homeDir\.devpilot\.env"
 if (Test-Path $envPath) {
-    . $envPath
+    Get-Content $envPath | ForEach-Object {
+        if ($_ -match '^\s*([^#][^=]+)=(.+)$') {
+            $key = $matches[1].Trim()
+            $value = $matches[2].Trim()
+            Set-Item -Path "Env:$key" -Value $value
+        }
+    }
+    Write-Host "[환경 변수] .env 파일 로드 완료: $envPath"
 } else {
     Write-Host "[오류] 환경 파일이 존재하지 않습니다: $envPath"
     exit 1
 }
+
+if (-not $env:JENKINS_PASSWORD) { throw "JENKINS_PASSWORD가 설정되어 있지 않습니다." }
+if (-not $git_token) { throw "--git-token은 필수입니다." }
+if (-not $git_credentials_id) { throw "--git-credentials-id는 필수입니다." }
+if (-not $git_repo_url) { throw "--git-repo-url은 필수입니다." }
+if (-not $jenkins_job_name) { throw "--jenkins-job-name은 필수입니다." }
 
 # ========================================================
 # 서버 설정 (환경 변수 기반 초기화)
@@ -30,24 +53,6 @@ $Server = @{
     jenkins_port = $env:JENKINS_PORT
     config_dir   = $env:CONFIG_DIR
 }
-
-# ========================================================
-# 인자 파싱
-# ========================================================
-param (
-[string]$git_token,
-[string]$git_credentials_id,
-[string]$git_repo_url,
-[string]$jenkins_job_name
-)
-
-if (-not $env:JENKINS_PASSWORD) { throw "JENKINS_PASSWORD가 설정되어 있지 않습니다." }
-if (-not $git_token) { throw "--git-token은 필수입니다." }
-if (-not $git_credentials_id) { throw "--git-credentials-id는 필수입니다." }
-if (-not $git_repo_url) { throw "--git-repo-url은 필수입니다." }
-if (-not $jenkins_job_name) { throw "--jenkins-job-name은 필수입니다." }
-
-$env:JENKINS_PASSWORD = $env:JENKINS_PASSWORD
 
 # SSH 연결
 Connect-SSHServer

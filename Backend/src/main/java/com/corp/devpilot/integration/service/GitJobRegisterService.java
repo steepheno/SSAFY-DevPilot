@@ -58,10 +58,19 @@ public class GitJobRegisterService {
 		}
 
 		command.add(scriptPath);
-		command.add("--git-token=" + request.getGitToken());
-		command.add("--git-credentials-id=" + request.getGitCredentialsId());
-		command.add("--git-repo-url=" + request.getGitRepoUrl());
-		command.add("--jenkins-job-name=" + request.getJenkinsJobName());
+
+		command.add("-git_token");
+		command.add(request.getGitToken());
+
+		command.add("-git_credentials_id");
+		command.add(request.getGitCredentialsId());
+
+		command.add("-git_repo_url");
+		command.add(request.getGitRepoUrl());
+
+		command.add("-jenkins_job_name");
+		command.add(request.getJenkinsJobName());
+
 
 		ProcessBuilder processBuilder = new ProcessBuilder(command);
 		processBuilder.redirectErrorStream(true);
