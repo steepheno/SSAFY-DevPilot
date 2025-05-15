@@ -289,7 +289,7 @@ function Main
                 Log "[Jenkins] 설치되어 있지 않거나 활성화되지 않음. 설치 시작..."
                 try
                 {
-                    Install-Jenkins
+                    Install-JavaJenkins
                     Log "[Jenkins] 설치 완료"
                 }
                 catch
