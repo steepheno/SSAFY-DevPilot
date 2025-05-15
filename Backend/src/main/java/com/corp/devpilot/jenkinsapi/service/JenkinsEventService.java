@@ -41,6 +41,7 @@ public class JenkinsEventService {
 	 * MVC 환경에서 SseEmitter를 이용해 Jenkins 이벤트를 스트리밍합니다.
 	 */
 	public SseEmitter streamBuildAndPipelineEvents(String clientId) {
+		jenkinsApiService.isClient();
 		SseEmitter emitter = new SseEmitter(Long.MAX_VALUE);
 		WebClient client = jenkinsApiService.authorizedClient();
 		// 1) 구독 확인 메시지 전송
@@ -134,6 +135,7 @@ public class JenkinsEventService {
 	public ProgressiveLogDto fetchProgressiveLog(
 		String jobName, int buildNumber, long offset
 	) {
+		jenkinsApiService.isClient();
 		WebClient client = jenkinsApiService.authorizedClient();
 		Mono<ResponseEntity<String>> mono = client.get()
 			.uri(uri -> uri
