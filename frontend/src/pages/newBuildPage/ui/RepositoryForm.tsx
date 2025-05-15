@@ -74,14 +74,25 @@ const RepositoryForm: React.FC = () => {
         </FormField>
       </div>
 
-      <FormField label="인증 정보">
-        <input
-          className="h-10 w-80 border-[1px]"
-          value={repositoryConfig.gitCredentialsId}
-          required
-          onChange={(e) => setRepositoryConfig({ gitCredentialsId: e.target.value })}
-        />
-      </FormField>
+      <div className="flex gap-10">
+        <FormField label="인증 정보">
+          <input
+            className="h-10 w-80 border-[1px]"
+            value={repositoryConfig.gitCredentialsId}
+            required
+            onChange={(e) => setRepositoryConfig({ gitCredentialsId: e.target.value })}
+          />
+        </FormField>
+
+        <FormField label="Gitlab 토큰">
+          <input
+            className="h-10 w-80 border-[1px]"
+            value={repositoryConfig.gitToken}
+            required
+            onChange={(e) => setRepositoryConfig({ gitToken: e.target.value })}
+          />
+        </FormField>
+      </div>
     </div>
   );
 };

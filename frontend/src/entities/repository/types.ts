@@ -1,6 +1,7 @@
 export interface RepositoryConfig {
   gitRepositoryUrl: string;
   gitCredentialsId: string;
+  gitToken: string;
   jenkinsfileBranchConfigs: BranchConfig[];
 }
 
