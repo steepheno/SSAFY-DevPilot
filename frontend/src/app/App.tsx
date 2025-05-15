@@ -2,14 +2,7 @@ import './styles/App.css';
 
 import { createBrowserRouter, Outlet } from 'react-router-dom';
 import PageLayout from '@/widgets/PageLayout';
-import {
-  MainPage,
-  NewBuildPage,
-  DockerSettings,
-  ConfigurePage,
-  BuildInfoPage,
-  BuildLogPage,
-} from '@/pages';
+import { MainPage, NewBuildPage, DockerSettings, BuildInfoPage, BuildLogPage } from '@/pages';
 import RepositorySettings from '@/features/jenkinsSettings/ui/RepositorySettings';
 import BuildList from '@/pages/buildLog/ui/BuildList';
 import BuildDetail from '@/pages/buildLog/ui/BuildDetail';
@@ -35,11 +28,10 @@ const Router = createBrowserRouter([
             element: <RepositorySettings />,
           },
           {
-            path: 'environment',
+            path: 'project',
             handle: { breadcrumb: '빌드 파일 생성' },
             element: <DockerSettings />,
           },
-          { path: 'configure', element: <ConfigurePage /> },
         ],
       },
       {
