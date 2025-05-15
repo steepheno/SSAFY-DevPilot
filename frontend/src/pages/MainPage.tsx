@@ -1,6 +1,7 @@
 import DetailButton from '@/shared/ui/DetailButton';
 import DetailInput from '@/shared/ui/DetailInput';
 import { useState } from 'react';
+import { Play } from 'lucide-react';
 
 const MainPage = () => {
   const [isEditMode, setIsEditMode] = useState(false);
@@ -60,7 +61,9 @@ const MainPage = () => {
             <td className="border border-gray-300 p-2 text-center">--</td>
             <td className="border border-gray-300 p-2 text-center">8.5 sec</td>
             <td className="border border-gray-300 p-2 text-center">43ms</td>
-            <td className="cursor-pointer border border-gray-300 p-2 text-center">아이콘</td>
+            <td className="border border-gray-300 p-2 text-center">
+              <Play size={20} color="rgb(0, 200, 0)" className="mx-auto cursor-pointer" />
+            </td>
           </tr>
           <tr>
             <td className="border border-gray-300 p-2 text-center">성공</td>
@@ -69,7 +72,9 @@ const MainPage = () => {
             <td className="border border-gray-300 p-2 text-center">24 sec</td>
             <td className="border border-gray-300 p-2 text-center">--</td>
             <td className="border border-gray-300 p-2 text-center">43ms</td>
-            <td className="cursor-pointer border border-gray-300 p-2 text-center">아이콘</td>
+            <td className="border border-gray-300 p-2 text-center">
+              <Play size={20} color="rgb(0, 200, 0)" className="mx-auto cursor-pointer" />
+            </td>
           </tr>
         </tbody>
       </table>

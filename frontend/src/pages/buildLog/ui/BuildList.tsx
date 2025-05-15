@@ -1,7 +1,9 @@
+import { Play } from 'lucide-react';
+
 const BuildList = () => {
   return (
     <>
-      <h1 className="px-5 py-10 text-h3 font-bold">Jenkins의 프로젝트</h1>
+      <h1 className="px-5 py-10 text-h3 font-bold">Admin의 프로젝트</h1>
       <table className="w-full border-separate border-spacing-0 px-5 py-5">
         <thead>
           <tr>
@@ -20,14 +22,18 @@ const BuildList = () => {
             <td className="border border-gray-300 p-2 text-center text-red-500">
               broken since this build
             </td>
-            <td className="cursor-pointer border border-gray-300 p-2 text-center">아이콘</td>
+            <td className="border border-gray-300 p-2 text-center">
+              <Play size={20} color="rgb(0, 200, 0)" className="mx-auto cursor-pointer" />
+            </td>
           </tr>
           <tr>
             <td className="border border-gray-300 p-2 text-center">성공</td>
             <td className="border border-gray-300 p-2 text-center">test2</td>
             <td className="border border-gray-300 p-2 text-center">5 min</td>
             <td className="border border-gray-300 p-2 text-center">stable</td>
-            <td className="cursor-pointer border border-gray-300 p-2 text-center">아이콘</td>
+            <td className="border border-gray-300 p-2 text-center">
+              <Play size={20} color="rgb(0, 200, 0)" className="mx-auto cursor-pointer" />
+            </td>
           </tr>
         </tbody>
       </table>
