@@ -9,11 +9,26 @@ import {
   BuildInfoPage,
   BuildLogPage,
   RepositorySettingsPage,
+  LoginPage,
+  InitialPage,
 } from '@/pages';
 import BuildList from '@/pages/buildLog/ui/BuildList';
 import BuildDetail from '@/pages/buildLog/ui/BuildDetail';
 
 const Router = createBrowserRouter([
+  {
+    path: '/login',
+    children: [
+      {
+        path: '',
+        element: <LoginPage />,
+      },
+      {
+        path: 'new',
+        element: <InitialPage />,
+      },
+    ],
+  },
   {
     path: '/',
     element: <PageLayout />,

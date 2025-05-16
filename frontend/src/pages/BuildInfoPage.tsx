@@ -1,54 +1,67 @@
-import { CircleCheck, CircleEllipsis, CircleXIcon } from 'lucide-react';
+import { fetchJobInfo } from '@/entities/build/api.ts';
 import { useParams } from 'react-router-dom';
-import { BuildStatus } from '@/entities/build/types';
 import { useEffect, useState } from 'react';
-import { fetchBuildInfo } from '@/entities/build/api.ts';
+import { useLocation, useNavigate } from 'react-router-dom';
+import BuildList from './buildLog/ui/BuildList';
+import { Job } from '@/features/jobs/types';
+
+// type LocationState = {
+//   job?: Job;
+// };
 
 const BuildInfoPage = () => {
-  const [buildStatus, setBuildStatus] = useState<BuildStatus>();
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const location = useLocation();
+  const navigate = useNavigate();
   const { buildId } = useParams<{ buildId: string }>();
+  const [job, setJob] = useState<Job | null>(null);
 
   useEffect(() => {
-    const load = async () => {
+    const loadBuildInfo = async () => {
+      if (!location.state.name) {
+        setError('Job 정보가 제공되지 않았습니다.');
+        return;
+      }
+      if (!job || !buildId) return;
+      setIsLoading(true);
       try {
-        const response = await fetchBuildInfo('test', buildId || '');
-        setBuildStatus(response.data);
+        const response = await fetchJobInfo(job.name);
+        if (response?.data) {
+          setJob(location.state);
+        } else {
+          setError('Build 정보를 가져올 수 없습니다.');
+        }
       } catch (err) {
         console.error(err);
+        setError('Build 조회 중 오류가 발생했습니다.');
+      } finally {
+        setIsLoading(false);
       }
     };
+    loadBuildInfo();
+  }, [job, location.state, buildId]);
 
-    load(); // 함수 호출
-  }, []);
+  if (error) {
+    return <div className="p-4 text-red-500">{error}</div>;
+  }
+  if (!job) {
+    navigate('/builds');
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <span className="text-gray-600">빌드 정보를 불러오는 중...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-4 p-4">
-      <div className="flex items-center gap-1">
-        {buildStatus?.result === 'SUCCESS' ? (
-          <CircleCheck color="green" />
-        ) : buildStatus?.result === 'FAILURE' ? (
-          <CircleXIcon color="red" />
-        ) : (
-          <CircleEllipsis color="blue" />
-        )}
-        <h2 className="">{buildStatus?.fullDisplayName}</h2>
-      </div>
-
-      <h3 className="font-semibold">고정 링크</h3>
-      <ul className="list-inside list-disc pl-4">
-        <li>
-          <a href="">last build: 링크임</a>
-        </li>
-        <li>
-          <a>last failed build: 링크임</a>
-        </li>
-        <li>
-          <a>last unsuccessful build: 링크임</a>
-        </li>
-        <li>
-          <a>last complted build: 링크임</a>
-        </li>
-      </ul>
+      <h2 className="text-lg font-semibold">{location.state.name}</h2>
+      <BuildList />
     </div>
   );
 };
