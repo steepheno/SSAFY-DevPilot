@@ -1,5 +1,5 @@
-import DetailButton from '@/shared/ui/DetailButton';
-import DetailInput from '@/shared/ui/DetailInput';
+import DetailButton from '@/shared/ui/DetailButton.tsx';
+import DetailInput from '@/shared/ui/DetailInput.tsx';
 import { useState } from 'react';
 import { Play } from 'lucide-react';
 

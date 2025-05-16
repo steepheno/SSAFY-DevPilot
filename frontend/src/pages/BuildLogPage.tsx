@@ -1,4 +1,4 @@
-import LoadingSpinner from '@/shared/ui/LoadingSpinner';
+import LoadingSpinner from '@/shared/ui/lottie/LoadingSpinner.tsx';
 import { CircleCheckIcon, CirclePlayIcon, CircleXIcon } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
 

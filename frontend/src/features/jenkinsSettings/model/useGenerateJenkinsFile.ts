@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { generateJenkinsFile } from '@/entities/jenkins/api/generateJenkinsfile';
+import { generateJenkinsFile } from '@/entities/jenkins/api/generateJenkinsfile.ts';
 import type { JenkinsConfig } from '@/entities/jenkins/types';
 
 export function useGenerateJenkinsFile() {

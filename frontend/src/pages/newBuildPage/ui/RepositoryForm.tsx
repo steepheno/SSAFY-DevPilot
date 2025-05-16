@@ -44,7 +44,7 @@ const RepositoryForm: React.FC = () => {
         <FormField label="원격 저장소 주소">
           <input
             required
-            className="h-10 w-80 border-[1px] border-border"
+            className="h-10 min-w-20 max-w-full rounded border-[1px] border-border"
             value={repositoryConfig.gitRepositoryUrl}
             onChange={(e) => setRepositoryConfig({ gitRepositoryUrl: e.target.value })}
           />
@@ -59,8 +59,11 @@ const RepositoryForm: React.FC = () => {
             }}
             placeholder="브랜치 추가..."
             styleClasses={{
-              input: 'w-full min-w-[200px] h-10 md:max-w-[350px]',
-              inlineTagsContainer: 'w-[400px] bg-white py-0 gap-2',
+              input: 'max-w-80 min-w-20 h-10 md:max-w-[350px]',
+              inlineTagsContainer: 'min-w-20 bg-white py-0 gap-2',
+              autoComplete: {
+                popoverContent: 'bg-white',
+              },
               tag: {
                 body: 'bg-gray-100 p-1 rounded-md text-gray-600',
                 closeButton: 'text-gray-400',
@@ -77,7 +80,7 @@ const RepositoryForm: React.FC = () => {
       <div className="flex gap-10">
         <FormField label="인증 정보">
           <input
-            className="h-10 w-80 border-[1px]"
+            className="h-10 min-w-20 max-w-80 rounded border-[1px]"
             value={repositoryConfig.gitCredentialsId}
             required
             onChange={(e) => setRepositoryConfig({ gitCredentialsId: e.target.value })}
@@ -86,7 +89,7 @@ const RepositoryForm: React.FC = () => {
 
         <FormField label="Gitlab 토큰">
           <input
-            className="h-10 w-80 border-[1px]"
+            className="h-10 w-80 min-w-20 rounded border-[1px]"
             value={repositoryConfig.gitToken}
             required
             onChange={(e) => setRepositoryConfig({ gitToken: e.target.value })}
