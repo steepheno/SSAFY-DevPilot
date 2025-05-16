@@ -3,6 +3,8 @@ import './styles/App.css';
 import { createBrowserRouter, Outlet } from 'react-router-dom';
 import PageLayout from '@/widgets/PageLayout';
 import {
+  LoginPage,
+  InitialPage,
   MainPage,
   NewBuildPage,
   DockerSettings,
