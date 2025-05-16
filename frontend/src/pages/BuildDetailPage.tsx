@@ -3,7 +3,7 @@ import { CircleCheck, CircleEllipsis, CircleXIcon } from 'lucide-react';
 import { BuildStatus } from '@/entities/build/types';
 
 const BuildDetailPage = () => {
-  const [buildStatus, setBuildStatus] = useState<BuildStatus | null>(null);
+  const [buildStatus] = useState<BuildStatus | null>(null);
   return (
     <>
       <div className="flex items-center gap-1">

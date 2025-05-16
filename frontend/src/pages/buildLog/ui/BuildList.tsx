@@ -1,19 +1,12 @@
 import { LogIn } from 'lucide-react';
-import { Job } from '@/features/jobs/types';
 
 // 빌드 리스트 항목 타입 정의
-interface BuildEntry {
-  number: string;
-  duration: string;
-  status: string;
-  logUrl: string;
-}
-
-// BuildList 컴포넌트: job 정보와 빌드 배열을 받아 동적 렌더링
-interface BuildListProps {
-  job?: Job;
-  builds: BuildEntry[];
-}
+// interface BuildEntry {
+//   number: string;
+//   duration: string;
+//   status: string;
+//   logUrl: string;
+// }
 
 const BuildList = () => {
   // 컬럼 헤더 설정
@@ -65,7 +58,7 @@ const BuildList = () => {
                   <LogIn
                     size={20}
                     className="mx-auto cursor-pointer"
-                    onClick={() => window.open(b.logUrl, '_blank')}
+                    // onClick={() => window.open(b.logUrl, '_blank')}
                   />
                 </td>
               </tr>

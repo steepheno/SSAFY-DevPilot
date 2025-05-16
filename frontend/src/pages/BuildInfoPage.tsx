@@ -61,7 +61,7 @@ const BuildInfoPage = () => {
   return (
     <div className="flex flex-col gap-4 p-4">
       <h2 className="text-lg font-semibold">{location.state.name}</h2>
-      <BuildList job={job} />
+      <BuildList />
     </div>
   );
 };
