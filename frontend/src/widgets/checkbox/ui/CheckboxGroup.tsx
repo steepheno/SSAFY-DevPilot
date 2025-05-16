@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Checkbox } from './Checkboxs';
+import { Checkbox } from './Checkboxs.tsx';
 
 // 체크박스 옵션 타입 정의
 export interface CheckboxOption {
@@ -53,4 +53,3 @@ const CheckboxGroup = ({ options, onChange }: CheckboxGroupProps) => {
 };
 
 export default CheckboxGroup;
-

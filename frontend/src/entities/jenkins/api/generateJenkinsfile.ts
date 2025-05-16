@@ -1,5 +1,6 @@
 import axios from 'axios';
-import { JenkinsConfig, GenerateFileResponse } from '../types';
+import { JenkinsConfig } from '../types/JenkinsConfig.ts';
+import { GenerateFileResponse } from '../types/GenerateFileResponse.ts';
 
 const url = import.meta.env.VITE_API_URL;
 const endpoint = `${url}/jenkinsfile/generate-file`;

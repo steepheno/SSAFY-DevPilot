@@ -1,4 +1,4 @@
-import { instance } from '@/shared/api/instance';
+import { instance } from '@/shared/api/instance.ts';
 import { InitialSettings } from '@/features/initialSettings/types';
 
 export const initialSettings = async (settings: InitialSettings) => {

@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import DetailButton from '@/shared/ui/DetailButton';
-import DetailInput from '@/shared/ui/DetailInput';
+import DetailButton from '@/shared/ui/DetailButton.tsx';
+import DetailInput from '@/shared/ui/DetailInput.tsx';
 
 const BuildDetail = () => {
   const [isEditMode, setIsEditMode] = useState(false);

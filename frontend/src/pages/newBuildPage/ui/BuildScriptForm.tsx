@@ -1,5 +1,5 @@
 // import CheckboxGroup from '@/widgets/checkbox/ui/CheckboxGroup';
-import type { CheckboxOption } from '@/widgets/checkbox/ui/CheckboxGroup';
+import type { CheckboxOption } from '@/widgets/checkbox/ui/CheckboxGroup.tsx';
 
 interface ProjectStructure {
   directory: string;
