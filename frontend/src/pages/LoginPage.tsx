@@ -1,5 +1,5 @@
 import MainLogo from '@/assets/login_icon.png';
-import { loginJenkins } from '@/features/login/api';
+import { loginJenkins } from '@/features/login/api.ts';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 

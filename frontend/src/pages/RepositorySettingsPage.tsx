@@ -1,9 +1,9 @@
 import { useFormStore } from '@/shared/store';
 import { ChevronRight } from 'lucide-react';
-import RepositoryForm from '@/pages/newBuildPage/ui/RepositoryForm';
+import RepositoryForm from '@/pages/newBuildPage/ui/RepositoryForm.tsx';
 import { useNavigate } from 'react-router-dom';
 
-export default function RepositorySettings() {
+export default function RepositorySettingsPage() {
   const { projectConfig, setProjectConfig } = useFormStore();
 
   const navigate = useNavigate();
@@ -17,7 +17,7 @@ export default function RepositorySettings() {
           <div>
             <p className="text-body font-bold">프로젝트 이름</p>
             <input
-              className="mt-3 h-8 rounded border px-2"
+              className="mt-3 h-10 rounded border px-2"
               value={projectConfig.projectName}
               onChange={(e) => setProjectConfig({ projectName: e.target.value })}
               onKeyDown={(e) =>

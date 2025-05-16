@@ -1,6 +1,6 @@
-import Header from './Header';
-import Sidebar from './Sidebar';
-import ChatbotButton from '@/widgets/chatbot/ChatbotButton';
+import Header from './Header.tsx';
+import Sidebar from './Sidebar.tsx';
+import ChatbotButton from '@/widgets/chatbot/ChatbotButton.tsx';
 import { Outlet } from 'react-router-dom';
 
 const PageLayout = () => {
@@ -14,7 +14,7 @@ const PageLayout = () => {
           <Sidebar />
         </aside>
 
-        <main className="absolute bottom-0 left-14 right-0 top-20 overflow-auto p-6 px-10 py-10 md:left-60">
+        <main className="absolute bottom-0 left-14 right-0 top-20 min-w-[700px] overflow-auto p-6 px-10 py-10 md:left-60">
           <Outlet />
         </main>
       </div>
