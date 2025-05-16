@@ -1,4 +1,5 @@
 import { ChatbotContentsProps, MessageType } from '@/features/chatbot/model/types';
+import { chatbotApi } from '@/features/chatbot/model/api';
 import { useEffect, useRef, useState } from 'react';
 
 const ChatbotContents = ({ isOpen, onClose }: ChatbotContentsProps) => {
@@ -20,18 +21,31 @@ const ChatbotContents = ({ isOpen, onClose }: ChatbotContentsProps) => {
   // 자동 높이 조절 및 스크롤
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
+  // 입력 컨테이너 참조
+  const inputContainerRef = useRef<HTMLDivElement>(null);
+
   // 입력 필드 높이 자동 조절
   useEffect(() => {
-    if (textareaRef.current) {
+    if (textareaRef.current && inputContainerRef.current) {
       // 높이 초기화
       textareaRef.current.style.height = 'auto';
-      // 스크롤 높이에 맞게 조절 (최대 4줄까지)
+
+      // 스크롤 높이에 맞게 조절 (최대 100px)
       const scrollHeight = textareaRef.current.scrollHeight;
-      textareaRef.current.style.height = Math.min(scrollHeight, 100) + 'px';
+      const newHeight = Math.min(scrollHeight, 100);
+      textareaRef.current.style.height = newHeight + 'px';
+
+      // 채팅 컨테이너 영역 조정
+      if (chatContainerRef.current) {
+        const baseChatHeight = 500 - 56 - 68; // 기본 채팅 영역 높이 (500px - 헤더(56px) - 입력창 기본 높이(68px))
+        const extraInputHeight = Math.max(0, newHeight - 40); // 추가 입력창 높이 (기본 높이 40px을 초과하는 부분)
+
+        chatContainerRef.current.style.height = baseChatHeight - extraInputHeight + 'px'; // 채팅 영역 높이 조정
+      }
     }
   }, [inputValue]);
 
-  // 새 메시지가 추가될 때 스크롤을 최하단으로 (잘 안 되는듯)
+  // 새 메시지 추가되면 스크롤 최하단으로
   useEffect(() => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
@@ -50,7 +64,7 @@ const ChatbotContents = ({ isOpen, onClose }: ChatbotContentsProps) => {
   };
 
   // 사용자 메시지 전송 후 봇 응답 추가
-  const sendMessage = () => {
+  const sendMessage = async () => {
     if (inputValue.trim() === '') return;
 
     // 사용자 메시지 추가
@@ -61,17 +75,28 @@ const ChatbotContents = ({ isOpen, onClose }: ChatbotContentsProps) => {
 
     // textarea 높이 초기화
     if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = '40px';
+    }
+
+    // 채팅 영역 높이 원상복구
+    if (chatContainerRef.current) {
+      chatContainerRef.current.style.height = '376px'; // 500 - 56 - 68
     }
 
     // 로딩 상태 활성화
     setIsLoading(true);
 
-    // 봇 응답 추가
-    setTimeout(() => {
+    try {
+      const response = await chatbotApi.sendMessage(inputValue);
       setIsLoading(false);
-      addMessage('메시지 수신', true);
-    }, 2000);
+
+      // 봇 응답 추가
+      addMessage(response, true);
+    } catch (error) {
+      console.error('메시지 전송 중 오류 발생:', error);
+      setIsLoading(false);
+      addMessage('오류가 발생했습니다. 다시 시도해주세요.', true);
+    }
   };
 
   /* 3. 입력 필드 핸들링 */
@@ -91,7 +116,7 @@ const ChatbotContents = ({ isOpen, onClose }: ChatbotContentsProps) => {
   if (!isOpen) return null;
 
   return (
-    <div className="absolute bottom-16 right-0 mb-2 w-80 rounded-lg bg-white shadow-lg">
+    <div className="absolute bottom-16 right-0 mb-2 flex h-[500px] w-80 flex-col rounded-lg bg-white shadow-lg">
       <div className="flex items-center justify-between border-b p-4">
         <h3 className="font-medium">AI 채팅</h3>
         <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
@@ -99,8 +124,12 @@ const ChatbotContents = ({ isOpen, onClose }: ChatbotContentsProps) => {
         </button>
       </div>
 
-      {/* 4. 채팅 내용 */}
-      <div ref={chatContainerRef} className="h-80 overflow-y-auto p-4">
+      {/* 4. 채팅 내용 - 유동적인 높이를 가지게 변경 */}
+      <div
+        ref={chatContainerRef}
+        className="flex-1 overflow-y-auto p-4"
+        style={{ height: '376px' }} // 초기 높이 설정 (500 - 헤더(56) - 입력창(68))
+      >
         {messages.map((message) => (
           <div
             key={message.id}
@@ -134,9 +163,9 @@ const ChatbotContents = ({ isOpen, onClose }: ChatbotContentsProps) => {
         )}
       </div>
 
-      {/* 입력창 */}
-      <div className="border-t p-4">
-        <div className="flex">
+      {/* 입력창 - 고정된 위치 */}
+      <div ref={inputContainerRef} className="mt-auto border-t p-4">
+        <div className="flex items-end">
           <textarea
             ref={textareaRef}
             placeholder="메시지를 입력하세요..."
@@ -145,11 +174,12 @@ const ChatbotContents = ({ isOpen, onClose }: ChatbotContentsProps) => {
             onChange={inputChange}
             onKeyDown={handleKeyDown}
             rows={1}
-            style={{ minHeight: '40px', maxHeight: '100px' }}
+            style={{ height: '40px', maxHeight: '100px' }}
           />
           <button
-            className="h-full self-end rounded-r-lg bg-blue-500 px-4 py-2 text-white"
+            className="rounded-r-lg bg-blue-500 px-4 py-2 text-white"
             onClick={sendMessage}
+            style={{ minHeight: '40px' }}
           >
             전송
           </button>

@@ -8,3 +8,11 @@ export interface MessageType {
   text: string;
   isBot: boolean;
 }
+
+export interface ChatbotRequest {
+  question: string;
+}
+
+export interface ChatbotResponse {
+  response: string;
+}
