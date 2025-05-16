@@ -44,7 +44,7 @@ const RepositoryForm: React.FC = () => {
         <FormField label="원격 저장소 주소">
           <input
             required
-            className="h-10 min-w-20 max-w-full border-[1px] border-border"
+            className="h-10 min-w-20 max-w-full rounded border-[1px] border-border"
             value={repositoryConfig.gitRepositoryUrl}
             onChange={(e) => setRepositoryConfig({ gitRepositoryUrl: e.target.value })}
           />
@@ -80,7 +80,7 @@ const RepositoryForm: React.FC = () => {
       <div className="flex gap-10">
         <FormField label="인증 정보">
           <input
-            className="h-10 min-w-20 max-w-80 border-[1px]"
+            className="h-10 min-w-20 max-w-80 rounded border-[1px]"
             value={repositoryConfig.gitCredentialsId}
             required
             onChange={(e) => setRepositoryConfig({ gitCredentialsId: e.target.value })}
@@ -89,7 +89,7 @@ const RepositoryForm: React.FC = () => {
 
         <FormField label="Gitlab 토큰">
           <input
-            className="h-10 w-80 min-w-20 border-[1px]"
+            className="h-10 w-80 min-w-20 rounded border-[1px]"
             value={repositoryConfig.gitToken}
             required
             onChange={(e) => setRepositoryConfig({ gitToken: e.target.value })}

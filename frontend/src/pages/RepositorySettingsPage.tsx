@@ -17,7 +17,7 @@ export default function RepositorySettingsPage() {
           <div>
             <p className="text-body font-bold">프로젝트 이름</p>
             <input
-              className="mt-3 h-8 rounded border px-2"
+              className="mt-3 h-10 rounded border px-2"
               value={projectConfig.projectName}
               onChange={(e) => setProjectConfig({ projectName: e.target.value })}
               onKeyDown={(e) =>
