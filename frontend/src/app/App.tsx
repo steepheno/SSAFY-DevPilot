@@ -11,8 +11,6 @@ import {
   BuildInfoPage,
   BuildLogPage,
   RepositorySettingsPage,
-  LoginPage,
-  InitialPage,
 } from '@/pages';
 import BuildList from '@/pages/buildLog/ui/BuildList';
 import BuildDetail from '@/pages/buildLog/ui/BuildDetail';
