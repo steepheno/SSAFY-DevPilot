@@ -1,28 +1,10 @@
 import DetailButton from '@/shared/ui/DetailButton.tsx';
 import DetailInput from '@/shared/ui/DetailInput.tsx';
+import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { CircleCheckIcon, CircleEllipsisIcon, CircleXIcon, Play } from 'lucide-react';
+import { Job } from '@/features/jobs/types';
 import { fetchJobsInfo } from '@/features/jobs/api';
-
-interface Job {
-  name: string;
-  url: string;
-  color:
-    | 'red'
-    | 'red_anime'
-    | 'yellow'
-    | 'yellow_anime'
-    | 'blue'
-    | 'blue_anime'
-    | 'grey'
-    | 'grey_anime'
-    | 'disabled'
-    | 'disabled_anime'
-    | 'aborted'
-    | 'aborted_anime'
-    | 'notbuilt'
-    | 'notbuilt_anime';
-}
 
 const Cell: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <td className="h-12 border border-gray-300 p-2 text-center align-middle">{children}</td>
@@ -35,6 +17,7 @@ const MainPage = () => {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
+  // 페이지 로딩 시 프로젝트 목록 로딩
   useEffect(() => {
     setIsLoading(true);
     fetchJobsInfo()
@@ -70,6 +53,7 @@ const MainPage = () => {
         </div>
       ) : (
         <>
+          <h2>프로젝트 목록</h2>
           {/* 헤더 (제목 & 에디트 버튼) */}
           {!isEditMode ? (
             <div className="my-10 mr-5">
@@ -107,23 +91,27 @@ const MainPage = () => {
                 </th>
                 <th className="h-12 bg-gray-700 p-2 text-center text-white">상태</th>
                 <th className="h-12 bg-gray-700 p-2 text-center text-white">프로젝트 이름</th>
-                <th className="h-12 bg-gray-700 p-2 text-center text-white">최근 성공</th>
-                <th className="h-12 bg-gray-700 p-2 text-center text-white">최근 실패</th>
-                <th className="h-12 bg-gray-700 p-2 text-center text-white">최근 소요시간</th>
                 <th className="h-12 rounded-tr-lg bg-gray-700 p-2 text-center text-white">빌드</th>
               </tr>
             </thead>
             <tbody>
               {jobs.map((job) => {
+                {
+                  /* 특정 프로젝트 빌드 목록 링크 */
+                }
                 const link = (
-                  <a href={job.url} target="_blank" rel="noopener noreferrer">
+                  <Link
+                    to={`builds/${job.name}`}
+                    state={job}
+                    className="text-blue-500 hover:underline"
+                  >
                     {job.name}
-                  </a>
+                  </Link>
                 );
                 const playIcon = (
                   <Play size={25} color="rgb(0, 200, 0)" className="mx-auto cursor-pointer" />
                 );
-                const placeholders = ['--', '--', '--'];
+                const placeholders = [];
                 const iconsMap: Record<Job['color'], JSX.Element> = {
                   red: <CircleXIcon size={20} color="red" className="mx-auto" />,
                   red_anime: <CircleXIcon size={20} color="red" className="mx-auto" />,
