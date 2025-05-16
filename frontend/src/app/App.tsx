@@ -6,7 +6,6 @@ import {
   MainPage,
   NewBuildPage,
   DockerSettings,
-  ConfigurePage,
   BuildInfoPage,
   BuildLogPage,
   RepositorySettingsPage,
@@ -35,11 +34,10 @@ const Router = createBrowserRouter([
             element: <RepositorySettingsPage />,
           },
           {
-            path: 'environment',
+            path: 'project',
             handle: { breadcrumb: '빌드 파일 생성' },
             element: <DockerSettings />,
           },
-          { path: 'configure', element: <ConfigurePage /> },
         ],
       },
       {
