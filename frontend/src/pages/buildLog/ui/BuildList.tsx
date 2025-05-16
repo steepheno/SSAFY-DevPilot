@@ -7,7 +7,7 @@ const BuildList = () => {
       <table className="w-full border-separate border-spacing-0 px-5 py-5">
         <thead>
           <tr>
-            <th className="bg-gray-700 p-2 text-center text-white">날씨</th>
+            {/* <th className="bg-gray-700 p-2 text-center text-white">날씨</th> */}
             <th className="bg-gray-700 p-2 text-center text-white">프로젝트 이름</th>
             <th className="bg-gray-700 p-2 text-center text-white">경과 시간</th>
             <th className="bg-gray-700 p-2 text-center text-white">상태</th>
@@ -27,7 +27,7 @@ const BuildList = () => {
             </td>
           </tr>
           <tr>
-            <td className="border border-gray-300 p-2 text-center">성공</td>
+            {/* <td className="border border-gray-300 p-2 text-center">성공</td> */}
             <td className="border border-gray-300 p-2 text-center">test2</td>
             <td className="border border-gray-300 p-2 text-center">5 min</td>
             <td className="border border-gray-300 p-2 text-center">stable</td>
