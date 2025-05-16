@@ -203,20 +203,21 @@ instance.save()
     Log "보안 설정 완료"
 }
 
-function Register-GitCredentials($provider, $token, $cred_id) {
+function Register-GitCredentials {
     param (
         [string]$provider,
         [string]$token,
         [string]$cred_id
     )
-    $xml = """
+
+    $xml = @"
 <com.cloudbees.plugins.credentials.impl.StringCredentialsImpl>
   <scope>GLOBAL</scope>
   <id>$cred_id</id>
   <description>$provider token</description>
   <secret>$token</secret>
 </com.cloudbees.plugins.credentials.impl.StringCredentialsImpl>
-"""
+"@
     $tempPath = "$env:TEMP\${cred_id}.xml"
     $xml | Out-File -FilePath $tempPath -Encoding utf8
     Upload-File -localPath $tempPath -remotePath "/tmp/${cred_id}.xml"
