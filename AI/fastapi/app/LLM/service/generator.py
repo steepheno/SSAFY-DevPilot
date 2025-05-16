@@ -75,7 +75,7 @@ chain = prompt | llm | StrOutputParser()
 
 chat_histories: Dict[str, List[Dict[str, str]]] = {}
 
-def generate_chat_response(session_id: str, question: str) -> str:
+async def  generate_chat_response(session_id: str, question: str) -> str:
     history = chat_histories.get(session_id, [])
 
     # RAG 검색
@@ -89,7 +89,7 @@ def generate_chat_response(session_id: str, question: str) -> str:
     elif not context:
         response = "죄송합니다. 해당 내용을 찾을 수 없습니다."
     else:
-        response = chain.invoke({
+        response = await chain.invoke({
             "context": context,
             "chat_history": history_str,
             "question": question
