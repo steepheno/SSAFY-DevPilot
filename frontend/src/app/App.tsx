@@ -3,6 +3,8 @@ import './styles/App.css';
 import { createBrowserRouter, Outlet } from 'react-router-dom';
 import PageLayout from '@/widgets/PageLayout';
 import {
+  LoginPage,
+  InitialPage,
   MainPage,
   NewBuildPage,
   DockerSettings,
@@ -14,6 +16,19 @@ import BuildList from '@/pages/buildLog/ui/BuildList';
 import BuildDetail from '@/pages/buildLog/ui/BuildDetail';
 
 const Router = createBrowserRouter([
+  {
+    path: '/login',
+    children: [
+      {
+        path: '',
+        element: <LoginPage />,
+      },
+      {
+        path: 'new',
+        element: <InitialPage />,
+      },
+    ],
+  },
   {
     path: '/',
     element: <PageLayout />,
