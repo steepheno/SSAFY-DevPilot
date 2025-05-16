@@ -204,6 +204,11 @@ instance.save()
 }
 
 function Register-GitCredentials($provider, $token, $cred_id) {
+    param (
+        [string]$provider,
+        [string]$token,
+        [string]$cred_id
+    )
     $xml = """
 <com.cloudbees.plugins.credentials.impl.StringCredentialsImpl>
   <scope>GLOBAL</scope>
@@ -216,7 +221,7 @@ function Register-GitCredentials($provider, $token, $cred_id) {
     $xml | Out-File -FilePath $tempPath -Encoding utf8
     Upload-File -localPath $tempPath -remotePath "/tmp/${cred_id}.xml"
 
-    Invoke-Remote "java -jar $CliJarPath -s http://localhost:$JenkinsPort -auth admin:$JenkinsPassword create-credentials-by-xml system::system::jenkins _ < /tmp/${cred_id}.xml"
+    Invoke-Remote "java -jar /tmp/jenkins-cli.jar -s http://localhost:$($Server.jenkins_port) -auth admin:$env:JENKINS_PASSWORD create-credentials-by-xml system::system::jenkins _ < /tmp/${provider}_token.xml"
 
     Log "$provider 자격 증명 등록 완료: $cred_id"
 }
