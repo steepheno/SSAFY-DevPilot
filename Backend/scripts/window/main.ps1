@@ -249,6 +249,18 @@ function Main
 
                 try
                 {
+                    Log "[Jenkins] JDK 및 NodeJS 도구 설정 시작"
+                    Configure-JenkinsTools
+                    Log "[Jenkins] JDK 및 NodeJS 도구 설정 완료"
+                }
+                catch
+                {
+                    Log "[Jenkins] 도구 설정 중 오류 발생: $_"
+                    Log "오류를 무시하고 계속 진행합니다."
+                }
+
+                try
+                {
                     Log "[Jenkins] 보안 설정 시작"
                     Setup-SecurityOptions
                     Log "[Jenkins] 보안 설정 완료"

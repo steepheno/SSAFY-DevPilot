@@ -50,7 +50,8 @@ function Install-JenkinsPlugins() {
         "credentials:1254.vb_a_60f3e5df75",
         "plain-credentials:143.v1b_df8b_d3b_e48",
         "credentials-binding:657.v2b_19db_7d6e6d",
-        "sse-gateway:1.28"
+        "sse-gateway:1.28",
+        "nodejs:1.5.1"  # NodeJS 플러그인 추가
     )
 
     foreach ($plugin in $plugins) {
@@ -60,22 +61,37 @@ function Install-JenkinsPlugins() {
 
     Invoke-Remote "sudo systemctl restart jenkins"
     Log "[Jenkins] 플러그인 설치 완료"
+
+    # Jenkins 재시작 후 완전히 로딩될 때까지 대기
+    Log "[Jenkins] Jenkins 재시작 중... 서비스가 완전히 로드될 때까지 대기합니다."
+    $ready = $false
+    $retries = 30
+    for ($i = 0; $i -lt $retries; $i++) {
+        $status = Invoke-Remote "curl -s -o /dev/null -w '%{http_code}' http://localhost:$JenkinsPort/"
+        if ($status -eq "200" -or $status -eq "403") {
+            $ready = $true
+            Log "[Jenkins] Jenkins가 준비되었습니다."
+            break
+        }
+        Log "[Jenkins] Jenkins가 아직 준비되지 않았습니다... ($i/$retries)"
+        Start-Sleep -Seconds 10
+    }
+
+    if (-not $ready) {
+        ErrorExit "Jenkins가 시간 내에 준비되지 않았습니다."
+    }
 }
 
-function Configure-JenkinsUser
-{
+function Configure-JenkinsUser() {
     Log "[Jenkins] 사용자 구성 시작"
 
     # Jenkins가 완전히 시작될 때까지 대기
     $retries = 30
     $ready = $false
-    for ($i = 0; $i -lt $retries; $i++)
-    {
-        try
-        {
-            $status = Invoke-Remote "curl -s -o /dev/null -w '%{http_code}' http://localhost:$( $Server.jenkins_port )/login" -Silent
-            if ($status -eq "200" -or $status -eq "403")
-            {
+    for ($i = 0; $i -lt $retries; $i++) {
+        try {
+            $status = Invoke-Remote "curl -s -o /dev/null -w '%{http_code}' http://localhost:$JenkinsPort/login"
+            if ($status -eq "200" -or $status -eq "403") {
                 $ready = $true
                 break
             }
@@ -86,54 +102,41 @@ function Configure-JenkinsUser
         Start-Sleep -Seconds 10
     }
 
-    if (-not $ready)
-    {
+    if (-not $ready) {
         Log "[Jenkins] 시간 초과: Jenkins UI에 접근할 수 없습니다. 수동 설정이 필요할 수 있습니다."
         return
     }
 
     # 초기 비밀번호 가져오기
     Log "[Jenkins] 초기 비밀번호 확인 중..."
-    $initialPassword = Invoke-Remote "sudo cat /var/lib/jenkins/secrets/initialAdminPassword 2>/dev/null || echo ''" -Silent
+    $initialPassword = Invoke-Remote "sudo cat /var/lib/jenkins/secrets/initialAdminPassword 2>/dev/null || echo ''"
 
-    if (-not $initialPassword)
-    {
+    if (-not $initialPassword) {
         Log "[Jenkins] 초기 비밀번호를 찾을 수 없습니다. 이미 초기 설정이 완료되었거나 파일 위치가 다를 수 있습니다."
 
         # 대체 방법: 환경 변수로 설정된 비밀번호를 사용해 로그인 시도
         Log "[Jenkins] 제공된 비밀번호로 로그인을 시도합니다..."
-        $loginResult = Invoke-Remote "curl -s -I -u admin:$env:JENKINS_PASSWORD http://localhost:$( $Server.jenkins_port )/api/json" -Silent
+        $loginResult = Invoke-Remote "curl -s -I -u admin:$JenkinsPassword http://localhost:$JenkinsPort/api/json"
 
-        if ($loginResult -match "200 OK")
-        {
+        if ($loginResult -match "200 OK") {
             Log "[Jenkins] 제공된 비밀번호로 로그인 성공. 추가 설정이 필요하지 않습니다."
             return
         }
-        else
-        {
+        else {
             Log "[Jenkins] 제공된 비밀번호로 로그인 실패. 웹 UI를 통해 초기 설정을 완료해주세요."
-            Log "[Jenkins] URL: http://$( $Server.host ):$( $Server.jenkins_port )"
+            Log "[Jenkins] URL: http://$env:EC2_HOST:$JenkinsPort"
             return
         }
     }
 
     Log "[Jenkins] 초기 비밀번호 찾음: $initialPassword"
 
-    # 초기 설정 건너뛰기 시도 (jenkins.install.runSetupWizard=false)
+    # 초기 설정 건너뛰기 시도
     Log "[Jenkins] 초기 설정 마법사 건너뛰기 시도..."
-    Invoke-Remote "curl -s -X POST -d 'script=jenkins.model.Jenkins.instance.setInstallState(jenkins.install.InstallState.INITIAL_SETUP_COMPLETED)' http://localhost:$( $Server.jenkins_port )/scriptText --user admin:$initialPassword" -Silent
+    Invoke-Remote "curl -s -X POST -d 'script=jenkins.model.Jenkins.instance.setInstallState(jenkins.install.InstallState.INITIAL_SETUP_COMPLETED)' http://localhost:$JenkinsPort/scriptText --user admin:$initialPassword"
 
     # 새 관리자 비밀번호 설정
     Log "[Jenkins] 새 관리자 비밀번호 설정 중..."
-
-    # CLI JAR 파일 경로 확인
-    $cliPath = Invoke-Remote "find /tmp -name jenkins-cli.jar 2>/dev/null || echo ''" -Silent
-    if (-not $cliPath)
-    {
-        Log "[Jenkins] jenkins-cli.jar 파일을 찾을 수 없습니다. 다운로드합니다..."
-        Invoke-Remote "wget -q -O /tmp/jenkins-cli.jar http://localhost:$( $Server.jenkins_port )/jnlpJars/jenkins-cli.jar" -Silent
-        $cliPath = "/tmp/jenkins-cli.jar"
-    }
 
     # Groovy 스크립트 생성
     Log "[Jenkins] 비밀번호 변경 스크립트 생성..."
@@ -144,7 +147,7 @@ import hudson.security.*
 
 def instance = Jenkins.getInstance()
 def hudsonRealm = new HudsonPrivateSecurityRealm(false)
-hudsonRealm.createAccount('admin', '$env:JENKINS_PASSWORD')
+hudsonRealm.createAccount('admin', '$JenkinsPassword')
 instance.setSecurityRealm(hudsonRealm)
 instance.save()
 println('Admin user created with new password')
@@ -153,33 +156,126 @@ EOL
 
     # Groovy 스크립트 실행
     Log "[Jenkins] 비밀번호 변경 스크립트 실행..."
-    $changeResult = Invoke-Remote "java -jar $cliPath -s http://localhost:$( $Server.jenkins_port ) -auth admin:$initialPassword groovy = < /tmp/change_password.groovy" -Silent
+    $changeResult = Invoke-Remote "java -jar $CliJarPath -s http://localhost:$JenkinsPort -auth admin:$initialPassword groovy = < /tmp/change_password.groovy"
 
-    if ($changeResult -match "Admin user created")
-    {
+    if ($changeResult -match "Admin user created") {
         Log "[Jenkins] 관리자 비밀번호 변경 성공: $changeResult"
     }
-    else
-    {
+    else {
         Log "[Jenkins] 관리자 비밀번호 변경 시도 결과: $changeResult"
         Log "[Jenkins] 비밀번호 변경에 실패했을 수 있습니다. 웹 UI를 통해 직접 설정해주세요."
     }
 
     # 인증 확인
     Log "[Jenkins] 새 비밀번호로 인증 확인 중..."
-    $authCheck = Invoke-Remote "curl -s -I -u admin:$env:JENKINS_PASSWORD http://localhost:$( $Server.jenkins_port )/api/json" -Silent
+    $authCheck = Invoke-Remote "curl -s -I -u admin:$JenkinsPassword http://localhost:$JenkinsPort/api/json"
 
-    if ($authCheck -match "200 OK")
-    {
+    if ($authCheck -match "200 OK") {
         Log "[Jenkins] 새 관리자 비밀번호로 인증 성공"
     }
-    else
-    {
+    else {
         Log "[Jenkins] 새 관리자 비밀번호로 인증 실패: $authCheck"
         Log "[Jenkins] 웹 UI를 통해 직접 초기 설정을 완료해주세요."
     }
 
     Log "[Jenkins] 사용자 구성 완료"
+}
+
+function Configure-JenkinsTools() {
+    Log "[Jenkins] JDK 및 NodeJS 도구 설정 시작..."
+
+    # JDK 설정 Groovy 스크립트
+    $jdkGroovy = @"
+import jenkins.model.*
+import hudson.model.*
+import hudson.tools.*
+import hudson.plugins.jdk_tool.*
+
+def jenkins = Jenkins.getInstance()
+def descriptor = jenkins.getDescriptor(JDK.class)
+def installations = descriptor.getInstallations()
+
+// 기존 JDK17 설치 확인 및 제거
+def jdk17Exists = false
+def newInstallations = []
+for (inst in installations) {
+    if (inst.getName() == "JDK17") {
+        jdk17Exists = true
+    } else {
+        newInstallations.add(inst)
+    }
+}
+
+// JDK17이 없으면 추가
+if (!jdk17Exists) {
+    def installer = new JDKInstaller("jdk-17", true)
+    def installProps = new InstallSourceProperty([installer])
+    def jdk17 = new JDK("JDK17", null, [installProps])
+    newInstallations.add(jdk17)
+
+    descriptor.setInstallations(newInstallations.toArray(new JDK[newInstallations.size()]))
+    jenkins.save()
+    println("JDK17 설정이 추가되었습니다.")
+} else {
+    println("JDK17 설정이 이미 존재합니다.")
+}
+"@
+
+    # NodeJS 설정 Groovy 스크립트
+    $nodeJSGroovy = @"
+import jenkins.model.*
+import hudson.tools.*
+import jenkins.plugins.nodejs.tools.*
+
+def jenkins = Jenkins.getInstance()
+def descriptor = jenkins.getDescriptorByType(NodeJSInstallation.DescriptorImpl.class)
+def installations = descriptor.getInstallations()
+
+// 기존 NodeJS 설치 확인 및 제거
+def nodeJSExists = false
+def newInstallations = []
+for (inst in installations) {
+    if (inst.getName() == "nodejs") {
+        nodeJSExists = true
+    } else {
+        newInstallations.add(inst)
+    }
+}
+
+// NodeJS가 없으면 추가
+if (!nodeJSExists) {
+    def installer = new NodeJSInstaller("16.17.0", "", NodeJSInstaller.NodeJSInstallerId.DEFAULT)
+    def installProps = new InstallSourceProperty([installer])
+    def nodeJS = new NodeJSInstallation("nodejs", "", [installProps])
+    newInstallations.add(nodeJS)
+
+    descriptor.setInstallations(newInstallations.toArray(new NodeJSInstallation[newInstallations.size()]))
+    jenkins.save()
+    println("NodeJS 설정이 추가되었습니다.")
+} else {
+    println("NodeJS 설정이 이미 존재합니다.")
+}
+"@
+
+    # 임시 파일에 저장
+    $tempJDKScript = "$env:TEMP\jdk_config.groovy"
+    $tempNodeJSScript = "$env:TEMP\nodejs_config.groovy"
+
+    $jdkGroovy | Out-File -FilePath $tempJDKScript -Encoding utf8
+    $nodeJSGroovy | Out-File -FilePath $tempNodeJSScript -Encoding utf8
+
+    # 원격 서버로 업로드
+    Upload-File -localPath $tempJDKScript -remotePath "/tmp/jdk_config.groovy"
+    Upload-File -localPath $tempNodeJSScript -remotePath "/tmp/nodejs_config.groovy"
+
+    # Jenkins CLI를 통해 실행
+    $jdkResult = Invoke-Remote "java -jar $CliJarPath -s http://localhost:$JenkinsPort -auth admin:$JenkinsPassword groovy = < /tmp/jdk_config.groovy"
+    Log "[Jenkins] JDK 설정 결과: $jdkResult"
+
+    $nodeResult = Invoke-Remote "java -jar $CliJarPath -s http://localhost:$JenkinsPort -auth admin:$JenkinsPassword groovy = < /tmp/nodejs_config.groovy"
+    Log "[Jenkins] NodeJS 설정 결과: $nodeResult"
+
+    Log "[Jenkins] 도구 설정 완료"
 }
 
 function Setup-SecurityOptions() {
@@ -222,7 +318,7 @@ function Register-GitCredentials {
     $xml | Out-File -FilePath $tempPath -Encoding utf8
     Upload-File -localPath $tempPath -remotePath "/tmp/${cred_id}.xml"
 
-    Invoke-Remote "java -jar /tmp/jenkins-cli.jar -s http://localhost:$($Server.jenkins_port) -auth admin:$env:JENKINS_PASSWORD create-credentials-by-xml system::system::jenkins _ < /tmp/${provider}_token.xml"
+    Invoke-Remote "java -jar $CliJarPath -s http://localhost:$JenkinsPort -auth admin:$JenkinsPassword create-credentials-by-xml system::system::jenkins _ < /tmp/${cred_id}.xml"
 
     Log "$provider 자격 증명 등록 완료: $cred_id"
 }
