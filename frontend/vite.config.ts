@@ -4,7 +4,11 @@ import svgr from 'vite-plugin-svgr';
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: './',
   plugins: [react(), svgr()],
+  build: {
+    outDir: 'dist/app',
+  },
   resolve: {
     alias: {
       '@': '/src',

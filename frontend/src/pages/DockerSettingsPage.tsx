@@ -3,7 +3,6 @@ import BuildInfo from '@/features/dockerfileSettings/ui/BuildInfo.tsx';
 import { checkInpuValidation } from '@/features/dockerfileSettings/lib/checkInputValidation.ts';
 import ProjectEnvironment from '@/features/dockerfileSettings/ui/ProjectEnvironment.tsx';
 import MySqlInfo from '@/features/dockerfileSettings/ui/MySqlInfo.tsx';
-import ProjectNameInput from './newBuildPage/ui/ProjectNameInput';
 // import DockerfileConfig from '@/entities/dockerFile/types';
 // import { generateDockerfile } from '@/entities/dockerFile/api';
 // import { useNavigate } from 'react-router-dom';
@@ -67,14 +66,17 @@ const DockerfileSettings = () => {
 
   return (
     <div>
-      <ProjectNameInput />
-      {/* <h2 className="mb-5">Dockerfile 설정</h2> */}
+      <h2 className="mb-5">Dockerfile 설정</h2>
+
       {/* 빌드 정보 입력 */}
       <BuildInfo />
+
       {/* 프로젝트 환경 선택 */}
       <ProjectEnvironment />
+
       {/* MySQL 설정 */}
       <MySqlInfo />
+
       {/* 빌드 버튼 */}
       <div className="flex justify-center">
         <button
