@@ -38,7 +38,10 @@ const ProjectEnvironment = () => {
 
       {/* 빌드 도구 선택 (Gradle or Maven) */}
       <div className="mt-3 flex flex-col space-y-2">
-        <p>Spring 빌드 환경</p>
+        <div className="flex">
+          <span className="mr-1 text-red-500">*</span>
+          <p>Spring 빌드 환경</p>
+        </div>
         <div className="flex gap-20 pb-5">
           <div className="flex items-center space-x-2">
             <input
