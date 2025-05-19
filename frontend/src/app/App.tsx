@@ -1,8 +1,7 @@
 import './styles/App.css';
 
-import { createBrowserRouter, Outlet } from 'react-router-dom';
+import { createHashRouter, Outlet } from 'react-router-dom';
 import PageLayout from '@/widgets/PageLayout';
-import BuildFormLayout from '@/widgets/BuildFormLayout';
 import {
   LoginPage,
   InitialPage,
@@ -15,7 +14,7 @@ import {
 import BuildList from '@/pages/buildLog/ui/BuildList';
 import BuildDetail from '@/pages/buildLog/ui/BuildDetail';
 
-const Router = createBrowserRouter([
+const Router = createHashRouter([
   {
     path: '/login',
     children: [
