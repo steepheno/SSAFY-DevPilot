@@ -2,6 +2,7 @@ import './styles/App.css';
 
 import { createHashRouter, Outlet } from 'react-router-dom';
 import PageLayout from '@/widgets/PageLayout';
+import BuildFormLayout from '@/widgets/BuildFormLayout';
 import {
   LoginPage,
   InitialPage,
