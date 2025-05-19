@@ -1,12 +1,12 @@
 import './styles/App.css';
 
-import { createBrowserRouter, Outlet } from 'react-router-dom';
+import { createHashRouter, Outlet } from 'react-router-dom';
 import PageLayout from '@/widgets/PageLayout';
-import BuildFormLayout from '@/widgets/BuildFormLayout';
 import {
   LoginPage,
   InitialPage,
   MainPage,
+  NewBuildPage,
   DockerSettings,
   BuildInfoPage,
   BuildLogPage,
@@ -15,7 +15,7 @@ import {
 import BuildList from '@/pages/buildLog/ui/BuildList';
 import BuildDetail from '@/pages/buildLog/ui/BuildDetail';
 
-const Router = createBrowserRouter([
+const Router = createHashRouter([
   {
     path: '/login',
     children: [
@@ -41,17 +41,16 @@ const Router = createBrowserRouter([
       {
         path: 'new',
         handle: { breadcrumb: '새 빌드' },
-        element: <BuildFormLayout />,
+        element: <NewBuildPage />,
         children: [
           {
-            index: true,
             path: 'repository',
-            handle: { breadcrumb: 'Git 설정', buildStep: 1, title: '저장소 설정' },
+            handle: { breadcrumb: 'Git 설정' },
             element: <RepositorySettingsPage />,
           },
           {
             path: 'project',
-            handle: { breadcrumb: '빌드 파일 생성', buildStep: 2, title: '빌드 파일 생성' },
+            handle: { breadcrumb: '빌드 파일 생성' },
             element: <DockerSettings />,
           },
         ],
