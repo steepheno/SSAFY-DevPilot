@@ -28,7 +28,7 @@ export default function RepositorySettingsPage() {
       {/* 프로젝트 이름 */}
       <form ref={formRef} onSubmit={handleSubmit}>
         <ProjectNameInput />
-        <div className="mb-4 flex flex-col gap-2 rounded-[10px] bg-gray-100 px-5 py-5">
+        <div className="mb-4 mt-3 flex flex-col gap-2 rounded-[10px] bg-gray-100 px-5 py-5">
           <p className="text-xl font-bold">저장소 정보</p>
           {/* 저장소 폼 */}
           <RepositoryForm />
