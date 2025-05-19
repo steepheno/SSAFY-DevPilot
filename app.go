@@ -49,9 +49,14 @@ func (a *App) StartJar() error {
 	javaPath := findJava()
 	fmt.Println("Using Java at path: ", javaPath)
 
+	const SERVER_HOST = "127.0.0.1"
 	const SERVER_PORT = 3000
+
 	// app에 상주할 Java process
-	cmd := exec.Command(javaPath, "-jar", jarPath, fmt.Sprintf("--server.port=%d", SERVER_PORT))
+	cmd := exec.Command(javaPath, "-jar", jarPath,
+		fmt.Sprintf("--server.address=%s", SERVER_HOST),
+		fmt.Sprintf("--server.port=%d", SERVER_PORT),
+	)
 	cmd.Dir = tmpDir
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
