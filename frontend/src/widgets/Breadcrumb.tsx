@@ -1,4 +1,4 @@
-import { useMatches, Params, Link, UIMatch } from "react-router";
+import { useMatches, Params, Link, UIMatch } from 'react-router-dom';
 
 // breadcrumb 핸들러 타입: 문자열 또는 인자를 받아 문자열을 반환
 type BreadcrumbContent = string | ((args: { params: Params }) => string);
@@ -8,11 +8,8 @@ export interface Handle {
 }
 
 // breadcrumb 핸들러를 실행해 label 문자열을 반환
-function resolveBreadcrumb(
-  breadcrumb: BreadcrumbContent,
-  params: Params,
-): string {
-  return typeof breadcrumb === "function" ? breadcrumb({ params }) : breadcrumb;
+function resolveBreadcrumb(breadcrumb: BreadcrumbContent, params: Params): string {
+  return typeof breadcrumb === 'function' ? breadcrumb({ params }) : breadcrumb;
 }
 
 function Breadcrumbs() {
@@ -23,9 +20,7 @@ function Breadcrumbs() {
   // 매칭된 UIMatch를 label로 매핑
   // breadcrumb 핸들러가 정의된 라우트만 필터링& breadcrumb 라벨과 경로를 매핑
   const crumbs = matches
-    .filter((m): m is UIMatch<Handle, Params> & { handle: Handle } =>
-      Boolean(m.handle?.breadcrumb),
-    )
+    .filter((m): m is UIMatch<Handle, Params> & { handle: Handle } => Boolean(m.handle?.breadcrumb))
     .map((m) => ({
       to: m.pathname,
       label: resolveBreadcrumb(m.handle.breadcrumb, m.params),
