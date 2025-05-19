@@ -12,7 +12,7 @@ const tagChoices: Tag[] = [
 
 const FormField = ({ label, children }: { label: string; children: React.ReactNode }) => (
   <div className="mt-3 space-y-2">
-    <span className="block text-sm font-medium text-gray-700">{label}</span>
+    <span className="text-m block font-medium text-gray-700">{label}</span>
     <div className="w-full">{children}</div>
   </div>
 );
@@ -38,8 +38,7 @@ const RepositoryForm: React.FC = () => {
   };
 
   return (
-    <div className="mt-5">
-      <span className="text-xl font-bold">저장소 정보</span>
+    <>
       <div className="flex gap-10">
         <FormField label="원격 저장소 주소">
           <input
@@ -53,16 +52,20 @@ const RepositoryForm: React.FC = () => {
         <FormField label="빌드 브랜치">
           <TagInput
             minTags={1}
+            required
             tags={selectedTags}
             setTags={(newTags: any) => {
               onTagsChange(newTags);
             }}
             placeholder="브랜치 추가..."
             styleClasses={{
-              input: 'max-w-80 min-w-20 h-10 md:max-w-[350px]',
-              inlineTagsContainer: 'min-w-20 bg-white py-0 gap-2',
+              tagList: {
+                container: 'p-0',
+              },
+              input: 'max-w-80 p-0 min-w-20 h-10 md:max-w-[350px]',
+              inlineTagsContainer: 'min-w-20 bg-white p-0 gap-2',
               autoComplete: {
-                popoverContent: 'bg-white',
+                popoverContent: 'bg-white p-0',
               },
               tag: {
                 body: 'bg-gray-100 p-1 rounded-md text-gray-600',
@@ -96,7 +99,7 @@ const RepositoryForm: React.FC = () => {
           />
         </FormField>
       </div>
-    </div>
+    </>
   );
 };
 
