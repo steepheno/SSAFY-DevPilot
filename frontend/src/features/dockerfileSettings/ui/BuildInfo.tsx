@@ -1,28 +1,27 @@
+import FolderNameInput from '@/features/validation/FolderNameInput';
+import PortNumberInput from '@/features/validation/PortNumberInput';
 import { useFormStore } from '@/shared/store';
 
 const BuildInfo = () => {
   const { backendConfig, setBackendConfig, frontendConfig, setFrontendConfig } = useFormStore();
 
   return (
-    <div className="mb-10 rounded-[10px] bg-gray-100 px-5 py-5">
+    <div className="mb-10 mt-3 rounded-[10px] bg-gray-100 px-5 py-6">
       <p className="text-xl font-bold">빌드 정보</p>
       <p className="mt-5 font-bold">백엔드</p>
       <div className="mt-2 flex justify-between">
         <div className="flex">
           <p>폴더명</p>
-          <input
-            className="ml-5 h-[25px] rounded border px-2"
+          <FolderNameInput
             value={backendConfig.backendDir}
-            onChange={(e) => setBackendConfig({ backendDir: e.target.value })}
+            onChange={(e) => setBackendConfig({ ...backendConfig, backendDir: e.target.value })}
           />
         </div>
         <div className="flex">
           <p>포트번호</p>
-          <input
-            className="ml-5 h-[25px] rounded border px-2"
-            type="number"
+          <PortNumberInput
             value={backendConfig.backendPort}
-            onChange={(e) => setBackendConfig({ backendPort: Number(e.target.value) })}
+            onChange={(value) => setBackendConfig({ ...backendConfig, backendPort: value })}
           />
         </div>
         <div className="flex">
@@ -44,19 +43,16 @@ const BuildInfo = () => {
       <div className="mt-2 flex justify-between">
         <div className="flex">
           <p>폴더명</p>
-          <input
-            className="ml-5 h-[25px] rounded border px-2"
+          <FolderNameInput
             value={frontendConfig.frontendDir}
-            onChange={(e) => setFrontendConfig({ frontendDir: e.target.value })}
+            onChange={(e) => setFrontendConfig({ ...frontendConfig, frontendDir: e.target.value })}
           />
         </div>
         <div className="flex">
           <p>포트번호</p>
-          <input
-            className="ml-5 h-[25px] rounded border px-2"
-            type="number"
+          <PortNumberInput
             value={frontendConfig.frontendPort}
-            onChange={(e) => setFrontendConfig({ frontendPort: Number(e.target.value) })}
+            onChange={(value) => setFrontendConfig({ ...frontendConfig, frontendPort: value })}
           />
         </div>
         <div className="flex">
