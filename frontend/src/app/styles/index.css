@@ -68,6 +68,10 @@
   * {
     @apply border-border;
   }
+  html,
+  body {
+    @apply overscroll-none;
+  }
   body {
     @apply bg-background text-foreground;
   }
