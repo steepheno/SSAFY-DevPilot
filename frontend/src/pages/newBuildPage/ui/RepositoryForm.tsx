@@ -128,8 +128,7 @@ const RepositoryForm = () => {
   };
 
   return (
-    <div className="mt-5">
-      <span className="text-xl font-bold">저장소 정보</span>
+    <>
       <div className="flex gap-10">
         <FormField
           label="원격 저장소 주소"
@@ -156,6 +155,7 @@ const RepositoryForm = () => {
         >
           <TagInput
             minTags={1}
+            required
             tags={selectedTags}
             setTags={(newTags: any) => {
               onTagsChange(newTags);
@@ -171,7 +171,7 @@ const RepositoryForm = () => {
                 isTry.branches && errors.branches ? 'border-red-500' : ''
               }`,
               autoComplete: {
-                popoverContent: 'bg-white',
+                popoverContent: 'bg-white p-0',
               },
               tag: {
                 body: 'bg-gray-100 p-1 ml-2 rounded-md text-gray-600',
@@ -222,7 +222,7 @@ const RepositoryForm = () => {
           />
         </FormField>
       </div>
-    </div>
+    </>
   );
 };
 

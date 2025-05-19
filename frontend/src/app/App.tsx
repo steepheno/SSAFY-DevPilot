@@ -6,7 +6,6 @@ import {
   LoginPage,
   InitialPage,
   MainPage,
-  NewBuildPage,
   DockerSettings,
   BuildInfoPage,
   BuildLogPage,
@@ -41,16 +40,17 @@ const Router = createHashRouter([
       {
         path: 'new',
         handle: { breadcrumb: '새 빌드' },
-        element: <NewBuildPage />,
+        element: <BuildFormLayout />,
         children: [
           {
+            index: true,
             path: 'repository',
-            handle: { breadcrumb: 'Git 설정' },
+            handle: { breadcrumb: 'Git 설정', buildStep: 1, title: '저장소 설정' },
             element: <RepositorySettingsPage />,
           },
           {
             path: 'project',
-            handle: { breadcrumb: '빌드 파일 생성' },
+            handle: { breadcrumb: '빌드 파일 생성', buildStep: 2, title: '빌드 파일 생성' },
             element: <DockerSettings />,
           },
         ],
