@@ -1,7 +1,7 @@
-import { useFormStore } from '@/shared/store';
-import { ChevronRight } from 'lucide-react';
-import RepositoryForm from '@/pages/newBuildPage/ui/RepositoryForm.tsx';
-import { useNavigate } from 'react-router-dom';
+import { useFormStore } from "@/shared/store";
+import { ChevronRight } from "lucide-react";
+import RepositoryForm from "@/pages/newBuildPage/ui/RepositoryForm.tsx";
+import { useNavigate } from "react-router-dom";
 
 export default function RepositorySettingsPage() {
   const { projectConfig, setProjectConfig } = useFormStore();
@@ -19,9 +19,13 @@ export default function RepositorySettingsPage() {
             <input
               className="mt-3 h-10 rounded border px-2"
               value={projectConfig.projectName}
-              onChange={(e) => setProjectConfig({ projectName: e.target.value })}
+              onChange={(e) =>
+                setProjectConfig({ projectName: e.target.value })
+              }
               onKeyDown={(e) =>
-                ['Enter', 'Escape'].includes(e.key) ? e.currentTarget.blur() : undefined
+                ["Enter", "Escape"].includes(e.key)
+                  ? e.currentTarget.blur()
+                  : undefined
               }
             />
           </div>
@@ -36,10 +40,10 @@ export default function RepositorySettingsPage() {
         onClick={() => {
           // 프로젝트 제목 검증
           if (!projectConfig.projectName) {
-            alert('프로젝트 이름을 입력해주세요.');
+            alert("프로젝트 이름을 입력해주세요.");
             return;
           }
-          navigate('/new/project');
+          navigate("/new/project");
         }}
       >
         다음
