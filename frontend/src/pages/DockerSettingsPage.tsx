@@ -71,10 +71,13 @@ const DockerfileSettings = () => {
       {/* <h2 className="mb-5">Dockerfile 설정</h2> */}
       {/* 빌드 정보 입력 */}
       <BuildInfo />
+
       {/* 프로젝트 환경 선택 */}
       <ProjectEnvironment />
+
       {/* MySQL 설정 */}
       <MySqlInfo />
+
       {/* 빌드 버튼 */}
       <div className="flex justify-center">
         <button
