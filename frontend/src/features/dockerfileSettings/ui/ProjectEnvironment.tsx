@@ -7,7 +7,6 @@ const ProjectEnvironment = () => {
   // Gradle, Maven 선택 라디오 버튼 핸들러
   const handleBuildTool = (value: 'gradle' | 'maven') => {
     setProjectConfig({
-      useGradle: value === 'gradle',
       useMaven: value === 'maven',
     });
   };
@@ -15,21 +14,18 @@ const ProjectEnvironment = () => {
   // 나머지 체크박스 핸들러
   const handleCheckbox =
     (key: keyof typeof projectConfig) => (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (key === 'useGradle' && e.target.checked) {
+      if (key === 'useMaven' && e.target.checked) {
         // Gradle 선택하면 Maven 해제
         setProjectConfig({
-          useGradle: true,
-          useMaven: false,
-        });
-      } else if (key === 'useMaven' && e.target.checked) {
-        // Maven 선택하면 Gradle 해제
-        setProjectConfig({
-          useGradle: false,
           useMaven: true,
         });
       } else {
-        setProjectConfig({ [key]: e.target.checked });
+        // Maven 선택하면 Gradle 해제
+        setProjectConfig({
+          useMaven: false,
+        });
       }
+      setProjectConfig({ [key]: e.target.checked });
     };
 
   return (
@@ -49,7 +45,7 @@ const ProjectEnvironment = () => {
               type="radio"
               name="buildTool"
               className="cursor-pointer"
-              checked={projectConfig.useGradle}
+              checked={!projectConfig.useMaven}
               onChange={() => handleBuildTool('gradle')}
             />
             <label htmlFor="gradle" className="cursor-pointer">
