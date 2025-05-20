@@ -41,17 +41,23 @@ const RepositoryForm = () => {
 
   // 각 필드별 에러 상태
   const [errors, setErrors] = useState({
-    gitRepositoryUrl: '',
-    gitCredentialsId: '',
+    gitUserName: '',
     gitToken: '',
+    gitCredentialsId: '',
+    gitPersonalToken: '',
+    gitPersonalCredentialsId: '',
+    gitRepoUrl: '',
     branches: '',
   });
 
   // 필드 상호작용 여부 추적
   const [isTry, setIsTry] = useState({
-    gitRepositoryUrl: false,
-    gitCredentialsId: false,
+    gitUserName: false,
     gitToken: false,
+    gitCredentialsId: false,
+    gitPersonalToken: false,
+    gitPersonalCredentialsId: false,
+    gitRepoUrl: false,
     branches: false,
   });
 
@@ -66,12 +72,18 @@ const RepositoryForm = () => {
       // 문자열 필드에 대한 유효성 검사
       if (!value || (typeof value === 'string' && value.trim() === '')) {
         switch (name) {
-          case 'gitRepositoryUrl':
-            return '원격 저장소 주소를 입력해주세요.';
-          case 'gitCredentialsId':
-            return '인증 정보를 입력해주세요.';
+          case 'gitUserName':
+            return 'Git 아이디를 입력해주세요.';
           case 'gitToken':
-            return 'Gitlab 토큰을 입력해주세요.';
+            return '프로젝트의 Git 토큰값을 입력해주세요.';
+          case 'gitCredentialsId':
+            return '프로젝트의 Git 토큰 이름을 입력해주세요.';
+          case 'gitPersonalToken':
+            return '개인 Git 토큰값을 입력해주세요.';
+          case 'gitPersonalCredentialsId':
+            return '개인 Git 토큰 이름을 입력해주세요.';
+          case 'gitRepoUrl':
+            return '원격 저장소 주소를 입력해주세요.';
           default:
             return '필수 입력 항목입니다.';
         }
@@ -129,21 +141,40 @@ const RepositoryForm = () => {
 
   return (
     <>
-      <div className="flex gap-10">
+      <div>
         <FormField
-          label="원격 저장소 주소"
+          label="Git 아이디"
           required
-          error={errors.gitRepositoryUrl}
-          showError={isTry.gitRepositoryUrl && !!errors.gitRepositoryUrl}
+          error={errors.gitUserName}
+          showError={isTry.gitUserName && !!errors.gitUserName}
         >
           <input
             required
             className={`h-10 min-w-20 max-w-full rounded border-[1px] pl-2 ${
-              isTry.gitRepositoryUrl && errors.gitRepositoryUrl ? 'border-red-500' : 'border-border'
+              isTry.gitUserName && errors.gitUserName ? 'border-red-500' : 'border-border'
             }`}
-            value={repositoryConfig.gitRepositoryUrl}
-            onChange={(e) => handleFieldChange('gitRepositoryUrl', e.target.value)}
-            onBlur={(e) => handleBlur('gitRepositoryUrl', e.target.value)}
+            value={repositoryConfig.gitUserName}
+            onChange={(e) => handleFieldChange('gitUserName', e.target.value)}
+            onBlur={(e) => handleBlur('gitUserName', e.target.value)}
+          />
+        </FormField>
+      </div>
+
+      <div className="flex gap-20">
+        <FormField
+          label="원격 저장소 주소"
+          required
+          error={errors.gitRepoUrl}
+          showError={isTry.gitRepoUrl && !!errors.gitRepoUrl}
+        >
+          <input
+            required
+            className={`h-10 min-w-20 max-w-full rounded border-[1px] pl-2 ${
+              isTry.gitRepoUrl && errors.gitRepoUrl ? 'border-red-500' : 'border-border'
+            }`}
+            value={repositoryConfig.gitRepoUrl}
+            onChange={(e) => handleFieldChange('gitRepoUrl', e.target.value)}
+            onBlur={(e) => handleBlur('gitRepoUrl', e.target.value)}
           />
         </FormField>
 
@@ -187,15 +218,15 @@ const RepositoryForm = () => {
         </FormField>
       </div>
 
-      <div className="flex gap-10">
+      <div className="flex gap-20">
         <FormField
-          label="인증 정보"
+          label="프로젝트 Git 토큰 이름"
           required
           error={errors.gitCredentialsId}
           showError={isTry.gitCredentialsId && !!errors.gitCredentialsId}
         >
           <input
-            className={`h-10 min-w-20 max-w-80 rounded border-[1px] pl-2 ${
+            className={`h-10 min-w-20 max-w-full rounded border-[1px] pl-2 ${
               isTry.gitCredentialsId && errors.gitCredentialsId ? 'border-red-500' : 'border-border'
             }`}
             value={repositoryConfig.gitCredentialsId}
@@ -206,7 +237,7 @@ const RepositoryForm = () => {
         </FormField>
 
         <FormField
-          label="Gitlab 토큰"
+          label="프로젝트 Git 토큰값"
           required
           error={errors.gitToken}
           showError={isTry.gitToken && !!errors.gitToken}
@@ -219,6 +250,44 @@ const RepositoryForm = () => {
             required
             onChange={(e) => setRepositoryConfig({ gitToken: e.target.value })}
             onBlur={(e) => handleBlur('gitToken', e.target.value)}
+          />
+        </FormField>
+      </div>
+
+      <div className="flex gap-20">
+        <FormField
+          label="개인 Git 토큰 이름"
+          required
+          error={errors.gitPersonalCredentialsId}
+          showError={isTry.gitPersonalCredentialsId && !!errors.gitPersonalCredentialsId}
+        >
+          <input
+            className={`h-10 min-w-20 max-w-full rounded border-[1px] pl-2 ${
+              isTry.gitPersonalCredentialsId && errors.gitPersonalCredentialsId
+                ? 'border-red-500'
+                : 'border-border'
+            }`}
+            value={repositoryConfig.gitPersonalCredentialsId}
+            required
+            onChange={(e) => setRepositoryConfig({ gitPersonalCredentialsId: e.target.value })}
+            onBlur={(e) => handleBlur('gitPersonalCredentialsId', e.target.value)}
+          />
+        </FormField>
+
+        <FormField
+          label="개인 Gitlab 토큰값"
+          required
+          error={errors.gitPersonalToken}
+          showError={isTry.gitPersonalToken && !!errors.gitPersonalToken}
+        >
+          <input
+            className={`h-10 w-80 min-w-20 rounded border-[1px] pl-2 ${
+              isTry.gitPersonalToken && errors.gitPersonalToken ? 'border-red-500' : 'border-border'
+            }`}
+            value={repositoryConfig.gitPersonalToken}
+            required
+            onChange={(e) => setRepositoryConfig({ gitPersonalToken: e.target.value })}
+            onBlur={(e) => handleBlur('gitPersonalToken', e.target.value)}
           />
         </FormField>
       </div>
