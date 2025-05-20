@@ -7,13 +7,25 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const InitialPage = () => {
+  const [loading, setLoading] = useState(false);
+
   const [settings, setSettings] = useState<InitialSettings>({
     pemPath: '',
     ec2Host: '',
+    jenkinsPort: '',
     jenkinsPassword: '',
+    configDir: '',
   });
+  const fields = Object.keys(settings) as (keyof InitialSettings)[];
 
-  const [loading, setLoading] = useState(false);
+  const fieldPlaceholders: Record<keyof InitialSettings, string> = {
+    pemPath: 'PEM 파일 경로',
+    ec2Host: 'EC2 호스트',
+    jenkinsPort: 'Jenkins 포트',
+    jenkinsPassword: '사용할 Jenkins 패스워드',
+    configDir: '설정 디렉토리',
+  };
+
   const navigate = useNavigate();
   const { isInitialized, setIsInitialized } = useConfigStore();
 
@@ -27,9 +39,10 @@ const InitialPage = () => {
   };
 
   // 유효성 검사
-  const validateForm = () => {
-    const { pemPath, ec2Host, jenkinsPassword } = settings;
-    if (!pemPath.trim() || !ec2Host.trim() || !jenkinsPassword.trim()) {
+  const validateForm = (): boolean => {
+    const hasEmpty = fields.some((key) => settings[key].trim() === '');
+
+    if (hasEmpty) {
       alert('모든 필드를 입력해주세요.');
       return false;
     }
@@ -51,8 +64,11 @@ const InitialPage = () => {
     try {
       // API 호출
       const response = await postInitialSettings(settings);
+      console.log(settings);
       if (response === true) {
-        alert('다운로드 완료! 아래 발급된 Password를 반드시 저장해주세요.\nPassword: aaa');
+        alert(
+          `초기 설정이 완료되었습니다. \n아래 발급된 Password를 반드시 저장해주세요.\nPassword: ${settings.jenkinsPassword}`,
+        );
         setIsInitialized(response);
       }
     } catch (error) {
@@ -63,53 +79,46 @@ const InitialPage = () => {
   };
 
   const inputStyle = `
-    [&_input]:h-[35px]
-    [&_input]:rounded-md
-    [&_input]:border-none
-    [&_input]:bg-white
-    [&_input]:px-4
-    [&_input]:py-1.5
-    [&_input]:text-sm
-    [&_input]:font-bold
-    [&_input]:text-[#748194]
-    [&_input]:outline-none
 `;
 
   return (
     <div className="flex h-screen items-center justify-center">
       <form
         className={
-          'flex h-[500px] max-w-[400px] flex-col items-center rounded-2xl bg-gray-200 p-10'
+          'flex min-h-[500px] max-w-[400px] flex-col items-center rounded-2xl bg-gray-200 p-10'
         }
         onSubmit={handleSubmit}
       >
         <img src={MainLogo} alt="Main Logo" className="h-[130px] w-[150px] justify-start" />
+
         <div className={`${inputStyle} m-10 flex w-[280px] flex-col gap-5`}>
           {/* <div className="flex items-center gap-2 p-0"> */}
           <input
             type="text"
             name="pemPath"
-            placeholder="pem Path"
+            placeholder=".pem 파일 경로"
             value={settings.pemPath}
             onChange={handleChange}
-            className=""
+            className="h-[35px] rounded-md border-none bg-white px-4 py-1.5 text-sm font-bold text-[#748194] outline-none"
           />
           {/* <PemUploaderContainer /> */}
           {/* </div> */}
-          <input
-            type="text"
-            name="ec2Host"
-            value={settings.ec2Host}
-            onChange={handleChange}
-            placeholder="EC2 Host"
-          />
-          <input
-            type="text"
-            name="jenkinsPassword"
-            value={settings.jenkinsPassword}
-            onChange={handleChange}
-            placeholder="Jenkins Password"
-          />
+
+          {fields
+            .filter((k) => k !== 'pemPath')
+            .map((key) => {
+              return (
+                <input
+                  type="text"
+                  key={key}
+                  name={key}
+                  value={settings[key]}
+                  onChange={handleChange}
+                  placeholder={fieldPlaceholders[key]}
+                  className="h-[35px] rounded-md border-none bg-white px-4 py-1.5 text-sm font-bold text-[#748194] outline-none"
+                />
+              );
+            })}
         </div>
         <button
           type="submit"
