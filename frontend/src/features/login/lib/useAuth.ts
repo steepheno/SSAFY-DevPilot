@@ -21,7 +21,7 @@ export function useAuth(password: string | null) {
     onSuccess: (loggedIn) => {
       client.setQueryData(['auth', password], loggedIn);
     },
-    onError: (err) => {
+    onError: (err: any) => {
       if (err.response?.status === 401) {
         alert('패스워드가 틀렸습니다.');
       } else {

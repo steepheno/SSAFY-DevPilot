@@ -19,3 +19,8 @@ export const getJobBuildInfo = async (jobName: string, buildNumber: string) => {
   const response = await instance.get<BuildStatus>(`/jenkinsapi/job/${jobName}/${buildNumber}`);
   return response.data;
 };
+
+export const getBuildStream = async (jobName: string, buildId: string) => {
+  const response = await instance.get(`/jenkinsapi/stream/${jobName}/${buildId}`);
+  return response.data;
+};
