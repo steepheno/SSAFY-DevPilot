@@ -30,13 +30,15 @@ const defaultProject: ProjectConfig = {
   useMaven: false,
   useMySQL: false,
   useRedis: false,
-  useGradle: false,
 };
 
 const defaultRepository: RepositoryConfig = {
-  gitRepositoryUrl: '',
-  gitCredentialsId: '',
   gitToken: '',
+  gitCredentialsId: '',
+  gitPersonalToken: '',
+  gitPersonalCredentialsId: '',
+  gitRepoUrl: '',
+  gitUserName: '',
   jenkinsfileBranchConfigs: [
     { branchName: '', buildEnabled: true, testEnabled: true, deployEnabled: true } as BranchConfig,
   ],
