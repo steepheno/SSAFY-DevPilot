@@ -3,7 +3,8 @@ param(
     [string]$git_repo_url,
     [string]$jenkins_url,
     [string]$webhook_secret,
-    [string]$credentials_id = "gitlab_token"
+    [string]$jenkins_job_name,
+    [string]$credentials_id = "gitlab_personal_token"
 )
 
 # 경로 설정
@@ -56,12 +57,10 @@ if (-Not $jenkins_url)
 }
 
 # Webhook Secret 생성
-if (-Not $webhook_secret)
-{
-    $webhook_secret = [guid]::NewGuid().ToString()
-    Write-Host "INFO: Webhook Secret automatically generated: $webhook_secret"
+if (-Not $webhook_secret) {
+    throw "ERROR: --webhook-secret is required"
 }
-
+Write-Host "INFO: Webhook Secret: $webhook_secret"
 Write-Host "DEBUG: Starting GitLab webhook registration process"
 
 # GitLab 프로젝트 정보 추출
@@ -115,7 +114,7 @@ catch
 }
 
 # Webhook 등록 요청
-$hook_url = "$jenkins_url/gitlab/build_now"
+$hook_url = "$jenkins_url/project/$jenkins_job_name"
 Write-Host "DEBUG: Webhook URL: $hook_url"
 
 # Webhook 설정 JSON 생성

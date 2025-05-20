@@ -34,20 +34,23 @@ public class TokenManager {
 	private WebClient webClientForAuth;
 	private final String user;
 	private final File tokenFile;
+	private final String envPath;
 
 	public TokenManager(
 		@Value("${server.jenkins.user}") String user,
-		@Value("${server.jenkins.tokenFile}") String tokenFilePath
+		@Value("${server.jenkins.tokenFile}") String tokenFilePath,
+		@Value("${user.home}/.devpilot/.env") String envPath
 	) {
 		this.user = user;
 		this.tokenFile = new File(tokenFilePath);
+		this.envPath = envPath;
 	}
 
 	public void isClient() throws JenkinsApiException {
 		if (webClientForAuth == null) {
 			try {
 				Properties props = new Properties();
-				props.load(new FileInputStream("/root/.devpilot/.env"));
+				props.load(new FileInputStream(envPath));
 
 				SslContext sslContext = SslContextBuilder.forClient()
 					.trustManager(InsecureTrustManagerFactory.INSTANCE)

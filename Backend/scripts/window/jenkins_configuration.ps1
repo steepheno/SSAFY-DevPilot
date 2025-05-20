@@ -3,6 +3,23 @@
 # Jenkins 설정 자동화 PowerShell 버전
 # ========================================================
 
+# Load .env file manually
+$homeDir = [Environment]::GetFolderPath("UserProfile")
+$envFile = "$homeDir\.devpilot\.env"  # 위치는 필요에 따라 조정
+
+if (Test-Path $envFile) {
+    Get-Content $envFile | ForEach-Object {
+        if ($_ -match '^\s*([^#][^=]+)=(.+)$') {
+            $key = $matches[1].Trim()
+            $value = $matches[2].Trim()
+            Set-Item -Path "Env:$key" -Value $value
+        }
+    }
+    Write-Host "[INFO] .env 환경변수 로드 완료: $envFile"
+} else {
+    Write-Host "[WARN] .env 파일을 찾을 수 없습니다: $envFile"
+}
+
 # Jenkins CLI 경로 및 인증 정보
 $JenkinsPort = $env:JENKINS_PORT
 $JenkinsPassword = $env:JENKINS_PASSWORD
@@ -47,11 +64,12 @@ function Install-JenkinsPlugins() {
         "multibranch-scan-webhook-trigger:1.0.11",
         "workflow-aggregator:608.v67378e9d3db_1",
         "workflow-multibranch:806.vb_b_688f609ee9",
-        "credentials:1254.vb_a_60f3e5df75",
-        "plain-credentials:143.v1b_df8b_d3b_e48",
-        "credentials-binding:657.v2b_19db_7d6e6d",
+        "credentials:1415.v831096eb_5534",
+        "plain-credentials:195.vb_906e9073dee",
+        "credentials-binding:687.v619cb_15e923f",
+        "configuration-as-code:1967.va_968e15fd05b_",
         "sse-gateway:1.28",
-        "nodejs:1.5.1"  # NodeJS 플러그인 추가
+        "nodejs:1.5.1"  # NodeJS 플러그인
     )
 
     foreach ($plugin in $plugins) {

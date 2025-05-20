@@ -8,12 +8,18 @@
 param (
     [string]$git_token,
     [string]$git_credentials_id,
+    [string]$git_personal_token,
+    [string]$git_personal_credentials_id,
     [string]$git_repo_url,
     [string]$jenkins_job_name
 )
 
 # Script path
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+$webhook_secret = [guid]::NewGuid().ToString()
+$webhook_creds_id = "webhook_token"
+
+. "$ScriptDir\jenkins_configuration.ps1"
 
 # Define all required functions directly
 # SSH command execution function
@@ -171,31 +177,14 @@ function Ensure-UUIDGenInstalled
     }
 }
 
-# GitLab credentials registration function
-function Register-GitCredentials
-{
-    param (
-        [string]$provider,
-        [string]$token,
-        [string]$cred_id
-    )
-
-    $timestamp = (Get-Date).ToString('yyyy-MM-dd HH:mm:ss')
-    Write-Host "[$timestamp] Starting $provider credential registration: $cred_id"
-
-    # Skip actual registration logic and just output success message
-    Write-Host "[INFO] $provider credential registration completed: $cred_id"
-
-    return $true
-}
-
 # Pipeline job configuration generation function
 function Generate-PipelineJobConfig
 {
     param (
         [string]$jobName,
         [string]$remoteDir,
-        [string]$jenkinsfilePath
+        [string]$jenkinsfilePath,
+        [string]$webhookSecret
     )
 
     Write-Host "Job info - Name: $jobName, Directory: $remoteDir, Jenkinsfile path: $jenkinsfilePath"
@@ -272,7 +261,25 @@ pipeline {
     <script>$escapedContent</script>
     <sandbox>true</sandbox>
   </definition>
-  <triggers/>
+  <triggers>
+    <com.dabsquared.gitlabjenkins.GitLabPushTrigger plugin="gitlab-plugin@1.9.8">
+      <spec></spec>
+      <triggerOnPush>true</triggerOnPush>
+      <triggerOnMergeRequest>false</triggerOnMergeRequest>
+      <triggerOpenMergeRequestOnPush>null</triggerOpenMergeRequestOnPush>
+      <triggerOnNoteRequest>false</triggerOnNoteRequest>
+      <noteRegex></noteRegex>
+      <ciSkip>false</ciSkip>
+      <setBuildDescription>true</setBuildDescription>
+      <addNoteOnMergeRequest>false</addNoteOnMergeRequest>
+      <addCiMessage>false</addCiMessage>
+      <addVoteOnMergeRequest>false</addVoteOnMergeRequest>
+      <branchFilterType>All</branchFilterType>
+      <includeBranches></includeBranches>
+      <excludeBranches></excludeBranches>
+      <secretToken>$webhookSecret</secretToken>
+    </com.dabsquared.gitlabjenkins.GitLabPushTrigger>
+  </triggers>
   <disabled>false</disabled>
 </flow-definition>
 "@
@@ -401,15 +408,65 @@ Connect-SSHServer
 # Ensure uuidgen is installed
 Ensure-UUIDGenInstalled
 
-# Register GitLab credentials
-Register-GitCredentials -provider "gitlab" -token $git_token -cred_id $git_credentials_id
+$remoteGroovyDir = "/tmp/jenkins_groovy"
+
+# === GitLab API Token Credential 등록 ===
+$gitlabApiTokenGroovy = "$ScriptDir\gitlab_api_token.groovy"
+$gitlabPersonalTokenGroovy = "$ScriptDir\gitlab_personal_token.groovy"
+
+$remoteApiTokenGroovy = "$remoteGroovyDir/gitlab_api_token.groovy"
+$remotePersonalTokenGroovy = "$remoteGroovyDir/gitlab_personal_token.groovy"
+
+Upload-File -localPath $gitlabApiTokenGroovy -remotePath $remoteApiTokenGroovy
+Upload-File -localPath $gitlabPersonalTokenGroovy -remotePath $remotePersonalTokenGroovy
+
+$gitlabApiTokenCmd = "java -jar /tmp/jenkins-cli.jar -s http://localhost:$($Server.jenkins_port) -auth admin:$env:JENKINS_PASSWORD groovy = < $remoteApiTokenGroovy $git_credentials_id $git_token"
+Invoke-Remote $gitlabApiTokenCmd
+
+$git_personal_desc = "gitlab_personal_token"
+$gitlabPersonalTokenCmd = "java -jar /tmp/jenkins-cli.jar -s http://localhost:$($Server.jenkins_port) -auth admin:$env:JENKINS_PASSWORD groovy = < $remotePersonalTokenGroovy $git_personal_credentials_id $git_personal_token $git_personal_desc"
+Invoke-Remote $gitlabPersonalTokenCmd
+
+$webhook_description = "webhook_token"
+$gitlabWebhookTokenCmd = "java -jar /tmp/jenkins-cli.jar -s http://localhost:$($Server.jenkins_port) -auth admin:$env:JENKINS_PASSWORD groovy = < $remotePersonalTokenGroovy $webhook_creds_id $webhook_secret $webhook_description"
+Invoke-Remote $gitlabWebhookTokenCmd
+
+# 업로드할 Groovy 스크립트 경로 지정
+$connectionGroovyPath = "$ScriptDir\gitlab_connection.groovy"
+$serverGroovyPath = "$ScriptDir\gitlab_server.groovy"
+
+# EC2 상 위치
+$remoteConnectionGroovy = "$remoteGroovyDir/gitlab_connection.groovy"
+$remoteServerGroovy = "$remoteGroovyDir/gitlab_server.groovy"
+
+# 원격 디렉토리 생성
+Invoke-Remote "mkdir -p $remoteGroovyDir"
+
+# 파일 업로드
+Upload-File -localPath $connectionGroovyPath -remotePath $remoteConnectionGroovy
+Upload-File -localPath $serverGroovyPath -remotePath $remoteServerGroovy
+
+# === Groovy 실행 ===
+# GitLab Connection (args: gitlabUrl, credentialsId)
+$gitlabUrl = "https://lab.ssafy.com"  # 또는 외부에서 전달받은 값 사용
+$gitlabCredsId = $git_credentials_id  # 파라미터 그대로 사용
+$connectionGroovyCmd = "java -jar /tmp/jenkins-cli.jar -s http://localhost:$($Server.jenkins_port) -auth admin:$env:JENKINS_PASSWORD groovy = < $remoteConnectionGroovy $gitlabUrl $gitlabCredsId $webhook_creds_id"
+Invoke-Remote $connectionGroovyCmd
+
+# GitLab Server (args: url, credentialsId, secretToken, hookRootUrl)
+$webhookSecretId = "gitlab_webhook_secret"  # 실제 Credential ID
+$gitlabPersCredsId = $git_personal_credentials_id
+$hookRootUrl = "http://$( $Server.host ):$( $Server.jenkins_port )"  # Jenkins 접근 경로
+# Groovy 실행 - GitLab 서버 등록
+$serverGroovyCmd = "java -jar /tmp/jenkins-cli.jar -s http://localhost:$($Server.jenkins_port) -auth admin:$env:JENKINS_PASSWORD groovy = < $remoteServerGroovy $gitlabUrl $gitlabPersCredsId $webhookSecretId $hookRootUrl"
+Invoke-Remote $serverGroovyCmd
 
 # Create and register Jenkins Job XML
 $project_dir = "/home/ubuntu/$jenkins_job_name"
 $jenkinsfile_path = "$project_dir/Jenkinsfile"
 
 # Pass parameters explicitly
-Generate-PipelineJobConfig -jobName $jenkins_job_name -remoteDir $project_dir -jenkinsfilePath $jenkinsfile_path
+Generate-PipelineJobConfig -jobName $jenkins_job_name -remoteDir $project_dir -jenkinsfilePath $jenkinsfile_path -webhookSecret $webhook_secret
 
 # Create or update Jenkins Job based on existence
 $jobExistsCheck = Invoke-Remote "java -jar /tmp/jenkins-cli.jar -s http://localhost:$( $Server.jenkins_port ) -auth admin:$env:JENKINS_PASSWORD get-job '$jenkins_job_name'" -Silent -TimeoutSeconds 5
@@ -450,13 +507,15 @@ Write-Host "Jenkins Job registration complete! Moving to GitLab Webhook registra
 Write-Host "[DEBUG] gitlab token: ${git_token}"
 
 # Handle webhook registration separately or simplify
-try
-{
+try {
     & "$ScriptDir\register_gitlab_webhook.ps1" `
-  -git_token "$git_token" `
-  -git_repo_url "$git_repo_url" `
-  -jenkins_url "http://$( $Server.host ):$( $Server.jenkins_port )" `
-  -webhook_secret "$( New-Guid )" -ErrorAction SilentlyContinue
+      -git_token "$git_token" `
+      -git_repo_url "$git_repo_url" `
+      -jenkins_url "http://$( $Server.host ):$( $Server.jenkins_port )" `
+      -webhook_secret "$( $webhook_secret )" `
+      -jenkins_job_name "$jenkins_job_name" `
+      -credentials_id "$git_personal_credentials_id" `
+      -ErrorAction SilentlyContinue
 }
 catch
 {
