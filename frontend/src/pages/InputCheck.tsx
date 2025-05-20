@@ -1,14 +1,48 @@
+import { generateJenkinsFile } from '@/entities/jenkins/api/generateJenkinsfile';
+import { JenkinsConfig } from '@/entities/jenkins/types';
 import { useFormStore } from '@/shared/store';
+import { useState } from 'react';
 
 const InputCheck = () => {
   const { projectConfig, repositoryConfig, backendConfig, frontendConfig, databaseConfig } =
     useFormStore();
+  const [isLoading, setIsLoading] = useState(false);
 
   // 브랜치 이름 목록 추출
   const branchNames = repositoryConfig.jenkinsfileBranchConfigs
     .map((config) => config.branchName)
     .filter((name) => name)
     .join(', ');
+
+  // API 요청 핸들러
+  const handleGenerateFile = async () => {
+    try {
+      setIsLoading(true);
+
+      // FormStore의 데이터를 JenkinsConfig 형식으로 변환
+      const jenkinsConfig: JenkinsConfig = {
+        jenkinsfileProjectType: projectConfig.useMaven ? 'JAVA_SPRING_MAVEN' : 'JAVA_SPRING_GRADLE',
+        projectName: projectConfig.projectName,
+        gitRepositoryUrl: repositoryConfig.gitRepoUrl,
+        gitCredentialsId: repositoryConfig.gitCredentialsId,
+        jenkinsfileBranchConfigs: repositoryConfig.jenkinsfileBranchConfigs,
+        frontendDir: frontendConfig.frontendDir,
+        backendDir: backendConfig.backendDir,
+        mattermostNotification: true, // 필요에 따라 조정
+        mattermostWebhookUrl: '', // 필요에 따라 조정
+        mattermostChannel: '', // 필요에 따라 조정
+        javaVersion: backendConfig.javaVersion,
+      };
+
+      // API 요청 보내기
+      const response = await generateJenkinsFile(jenkinsConfig);
+      console.log('Jenkins 파일 생성 성공: ', response);
+    } catch (error) {
+      console.error('Jenkins 파일 생성 실패: ', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="pr-10">
@@ -180,7 +214,13 @@ const InputCheck = () => {
 
       {/* 버튼 */}
       <div className="flex justify-center">
-        <button className="rounded-[10px] bg-blue-500 px-4 py-2 text-white">파일 생성</button>
+        <button
+          className="rounded-[10px] bg-blue-500 px-4 py-2 text-white"
+          onClick={handleGenerateFile}
+          disabled={isLoading}
+        >
+          파일 생성
+        </button>
       </div>
     </div>
   );
