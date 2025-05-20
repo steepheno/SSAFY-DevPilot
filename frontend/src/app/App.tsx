@@ -1,6 +1,10 @@
 import './styles/App.css';
 
 import { createHashRouter, Outlet } from 'react-router-dom';
+import ProtectedRoute from '@/features/login/ui/ProtectedRoute';
+import PublicRoute from '@/features/login/ui/PublicRoute';
+import InitRoute from '@/features/login/ui/InitRoute';
+
 import PageLayout from '@/widgets/PageLayout';
 import BuildFormLayout from '@/widgets/BuildFormLayout';
 import {
@@ -11,6 +15,8 @@ import {
   BuildInfoPage,
   BuildLogPage,
   RepositorySettingsPage,
+  NotFoundPage,
+  PreferencesPage,
   InputCheck,
 } from '@/pages';
 import BuildList from '@/pages/buildLog/ui/BuildList';
@@ -23,17 +29,29 @@ const Router = createHashRouter([
     children: [
       {
         path: '',
-        element: <LoginPage />,
+        element: (
+          <PublicRoute>
+            <LoginPage />
+          </PublicRoute>
+        ),
       },
       {
         path: 'new',
-        element: <InitialPage />,
+        element: (
+          <InitRoute>
+            <InitialPage />
+          </InitRoute>
+        ),
       },
     ],
   },
   {
     path: '/',
-    element: <PageLayout />,
+    element: (
+      <ProtectedRoute>
+        <PageLayout />
+      </ProtectedRoute>
+    ),
     children: [
       {
         index: true,
@@ -92,7 +110,17 @@ const Router = createHashRouter([
           },
         ],
       },
+
+      {
+        path: 'preferences',
+        handle: { breadcrumb: '설정', title: '설정' },
+        element: <PreferencesPage />,
+      },
     ],
+  },
+  {
+    path: '*',
+    element: <NotFoundPage />,
   },
 ]);
 
