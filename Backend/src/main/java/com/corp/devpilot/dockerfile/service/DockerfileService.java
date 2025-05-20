@@ -152,6 +152,10 @@ public class DockerfileService {
 		String templatePath = "templates/dockerfile/docker-compose.txt";
 		String template = readTemplateFile(templatePath);
 
+		String envPath = System.getProperty("user.home") + "/.devpilot/.env";  // 필요시 경로 수정
+		Map<String, String> envMap = loadEnv(envPath);
+		String ec2Host = envMap.getOrDefault("EC2_HOST", "localhost");
+
 		String result = template;
 		result = result.replace("##PROJECT_NAME##", dockerfileRequestDto.getProjectName());
 		result = result.replace("##BACKEND_PORT##", String.valueOf(dockerfileRequestDto.getBackendPort()));
@@ -183,6 +187,7 @@ public class DockerfileService {
 			nginxTemplate = nginxTemplate.replace("##FRONTEND_PORT##",
 				String.valueOf(dockerfileRequestDto.getFrontendPort()));
 			nginxTemplate = nginxTemplate.replace("##PROJECT_NAME##", dockerfileRequestDto.getProjectName());
+			nginxTemplate = nginxTemplate.replace("##PROJECT_DOMAIN##", ec2Host);
 
 			additionalServices.append(nginxTemplate).append("\n\n");
 		}
