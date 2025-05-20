@@ -6,8 +6,12 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -15,6 +19,7 @@ import org.springframework.stereotype.Service;
 import com.corp.devpilot.global.error.code.ErrorCode;
 import com.corp.devpilot.global.error.exception.BusinessException;
 import com.corp.devpilot.installation.dto.JenkinsInstallRequestDto;
+import com.corp.devpilot.installation.dto.StatusResponse;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -175,6 +180,38 @@ public class JenkinsInstallService {
 			log.error("Jenkins 설치 중 예외 발생", e);
 			throw new BusinessException(ErrorCode.INTERNAL_SERVER_ERROR, "main script 실행 중 오류가 발생했습니다");
 		}
+	}
+
+	public StatusResponse checkJenkins() {
+		String envPath = System.getProperty("user.home") + "/.devpilot/.env";  // 필요시 경로 수정
+		try {
+			Map<String, String> envMap = loadEnv(envPath);
+			if (!envMap.containsKey("PEM_PATH") ||
+				!envMap.containsKey("EC2_HOST") ||
+				!envMap.containsKey("JENKINS_PORT") ||
+				!envMap.containsKey("JENKINS_PASSWORD") ||
+				!envMap.containsKey("CONFIG_DIR")
+			) {
+				return new StatusResponse(false);
+			}
+			return new StatusResponse(true);
+		} catch (Exception e) {
+			return new StatusResponse(false);
+		}
+	}
+
+	private Map<String, String> loadEnv(String envFilePath) throws IOException {
+		Map<String, String> envMap = new HashMap<>();
+		List<String> lines = Files.readAllLines(Paths.get(envFilePath));
+		for (String line : lines) {
+			if (!line.trim().isEmpty() && !line.startsWith("#")) {
+				String[] parts = line.split("=", 2);
+				if (parts.length == 2) {
+					envMap.put(parts[0].trim(), parts[1].trim());
+				}
+			}
+		}
+		return envMap;
 	}
 
 }

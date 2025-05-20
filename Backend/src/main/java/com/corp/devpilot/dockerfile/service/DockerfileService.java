@@ -6,6 +6,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -194,9 +196,15 @@ public class DockerfileService {
 		String templatePath = "templates/dockerfile/etc/nginx.conf.txt";
 		String template = readTemplateFile(templatePath);
 
+		String envPath = System.getProperty("user.home") + "/.devpilot/.env";  // 필요시 경로 수정
+		Map<String, String> envMap = loadEnv(envPath);
+		String ec2Host = envMap.getOrDefault("EC2_HOST", "localhost");
+
 		String result = template;
-		result = result.replace("##FRONTEND_PORT##", String.valueOf(dockerfileRequestDto.getFrontendPort()));
 		result = result.replace("##BACKEND_PORT##", String.valueOf(dockerfileRequestDto.getBackendPort()));
+		result = result.replace("##SERVER_DOMAIN##", ec2Host);
+		result = result.replace("##FRONTEND_NAME##", dockerfileRequestDto.getProjectName() + "-frontend");
+		result = result.replace("##BACKEND_NAME##", dockerfileRequestDto.getProjectName() + "-backend");
 
 		return result;
 	}
@@ -283,6 +291,20 @@ public class DockerfileService {
 			writer.write(content);
 		}
 		return file.getAbsolutePath();
+	}
+
+	private Map<String, String> loadEnv(String envFilePath) throws IOException {
+		Map<String, String> envMap = new HashMap<>();
+		List<String> lines = Files.readAllLines(Paths.get(envFilePath));
+		for (String line : lines) {
+			if (!line.trim().isEmpty() && !line.startsWith("#")) {
+				String[] parts = line.split("=", 2);
+				if (parts.length == 2) {
+					envMap.put(parts[0].trim(), parts[1].trim());
+				}
+			}
+		}
+		return envMap;
 	}
 
 	public void uploadFiles(DockerfileRequestDto requestDto, Map<String, String> generatedPaths) {

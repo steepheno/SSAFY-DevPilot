@@ -3,12 +3,14 @@ package com.corp.devpilot.installation.controller;
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.corp.devpilot.installation.dto.JenkinsInstallRequestDto;
+import com.corp.devpilot.installation.dto.StatusResponse;
 import com.corp.devpilot.installation.service.JenkinsInstallService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -34,5 +36,10 @@ public class JenkinsInstallController {
 	public boolean test(@RequestBody JenkinsInstallRequestDto requestDto) {
 		jenkinsInstallService.confirmJenkins(requestDto);
 		return true;
+	}
+
+	@GetMapping("/status")
+	public ResponseEntity<StatusResponse> checkInstallStatus() {
+		return ResponseEntity.ok(jenkinsInstallService.checkJenkins());
 	}
 }

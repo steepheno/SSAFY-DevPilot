@@ -6,8 +6,8 @@ services:
     container_name: ##PROJECT_NAME##-backend
     ports:
       - "##BACKEND_PORT##:##BACKEND_PORT##"
-    environment:
-      - SPRING_PROFILES_ACTIVE=prod
+    env_file:
+      - ./.env
     restart: always
     networks:
       - ##PROJECT_NAME##-network

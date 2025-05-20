@@ -1,6 +1,6 @@
   nginx:
     image: nginx:alpine
-    container_name: ##PROJECT_NAME##-nginx
+    container_name: damul-nginx
     ports:
       - "80:80"
     volumes:
@@ -9,5 +9,5 @@
       - frontend
       - backend
     networks:
-      - ##PROJECT_NAME##-network
+      - damul-network
     restart: always
