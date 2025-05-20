@@ -114,9 +114,7 @@ public class DockerfileService {
 		String result = template;
 		result = result.replace("##JAVA_VERSION##", dockerfileRequestDto.getJavaVersion());
 		result = result.replace("##BACKEND_PORT##", String.valueOf(dockerfileRequestDto.getBackendPort()));
-		result = result.replace("##BACKEND_DIR##",
-			"/var/lib/jenkins/workspace/" + dockerfileRequestDto.getProjectName() + "/"
-				+ dockerfileRequestDto.getBackendDir());
+		result = result.replace("##BACKEND_DIR##", "../" + dockerfileRequestDto.getBackendDir());
 		result = result.replace("##PROJECT_NAME##", dockerfileRequestDto.getProjectName());
 
 		return result;
@@ -143,9 +141,7 @@ public class DockerfileService {
 
 		String result = template;
 		result = result.replace("##FRONTEND_PORT##", String.valueOf(dockerfileRequestDto.getFrontendPort()));
-		result = result.replace("##FRONTEND_DIR##",
-			"/var/lib/jenkins/workspace/" + dockerfileRequestDto.getProjectName() + "/"
-				+ dockerfileRequestDto.getFrontendDir());
+		result = result.replace("##FRONTEND_DIR##", "../" + dockerfileRequestDto.getFrontendDir());
 
 		return result;
 	}
