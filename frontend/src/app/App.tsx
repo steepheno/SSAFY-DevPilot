@@ -3,6 +3,8 @@ import './styles/App.css';
 import { createHashRouter, Outlet } from 'react-router-dom';
 import ProtectedRoute from '@/features/login/ui/ProtectedRoute';
 import PublicRoute from '@/features/login/ui/PublicRoute';
+import InitRoute from '@/features/login/ui/InitRoute';
+
 import PageLayout from '@/widgets/PageLayout';
 import BuildFormLayout from '@/widgets/BuildFormLayout';
 import {
@@ -15,11 +17,11 @@ import {
   RepositorySettingsPage,
   NotFoundPage,
   PreferencesPage,
+  InputCheck,
 } from '@/pages';
 import BuildList from '@/pages/buildLog/ui/BuildList';
 import BuildDetail from '@/pages/buildLog/ui/BuildDetail';
 import { useQueryClient } from '@tanstack/react-query';
-import InitRoute from '@/features/login/ui/InitRoute';
 
 const Router = createHashRouter([
   {
@@ -71,6 +73,11 @@ const Router = createHashRouter([
             path: 'project',
             handle: { breadcrumb: '빌드 파일 생성', buildStep: 2, title: '빌드 파일 생성' },
             element: <DockerSettings />,
+          },
+          {
+            path: 'check',
+            handle: { breadcrumb: '입력값 확인', buildStep: 3, title: '입력값 확인' },
+            element: <InputCheck />,
           },
         ],
       },
