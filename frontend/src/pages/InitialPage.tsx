@@ -1,5 +1,5 @@
 import MainLogo from '@/assets/login_icon.png';
-import { initialSettings } from '@/features/initialSettings/api';
+import { postInitialSettings } from '@/features/initialSettings/api/postInitialSettings';
 import { InitialSettings } from '@/features/initialSettings/types';
 import PemUploaderContainer from '@/features/upload';
 import { useConfigStore } from '@/shared/store/configStore';
@@ -50,9 +50,11 @@ const InitialPage = () => {
 
     try {
       // API 호출
-      const response = await initialSettings(settings);
-      alert('다운로드 완료! 아래 발급된 Password를 반드시 저장해주세요.\nPassword: aaa');
-      setIsInitialized(true);
+      const response = await postInitialSettings(settings);
+      if (response === true) {
+        alert('다운로드 완료! 아래 발급된 Password를 반드시 저장해주세요.\nPassword: aaa');
+        setIsInitialized(response);
+      }
     } catch (error) {
       console.error('설정 파일 다운로드 실패: ', error);
     } finally {

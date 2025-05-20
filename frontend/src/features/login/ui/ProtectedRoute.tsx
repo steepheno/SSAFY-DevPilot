@@ -1,13 +1,28 @@
-import { ReactNode } from 'react';
+import { ReactNode, useEffect } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useConfigStore } from '@/shared/store/configStore';
+import { getInitialSettingsStatus } from '@/features/initialSettings/api/getInitialSettingsStatus';
 
 interface Props {
   children: ReactNode;
 }
 
 function ProtectedRoute({ children }: Props) {
-  const { isInitialized, isLoggedIn } = useConfigStore();
+  const { isLoggedIn, isInitialized, setIsInitialized } = useConfigStore();
+
+  useEffect(() => {
+    async function checkInit() {
+      try {
+        const response = await getInitialSettingsStatus();
+        if (response.initialized === true) {
+          setIsInitialized(response.initialized);
+        }
+      } catch (error) {}
+    }
+
+    checkInit();
+  }, [isInitialized]);
+
   const location = useLocation();
 
   // 로그인 안 돼 있으면 로그인 페이지로
