@@ -10,6 +10,7 @@ param (
     [string]$git_credentials_id,
     [string]$git_personal_token,
     [string]$git_personal_credentials_id,
+    [string]$git_username,
     [string]$git_repo_url,
     [string]$jenkins_job_name
 )
@@ -249,7 +250,7 @@ pipeline {
     }
 
     # Escape XML special characters - use explicit strings rather than actual special characters
-    $escapedContent = $jenkinsFileContent.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;").Replace('"', "&quot;").Replace("'", "&apos;")
+#    $escapedContent = $jenkinsFileContent.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;").Replace('"', "&quot;").Replace("'", "&apos;")
 
     # Create Jenkins Job XML - use remote Jenkinsfile content (with proper escaping)
     $jobXml = @"
@@ -258,7 +259,9 @@ pipeline {
   <description>${jobName} Pipeline</description>
   <keepDependencies>false</keepDependencies>
   <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.94">
-    <script>$escapedContent</script>
+    <script><![CDATA[
+$jenkinsFileContent
+]]></script>
     <sandbox>true</sandbox>
   </definition>
   <triggers>
@@ -413,12 +416,15 @@ $remoteGroovyDir = "/tmp/jenkins_groovy"
 # === GitLab API Token Credential 등록 ===
 $gitlabApiTokenGroovy = "$ScriptDir\gitlab_api_token.groovy"
 $gitlabPersonalTokenGroovy = "$ScriptDir\gitlab_personal_token.groovy"
+$gitlabAuthTokenGroovy = "$ScriptDir\username_password.groovy"
 
 $remoteApiTokenGroovy = "$remoteGroovyDir/gitlab_api_token.groovy"
 $remotePersonalTokenGroovy = "$remoteGroovyDir/gitlab_personal_token.groovy"
+$remoteAuthTokenGroovy = "$remoteGroovyDir/username_password.groovy"
 
 Upload-File -localPath $gitlabApiTokenGroovy -remotePath $remoteApiTokenGroovy
 Upload-File -localPath $gitlabPersonalTokenGroovy -remotePath $remotePersonalTokenGroovy
+Upload-File -localPath $gitlabAuthTokenGroovy -remotePath $remoteAuthTokenGroovy
 
 $gitlabApiTokenCmd = "java -jar /tmp/jenkins-cli.jar -s http://localhost:$($Server.jenkins_port) -auth admin:$env:JENKINS_PASSWORD groovy = < $remoteApiTokenGroovy $git_credentials_id $git_token"
 Invoke-Remote $gitlabApiTokenCmd
@@ -430,6 +436,10 @@ Invoke-Remote $gitlabPersonalTokenCmd
 $webhook_description = "webhook_token"
 $gitlabWebhookTokenCmd = "java -jar /tmp/jenkins-cli.jar -s http://localhost:$($Server.jenkins_port) -auth admin:$env:JENKINS_PASSWORD groovy = < $remotePersonalTokenGroovy $webhook_creds_id $webhook_secret $webhook_description"
 Invoke-Remote $gitlabWebhookTokenCmd
+
+$auth_description = "gitlab_auth"
+$gitlabAuthTokenCmd = "java -jar /tmp/jenkins-cli.jar -s http://localhost:$($Server.jenkins_port) -auth admin:$env:JENKINS_PASSWORD groovy = < $remoteAuthTokenGroovy $($git_personal_credentials_id)_auth $git_username $git_personal_token"
+Invoke-Remote $gitlabAuthTokenCmd
 
 # 업로드할 Groovy 스크립트 경로 지정
 $connectionGroovyPath = "$ScriptDir\gitlab_connection.groovy"

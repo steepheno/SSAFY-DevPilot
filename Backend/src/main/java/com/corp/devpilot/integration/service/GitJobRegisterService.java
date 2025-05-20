@@ -71,6 +71,9 @@ public class GitJobRegisterService {
 		command.add("-git_personal_credentials_id");
 		command.add(request.getGitPersonalCredentialsId());
 
+		command.add("-git_username");
+		command.add(request.getGitUsername());
+
 		command.add("-git_repo_url");
 		command.add(request.getGitRepoUrl());
 
