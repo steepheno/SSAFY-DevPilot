@@ -48,10 +48,13 @@ public class JenkinsfileService {
 		result = result.replace("[(${frontendDir})]", requestDto.getFrontendDir());
 		result = result.replace("[(${backendDir})]", requestDto.getBackendDir());
 
-		result = result.replace("##BRANCH_NAME##", "*/${BRANCH_NAME}");
-		result = result.replace("[(${BRANCH_NAME_VAR})]", "${BRANCH_NAME}");
+		// 브랜치 이름 처리 개선
+		result = result.replace("##BRANCH_NAME##", "${params.BRANCH_NAME}");
+		result = result.replace("[(${BRANCH_NAME_VAR})]", "${params.BRANCH_NAME}");
 
-		result = result.replace("findBranchConfig('${BRANCH_NAME}')", "findBranchConfig(\"${BRANCH_NAME}\")");
+		// 함수 호출 수정
+		result = result.replace("findBranchConfig('${BRANCH_NAME}')", "findBranchConfig(\"${env.CURRENT_BRANCH}\")");
+		result = result.replace("findBranchConfig(\"${BRANCH_NAME}\")", "findBranchConfig(\"${env.CURRENT_BRANCH}\")");
 
 		if (requestDto.isMattermostNotification()) {
 			result = result.replace("[# th:if=\"${mattermostNotification}\"]", "");

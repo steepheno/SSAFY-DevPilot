@@ -1,165 +1,175 @@
 pipeline {
-    agent any
+   agent any
 
-    environment {
-        PROJECT_NAME = '[(${projectName})]'
-        GIT_REPO = '[(${gitRepositoryUrl})]'
-        FRONTEND_DIR = '[(${frontendDir})]'
-        BACKEND_DIR = '[(${backendDir})]'
-        BASE_PATH = "/home/ubuntu"
-    }
+   parameters {
+       string(name: 'BRANCH_NAME', defaultValue: 'master', description: 'Branch to build')
+   }
 
-    stages {
-        stage('Checkout') {
-            steps {
-                checkout([$class: 'GitSCM',
-                    branches: [[name: '*/${BRANCH_NAME}']],
-                    doGenerateSubmoduleConfigurations: false,
-                    extensions: [],
-                    submoduleCfg: [],
-                    userRemoteConfigs: [[
-                        credentialsId: '[(${gitCredentialsId})]',
-                        url: '[(${gitRepositoryUrl})]'
-                    ]]
-                ])
-                echo "Checked out branch: [(${BRANCH_NAME_VAR})]"
-            }
-        }
+   environment {
+       PROJECT_NAME = '[(${projectName})]'
+       GIT_REPO = '[(${gitRepositoryUrl})]'
+       FRONTEND_DIR = '[(${frontendDir})]'
+       BACKEND_DIR = '[(${backendDir})]'
+       BASE_PATH = "/home/ubuntu"
+       // Determine branch from parameter or auto-detection
+       BRANCH_TO_BUILD = "${params.BRANCH_NAME}"
+   }
 
-        stage('Frontend Build') {
-            when {
-                expression {
-                    def config = findBranchConfig('${BRANCH_NAME}')
-                    return config != null && config.buildEnabled
-                }
-            }
-            steps {
-                dir('[(${frontendDir})]') {
-                    script {
-                        echo "Building frontend in directory: [(${frontendDir})]"
-                        sh 'npm install'
-                        sh 'npm run build'
+   stages {
+       stage('Debug Info') {
+           steps {
+               echo "Building branch: ${BRANCH_TO_BUILD}"
+           }
+       }
 
-                        // Package frontend artifacts if needed
-                        sh 'mkdir -p ./dist'
-                        sh 'cp -r build/* ./dist/ || cp -r dist/* ./dist/ || true'
-                    }
-                }
-            }
-        }
+       stage('Checkout') {
+           steps {
+               checkout([$class: 'GitSCM',
+                   branches: [[name: "*/${BRANCH_TO_BUILD}"]],
+                   doGenerateSubmoduleConfigurations: false,
+                   extensions: [],
+                   submoduleCfg: [],
+                   userRemoteConfigs: [[
+                       credentialsId: '[(${gitCredentialsId})]',
+                       url: '[(${gitRepositoryUrl})]'
+                   ]]
+               ])
+               echo "Checked out branch: ${BRANCH_TO_BUILD}"
 
-        stage('Backend Build') {
-            when {
-                expression {
-                    def config = findBranchConfig('${BRANCH_NAME}')
-                    return config != null && config.buildEnabled
-                }
-            }
-            steps {
-                dir('[(${backendDir})]') {
-                    script {
-                        echo "Building backend in directory: [(${backendDir})]"
-                        // Check if it's Maven or Gradle project
-                        if (fileExists('pom.xml')) {
-                            sh 'mvn clean package -DskipTests'
-                        } else if (fileExists('build.gradle') || fileExists('build.gradle.kts')) {
-                            sh 'chmod +x ./gradlew || true'
-                            sh './gradlew clean build -x test'
-                        } else {
-                            error "Neither pom.xml nor build.gradle found in backend directory"
-                        }
-                    }
-                }
-            }
-        }
+               // Verify current branch
+               script {
+                   // Get current checked out branch name
+                   env.CURRENT_BRANCH = sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
+                   echo "Detected current branch: ${env.CURRENT_BRANCH}"
+               }
+           }
+       }
 
-        stage('Test') {
-            when {
-                expression {
-                    def config = findBranchConfig('${BRANCH_NAME}')
-                    return config != null && config.testEnabled
-                }
-            }
-            steps {
-                dir('[(${backendDir})]') {
-                    script {
-                        echo "Running tests in directory: [(${backendDir})]"
-                        // Check if it's Maven or Gradle project
-                        if (fileExists('pom.xml')) {
-                            sh 'mvn test'
-                            junit '**/target/surefire-reports/*.xml'
-                        } else if (fileExists('build.gradle') || fileExists('build.gradle.kts')) {
-                            sh './gradlew test'
-                            junit '**/build/test-results/test/*.xml'
-                        } else {
-                            error "Neither pom.xml nor build.gradle found in backend directory"
-                        }
-                    }
-                }
-            }
-        }
+       stage('Frontend Build') {
+           when {
+               expression {
+                   def config = findBranchConfig("${env.CURRENT_BRANCH}")
+                   return config != null && config.buildEnabled
+               }
+           }
+           steps {
+               dir('[(${frontendDir})]') {
+                   script {
+                       echo "Building frontend in directory: [(${frontendDir})]"
+                       sh 'npm install'
+                       sh 'npm run build'
 
-        stage('Docker Build & Deploy') {
-            when {
-                expression {
-                    def config = findBranchConfig('${BRANCH_NAME}')
-                    return config != null && config.deployEnabled
-                }
-            }
-            steps {
-                script {
-                    // Docker 명령어 플랫폼에 따라 다르게 실행
-                    if (isUnix()) {
-                        sh "docker-compose -f ${BASE_PATH}/${PROJECT_NAME}/docker-compose.yml down"
-                        sh 'docker-compose -f ${BASE_PATH}/${PROJECT_NAME}/docker-compose.yml build'
-                        sh 'docker-compose -f ${BASE_PATH}/${PROJECT_NAME}/docker-compose.yml up -d'
-                    } else {
-                        bat 'docker-compose -f ${BASE_PATH}/${PROJECT_NAME}/docker-compose.yml down'
-                        bat 'docker-compose -f ${BASE_PATH}/${PROJECT_NAME}/docker-compose.yml build'
-                        bat 'docker-compose -f ${BASE_PATH}/${PROJECT_NAME}/docker-compose.yml up -d'
-                    }
-                }
-            }
-        }
-    }
+                       // Package frontend artifacts if needed
+                       sh 'mkdir -p ./dist'
+                       sh 'cp -r build/* ./dist/ || cp -r dist/* ./dist/ || true'
+                   }
+               }
+           }
+       }
 
-    post {
-        [# th:if="${mattermostNotification}"]
-        always {
-            mattermostSend channel: '[(${mattermostChannel})]',
-                           color: currentBuild.currentResult == 'SUCCESS' ? 'good' : 'danger',
-                           message: "Build ${currentBuild.currentResult}: ${env.JOB_NAME} #${env.BUILD_NUMBER}\nDetails: ${env.BUILD_URL}",
-                           endpoint: '[(${mattermostWebhookUrl})]'
-        }
-        [/]
-        success {
-            echo "Pipeline for ${PROJECT_NAME} completed successfully!"
-        }
-        failure {
-            echo "Pipeline for ${PROJECT_NAME} failed!"
-        }
-    }
+       stage('Backend Build') {
+           when {
+               expression {
+                   def config = findBranchConfig("${env.CURRENT_BRANCH}")
+                   return config != null && config.buildEnabled
+               }
+           }
+           steps {
+               dir('[(${backendDir})]') {
+                   script {
+                       echo "Building backend in directory: [(${backendDir})]"
+                       // Check if it's Maven or Gradle project
+                       if (fileExists('pom.xml')) {
+                           sh 'mvn clean package -DskipTests'
+                       } else if (fileExists('build.gradle') || fileExists('build.gradle.kts')) {
+                           sh 'chmod +x ./gradlew || true'
+                           sh './gradlew clean build -x test'
+                       } else {
+                           error "Neither pom.xml nor build.gradle found in backend directory"
+                       }
+                   }
+               }
+           }
+       }
+
+       stage('Test') {
+           when {
+               expression {
+                   def config = findBranchConfig("${env.CURRENT_BRANCH}")
+                   return config != null && config.testEnabled
+               }
+           }
+           steps {
+               dir('[(${backendDir})]') {
+                   script {
+                       echo "Running tests in directory: [(${backendDir})]"
+                       // Check if it's Maven or Gradle project
+                       if (fileExists('pom.xml')) {
+                           sh 'mvn test'
+                           junit '**/target/surefire-reports/*.xml'
+                       } else if (fileExists('build.gradle') || fileExists('build.gradle.kts')) {
+                           sh './gradlew test'
+                           junit '**/build/test-results/test/*.xml'
+                       } else {
+                           error "Neither pom.xml nor build.gradle found in backend directory"
+                       }
+                   }
+               }
+           }
+       }
+
+       stage('Docker Build & Deploy') {
+           when {
+               expression {
+                   def config = findBranchConfig("${env.CURRENT_BRANCH}")
+                   return config != null && config.deployEnabled
+               }
+           }
+           steps {
+               script {
+                   // Execute Docker commands based on platform
+                   if (isUnix()) {
+                       sh "docker-compose -f ${BASE_PATH}/${PROJECT_NAME}/docker-compose.yml down"
+                       sh "docker-compose -f ${BASE_PATH}/${PROJECT_NAME}/docker-compose.yml build"
+                       sh "docker-compose -f ${BASE_PATH}/${PROJECT_NAME}/docker-compose.yml up -d"
+                   } else {
+                       bat "docker-compose -f ${BASE_PATH}/${PROJECT_NAME}/docker-compose.yml down"
+                       bat "docker-compose -f ${BASE_PATH}/${PROJECT_NAME}/docker-compose.yml build"
+                       bat "docker-compose -f ${BASE_PATH}/${PROJECT_NAME}/docker-compose.yml up -d"
+                   }
+               }
+           }
+       }
+   }
+
+   post {
+       [# th:if="${mattermostNotification}"]
+       always {
+           mattermostSend channel: '[(${mattermostChannel})]',
+                          color: currentBuild.currentResult == 'SUCCESS' ? 'good' : 'danger',
+                          message: "Build ${currentBuild.currentResult}: ${env.JOB_NAME} #${env.BUILD_NUMBER}\nDetails: ${env.BUILD_URL}",
+                          endpoint: '[(${mattermostWebhookUrl})]'
+       }
+       [/]
+       success {
+           echo "Pipeline for ${PROJECT_NAME} completed successfully!"
+       }
+       failure {
+           echo "Pipeline for ${PROJECT_NAME} failed!"
+       }
+   }
 }
 
 def findBranchConfig(branchName) {
    echo "Finding configuration for branch: ${branchName}"
 
    if (branchName == null || branchName.trim() == '') {
-       try {
-           def gitBranch = sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
-           if (gitBranch != 'HEAD') {
-               branchName = gitBranch
-           } else {
-               branchName = 'master'
-           }
-       } catch (Exception e) {
-           branchName = 'master'
-       }
+       branchName = 'master'
+       echo "Empty branch name, using default: ${branchName}"
    }
 
    def branchConfigs = [
-       [branchName: 'master', buildEnabled: true, testEnabled: true, deployEnabled: true],
-       [branchName: 'develop', buildEnabled: true, testEnabled: true, deployEnabled: true]
+       ##BRANCH_CONFIGS##
    ]
 
    def exactMatch = branchConfigs.find { it.branchName == branchName }
