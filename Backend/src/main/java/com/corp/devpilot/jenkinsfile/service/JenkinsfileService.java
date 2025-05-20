@@ -43,13 +43,15 @@ public class JenkinsfileService {
 
 		result = result.replace("[(${projectName})]", requestDto.getProjectName());
 		result = result.replace("[(${gitRepositoryUrl})]", requestDto.getGitRepositoryUrl());
-		result = result.replace("[(${gitCredentialsId})]", requestDto.getGitCredentialsId());
+		result = result.replace("[(${gitCredentialsId})]", requestDto.getGitCredentialsId() + "_auth");
 		result = result.replace("[(${javaVersion})]", requestDto.getJavaVersion());
 		result = result.replace("[(${frontendDir})]", requestDto.getFrontendDir());
 		result = result.replace("[(${backendDir})]", requestDto.getBackendDir());
 
-		result = result.replace("##BRANCH_NAME##", "${BRANCH_NAME}");
+		result = result.replace("##BRANCH_NAME##", "*/${BRANCH_NAME}");
 		result = result.replace("[(${BRANCH_NAME_VAR})]", "${BRANCH_NAME}");
+
+		result = result.replace("findBranchConfig('${BRANCH_NAME}')", "findBranchConfig(\"${BRANCH_NAME}\")");
 
 		if (requestDto.isMattermostNotification()) {
 			result = result.replace("[# th:if=\"${mattermostNotification}\"]", "");
