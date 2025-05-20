@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { CircleCheckIcon, CircleEllipsisIcon, CircleXIcon, Play } from 'lucide-react';
 import { Job } from '@/features/jobs/types';
-import { fetchJobsInfo } from '@/features/jobs/api';
+import { getJobsInfo } from '@/features/jobs/api';
 
 interface CellProps {
   children: React.ReactNode;
@@ -39,7 +39,7 @@ const MainPage: React.FC = () => {
 
   useEffect(() => {
     setIsLoading(true);
-    fetchJobsInfo()
+    getJobsInfo()
       .then((data) => setJobs(data.jobs))
       .catch((err) => console.error(err))
       .finally(() => setIsLoading(false));

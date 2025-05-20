@@ -1,9 +1,10 @@
-import { fetchJobInfo } from '@/entities/build/api.ts';
+// import { fetchJobInfo } from '@/entities/build/api.ts';
 import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import BuildList from './buildLog/ui/BuildList';
 import { Job } from '@/features/jobs/types';
+import { useJobs } from '@/features/jobs/model/useJobs';
 
 // type LocationState = {
 //   job?: Job;
@@ -15,39 +16,16 @@ const BuildInfoPage = () => {
 
   const location = useLocation();
   const navigate = useNavigate();
-  const { buildId } = useParams<{ buildId: string }>();
-  const [job, setJob] = useState<Job | null>(null);
+  const { jobName, buildId } = useParams<{
+    jobName: string;
+    buildId: string;
+  }>();
 
-  useEffect(() => {
-    const loadBuildInfo = async () => {
-      if (!location.state.name) {
-        setError('Job 정보가 제공되지 않았습니다.');
-        return;
-      }
-      if (!job || !buildId) return;
-      setIsLoading(true);
-      try {
-        const response = await fetchJobInfo(job.name);
-        if (response?.data) {
-          setJob(location.state);
-        } else {
-          setError('Build 정보를 가져올 수 없습니다.');
-        }
-      } catch (err) {
-        console.error(err);
-        setError('Build 조회 중 오류가 발생했습니다.');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    loadBuildInfo();
-  }, [job, location.state, buildId]);
+  const { builds } = useJobs(jobName!);
+  const [job, setJob] = useState<Job | null>(null);
 
   if (error) {
     return <div className="p-4 text-red-500">{error}</div>;
-  }
-  if (!job) {
-    navigate('/builds');
   }
 
   if (isLoading) {
@@ -60,8 +38,8 @@ const BuildInfoPage = () => {
 
   return (
     <div className="flex flex-col gap-4 p-4">
-      <h2 className="text-lg font-semibold">{location.state.name}</h2>
-      <BuildList />
+      {/* <h2 className="text-lg font-semibold">{location.state.name}</h2> */}
+      {/* <BuildList jobName={jobName} /> */}
     </div>
   );
 };
