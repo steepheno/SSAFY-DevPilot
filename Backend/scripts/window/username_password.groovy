@@ -16,7 +16,7 @@ def credentials = new UsernamePasswordCredentialsImpl(
         credentialId,
         "GitLab Username with Token",
         username,
-        Secret.fromString(password)
+        password
 )
 
 // 등록
