@@ -97,11 +97,6 @@ const BuildInfo = () => {
             onChange={(e) => {
               setBackendConfig({ ...backendConfig, backendDir: e.target.value });
               setIsTry((prev) => ({ ...prev, backendDir: true }));
-              if (!e.target.value) {
-                setErrors((prev) => ({ ...prev, backendDir: '폴더명을 입력해주세요.' }));
-              } else {
-                setErrors((prev) => ({ ...prev, backendDir: '' }));
-              }
             }}
           />
         </FormField>
@@ -117,11 +112,6 @@ const BuildInfo = () => {
             onChange={(value) => {
               setBackendConfig({ ...backendConfig, backendPort: value });
               setIsTry((prev) => ({ ...prev, backendPort: true }));
-              if (!value) {
-                setErrors((prev) => ({ ...prev, backendPort: '포트번호를 입력해주세요.' }));
-              } else {
-                setErrors((prev) => ({ ...prev, backendPort: '' }));
-              }
             }}
           />
         </FormField>
@@ -160,11 +150,6 @@ const BuildInfo = () => {
             onChange={(e) => {
               setFrontendConfig({ ...frontendConfig, frontendDir: e.target.value });
               setIsTry((prev) => ({ ...prev, frontendDir: true }));
-              if (!e.target.value) {
-                setErrors((prev) => ({ ...prev, frontendDir: '폴더명을 입력해주세요.' }));
-              } else {
-                setErrors((prev) => ({ ...prev, frontendDir: '' }));
-              }
             }}
           />
         </FormField>
@@ -180,11 +165,6 @@ const BuildInfo = () => {
             onChange={(value) => {
               setFrontendConfig({ ...frontendConfig, frontendPort: value });
               setIsTry((prev) => ({ ...prev, frontendPort: true }));
-              if (!value) {
-                setErrors((prev) => ({ ...prev, frontendPort: '포트번호를 입력해주세요.' }));
-              } else {
-                setErrors((prev) => ({ ...prev, frontendPort: '' }));
-              }
             }}
           />
         </FormField>

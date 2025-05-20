@@ -11,6 +11,7 @@ import {
   BuildInfoPage,
   BuildLogPage,
   RepositorySettingsPage,
+  InputCheck,
 } from '@/pages';
 import BuildList from '@/pages/buildLog/ui/BuildList';
 import BuildDetail from '@/pages/buildLog/ui/BuildDetail';
@@ -53,6 +54,11 @@ const Router = createHashRouter([
             path: 'project',
             handle: { breadcrumb: '빌드 파일 생성', buildStep: 2, title: '빌드 파일 생성' },
             element: <DockerSettings />,
+          },
+          {
+            path: 'check',
+            handle: { breadcrumb: '입력값 확인', buildStep: 3, title: '입력값 확인' },
+            element: <InputCheck />,
           },
         ],
       },
