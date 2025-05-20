@@ -6,3 +6,5 @@ export { default as BuildLogPage } from './BuildLogPage.tsx';
 export { default as LoginPage } from './LoginPage.tsx';
 export { default as InitialPage } from './InitialPage.tsx';
 export { default as RepositorySettingsPage } from './RepositorySettingsPage.tsx';
+export { default as NotFoundPage } from './NotFoundPage.tsx';
+export { default as PreferencesPage } from './PreferencesPage.tsx';

@@ -1,6 +1,8 @@
 import './styles/App.css';
 
 import { createHashRouter, Outlet } from 'react-router-dom';
+import ProtectedRoute from '@/features/login/ui/ProtectedRoute';
+import PublicRoute from '@/features/login/ui/PublicRoute';
 import PageLayout from '@/widgets/PageLayout';
 import BuildFormLayout from '@/widgets/BuildFormLayout';
 import {
@@ -11,9 +13,13 @@ import {
   BuildInfoPage,
   BuildLogPage,
   RepositorySettingsPage,
+  NotFoundPage,
+  PreferencesPage,
 } from '@/pages';
 import BuildList from '@/pages/buildLog/ui/BuildList';
 import BuildDetail from '@/pages/buildLog/ui/BuildDetail';
+import { useQueryClient } from '@tanstack/react-query';
+import InitRoute from '@/features/login/ui/InitRoute';
 
 const Router = createHashRouter([
   {
@@ -21,17 +27,29 @@ const Router = createHashRouter([
     children: [
       {
         path: '',
-        element: <LoginPage />,
+        element: (
+          <PublicRoute>
+            <LoginPage />
+          </PublicRoute>
+        ),
       },
       {
         path: 'new',
-        element: <InitialPage />,
+        element: (
+          <InitRoute>
+            <InitialPage />
+          </InitRoute>
+        ),
       },
     ],
   },
   {
     path: '/',
-    element: <PageLayout />,
+    element: (
+      <ProtectedRoute>
+        <PageLayout />
+      </ProtectedRoute>
+    ),
     children: [
       {
         index: true,
@@ -71,7 +89,17 @@ const Router = createHashRouter([
           { path: ':buildId/log', element: <BuildLogPage />, handle: { breadcrumb: '빌드 로그' } },
         ],
       },
+
+      {
+        path: 'preferences',
+        handle: { breadcrumb: '설정', title: '설정' },
+        element: <PreferencesPage />,
+      },
     ],
+  },
+  {
+    path: '*',
+    element: <NotFoundPage />,
   },
 ]);
 

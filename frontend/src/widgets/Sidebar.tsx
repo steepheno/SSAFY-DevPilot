@@ -15,7 +15,7 @@ const sidebarItems = [
   { name: '홈', icon: <Home />, path: '/' },
   { name: '빌드 생성', icon: <CreateBuild />, path: '/new/repository', activePath: '/new' },
   { name: '빌드 기록', icon: <BuildLog />, path: '/builds' },
-  { name: '설정', icon: <Settings />, path: '/login' }, // 경로 임시로 설정함
+  { name: '설정', icon: <Settings />, path: '/preferences' },
 ];
 
 const SidebarItem = ({ item, isActive, onClick }: SidebarItemProps) => {
