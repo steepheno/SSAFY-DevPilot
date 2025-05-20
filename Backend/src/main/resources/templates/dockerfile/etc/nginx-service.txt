@@ -1,4 +1,4 @@
-nginx:
+  nginx:
     image: nginx:alpine
     container_name: ##PROJECT_NAME##-nginx
     ports:

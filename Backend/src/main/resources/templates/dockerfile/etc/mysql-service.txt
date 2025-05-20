@@ -1,4 +1,4 @@
-mysql:
+  mysql:
     image: mysql:##MYSQL_VERSION##
     container_name: ##PROJECT_NAME##-mysql
     environment:

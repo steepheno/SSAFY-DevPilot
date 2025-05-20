@@ -1,4 +1,4 @@
-redis:
+  redis:
     image: redis:latest
     container_name: ##PROJECT_NAME##-redis
     ports:
