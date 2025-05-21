@@ -1,5 +1,4 @@
 import MainLogo from '@/assets/login_icon.png';
-import { loginJenkins } from '@/features/login/api.ts';
 import { useAuth } from '@/features/login/lib/useAuth';
 import { useConfigStore } from '@/shared/store/configStore';
 import { useState } from 'react';
@@ -7,11 +6,10 @@ import { useNavigate } from 'react-router-dom';
 
 const LoginPage = () => {
   const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  const { login } = useAuth(password);
-  const { isLoggedIn, setIsLoggedIn } = useConfigStore();
+  const { login, isLoggingIn } = useAuth(password);
+  const { setIsLoggedIn } = useConfigStore();
   // 비밀번호 상태 체크
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPassword(e.target.value);
@@ -25,20 +23,13 @@ const LoginPage = () => {
       alert('비밀번호를 입력해주세요.');
       return;
     }
-    setIsLoading(true);
 
-    try {
-      // 로그인 성공 시 리다이렉트
-      const success = await login({ initialPassword: password });
+    // 로그인 성공 시 리다이렉트
+    const success = await login({ initialPassword: password });
 
-      if (success) {
-        setIsLoggedIn(true);
-        navigate('/');
-      }
-    } catch (error) {
-      console.error('로그인 실패: ', error);
-    } finally {
-      setIsLoading(false);
+    if (success) {
+      setIsLoggedIn(true);
+      navigate('/');
     }
   };
 
@@ -53,16 +44,16 @@ const LoginPage = () => {
           type="password"
           value={password}
           onChange={handlePasswordChange}
-          disabled={isLoading}
+          disabled={isLoggingIn}
           placeholder="Password"
           className="mt-5 h-[35px] w-[280px] rounded-md border-none bg-white px-4 py-1.5 text-sm font-bold text-[#748194] outline-none"
         />
         <button
           type="submit"
-          disabled={isLoading}
+          disabled={isLoggingIn}
           className="mt-10 h-[45px] w-[280px] rounded-md border-none bg-[#0F3758] px-4 py-1.5 text-sm font-bold text-white outline-none hover:opacity-90"
         >
-          {isLoading ? '로그인 중...' : '로그인'}
+          {isLoggingIn ? '로그인 중...' : '로그인'}
         </button>
       </form>
     </div>
