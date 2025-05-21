@@ -17,3 +17,24 @@ export interface Job {
     | 'notbuilt'
     | 'notbuilt_anime';
 }
+
+export interface BuildStatus {
+  number: number;
+  result: 'SUCCESS' | 'FAILURE' | 'UNSTABLE';
+  timestamp: number;
+  duration: number;
+  fullDisplayName: string;
+  parameters: [
+    {
+      shortDescription: string;
+      userName: string;
+      userId: string;
+    },
+  ];
+}
+
+export interface JobInfo {
+  mode: string;
+  nodeDescription: string;
+  jobs: Job[];
+}

@@ -15,6 +15,10 @@ export default {
         button: '18px',
         buttonsmall: '16px',
       },
+      fontFamily: {
+        'noto-sans-kr': ['"Noto Sans KR"', 'sans-serif'],
+        inconsolata: ['Inconsolata', 'monospace'],
+      },
       borderRadius: {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',

@@ -70,7 +70,7 @@
   }
   html,
   body {
-    @apply overscroll-none;
+    @apply overscroll-none font-noto-sans-kr;
   }
   body {
     @apply bg-background text-foreground;
@@ -86,6 +86,10 @@
   }
   a {
     @apply text-[#0000EE] visited:text-[#551A8B];
+  }
+  pre,
+  code {
+    @apply font-inconsolata;
   }
   /* li { */
   /*   @apply ml-4 list-disc; */
