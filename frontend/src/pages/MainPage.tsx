@@ -214,7 +214,12 @@ const MainPage: React.FC = () => {
                       )}
                     </Cell>
                     <Cell>
-                      <ListIcon className="mx-auto cursor-pointer" />
+                      <ListIcon
+                        className="mx-auto cursor-pointer"
+                        onClick={() => {
+                          navigate(`/builds/${job.name}`);
+                        }}
+                      />
                     </Cell>
                   </tr>
                 );
