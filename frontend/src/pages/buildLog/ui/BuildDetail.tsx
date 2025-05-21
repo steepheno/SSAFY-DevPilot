@@ -43,17 +43,11 @@ const BuildDetail = () => {
           <p>로딩 중...</p>
         ) : (
           <>
-            {/* 빌드 생성 시간 표시 & 상세 내용 입력 버튼 */}
+            {/* 빌드 생성 시간 표시 */}
             <div className="mb-4 flex justify-between">
               <p className="flex items-center px-5 text-h3 font-bold">
                 {formatTimestamp(build?.timestamp!)}
               </p>
-
-              <DetailButton
-                isEditMode={isEditMode}
-                setIsEditMode={setIsEditMode}
-                savedText={savedText}
-              />
             </div>
 
             {/* 상세 내용 표시 - 버튼 아래에 위치하도록 수정 */}
@@ -62,17 +56,6 @@ const BuildDetail = () => {
                 <div className="text-xl">{savedText}</div>
               </div>
             )}
-
-            {/* 상세 내용 입력 영역 */}
-            <div className="px-5">
-              <DetailInput
-                isEditMode={isEditMode}
-                text={text}
-                setText={setText}
-                setIsEditMode={setIsEditMode}
-                onSubmit={submitDetailContents}
-              />
-            </div>
 
             <div className="h-[60vh] max-h-full overflow-y-auto whitespace-pre-wrap bg-gray-200 p-2 font-mono text-sm">
               {streamLines.map((line, idx) => (

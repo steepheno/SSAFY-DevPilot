@@ -29,29 +29,17 @@ const Router = createHashRouter([
     children: [
       {
         path: '',
-        element: (
-          <PublicRoute>
-            <LoginPage />
-          </PublicRoute>
-        ),
+        element: <LoginPage />,
       },
       {
         path: 'new',
-        element: (
-          <InitRoute>
-            <InitialPage />
-          </InitRoute>
-        ),
+        element: <InitialPage />,
       },
     ],
   },
   {
     path: '/',
-    element: (
-      <ProtectedRoute>
-        <PageLayout />
-      </ProtectedRoute>
-    ),
+    element: <PageLayout />,
     children: [
       {
         index: true,
