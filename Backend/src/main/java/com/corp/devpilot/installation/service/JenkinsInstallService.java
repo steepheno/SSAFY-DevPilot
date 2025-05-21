@@ -119,6 +119,8 @@ public class JenkinsInstallService {
 			writer.write("JENKINS_PORT=" + request.getJenkinsPort() + "\n");
 			writer.write("JENKINS_PASSWORD=" + request.getJenkinsPassword() + "\n");
 			writer.write("CONFIG_DIR=" + request.getConfigDir() + "\n");
+			writer.write("LOCAL_FRONT_DIR=" + request.getLocalFrontDir() + "\n");
+			writer.write("LOCAL_BACK_DIR=" + request.getLocalBackendDir()+ "\n");
 
 			log.info(".env 파일에 설치 관련 정보 저장 완료: {}", envFile.getAbsolutePath());
 		} catch (IOException e) {

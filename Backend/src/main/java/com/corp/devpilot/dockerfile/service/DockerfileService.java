@@ -94,6 +94,8 @@ public class DockerfileService {
 
 			return generatedFilePaths;
 		} catch (IOException e) {
+			System.err.println("❌ IOException 발생: " + e.getMessage());
+			e.printStackTrace(); // 이 줄이 핵심입니다!
 			throw new DockerfileException(ErrorCode.DOCKER_TEMPLATE_ERROR);
 		} catch (DockerfileException e) {
 			throw e;
@@ -124,6 +126,10 @@ public class DockerfileService {
 
 	private String generateFrontendDockerfile(DockerfileRequestDto dockerfileRequestDto) throws IOException {
 		String templatePath;
+		String envPath = System.getProperty("user.home") + "/.devpilot/.env";  // 필요시 경로 수정
+		Map<String, String> envMap = loadEnv(envPath);
+		String localFrontEnvPath = envMap.getOrDefault("LOCAL_FRONT_DIR", System.getProperty("user.home")) + "/.env";
+		String argEnvBlock = generateArgAndEnvBlock(localFrontEnvPath);
 
 		switch (dockerfileRequestDto.getDockerfileFrontendType()) {
 			case REACT:
@@ -144,6 +150,7 @@ public class DockerfileService {
 		String result = template;
 		result = result.replace("##FRONTEND_PORT##", String.valueOf(dockerfileRequestDto.getFrontendPort()));
 		result = result.replace("##FRONTEND_DIR##", "../" + dockerfileRequestDto.getFrontendDir());
+		result = result.replace("##ARGUMENTS##", argEnvBlock);
 
 		return result;
 	}
@@ -155,11 +162,14 @@ public class DockerfileService {
 		String envPath = System.getProperty("user.home") + "/.devpilot/.env";  // 필요시 경로 수정
 		Map<String, String> envMap = loadEnv(envPath);
 		String ec2Host = envMap.getOrDefault("EC2_HOST", "localhost");
+		String localFrontDir = envMap.getOrDefault("LOCAL_FRONT_DIR", System.getProperty("user.home")) + "/.env";
+		String argsBlock = generateBuildArgsFromEnvKeys(localFrontDir);
 
 		String result = template;
 		result = result.replace("##PROJECT_NAME##", dockerfileRequestDto.getProjectName());
 		result = result.replace("##BACKEND_PORT##", String.valueOf(dockerfileRequestDto.getBackendPort()));
 		result = result.replace("##FRONTEND_PORT##", String.valueOf(dockerfileRequestDto.getFrontendPort()));
+		result = result.replace("##ARGUMENTS##", argsBlock);
 
 		StringBuilder additionalServices = new StringBuilder();
 
@@ -312,6 +322,31 @@ public class DockerfileService {
 		return envMap;
 	}
 
+	private String generateBuildArgsFromEnvKeys(String envFilePath) throws IOException {
+		Map<String, String> envMap = loadEnv(envFilePath);
+		StringBuilder builder = new StringBuilder();
+		for (String key : envMap.keySet()) {
+			builder.append("        ").append(key).append(": ${").append(key).append("}\n");
+		}
+		return builder.toString();
+	}
+
+	private String generateArgAndEnvBlock(String envFilePath) throws IOException {
+		Map<String, String> envMap = loadEnv(envFilePath);
+		StringBuilder block = new StringBuilder();
+
+		for (String key : envMap.keySet()) {
+			if (!key.startsWith("VITE_")) continue; // 필요한 경우 필터링
+			block.append("ARG ").append(key).append("\n");
+		}
+		block.append("\n");
+		for (String key : envMap.keySet()) {
+			if (!key.startsWith("VITE_")) continue;
+			block.append("ENV ").append(key).append("=$").append(key).append("\n");
+		}
+		return block.toString();
+	}
+
 	public void uploadFiles(DockerfileRequestDto requestDto, Map<String, String> generatedPaths) {
 		try {
 			String os = System.getProperty("os.name").toLowerCase();
@@ -325,6 +360,10 @@ public class DockerfileService {
 			String projectRoot = new File("").getAbsolutePath();
 			String uploadScript = isWindows ? projectRoot + "/scripts/window/deploy_projects_files.ps1"
 				: projectRoot + "/scripts/linux/deploy_project_files.sh";
+
+			String envPath = System.getProperty("user.home") + "/.devpilot/.env";
+			Map<String, String> envMap = loadEnv(envPath);
+			String localBackDir = envMap.getOrDefault("LOCAL_BACK_DIR", "") + "/.env";
 
 			// 스크립트 존재 여부 확인
 			File scriptFile = new File(uploadScript);
@@ -364,6 +403,27 @@ public class DockerfileService {
 					File tempNginxConf = File.createTempFile("nginx", ".conf");
 					command.add("-NginxConf");
 					command.add(tempNginxConf.getAbsolutePath());
+				}
+
+				if (!localBackDir.isEmpty()) {
+					File backendEnvFile = new File(localBackDir);
+					if (backendEnvFile.exists()) {
+						command.add("-BackendEnv");
+						command.add(backendEnvFile.getAbsolutePath());
+						System.out.println("✅ backend .env 파일 확인 및 전달: " + backendEnvFile.getAbsolutePath());
+					} else {
+						// 존재하지 않을 경우 빈 파일 생성
+						File emptyEnv = File.createTempFile("empty-backend", ".env");
+						command.add("-BackendEnv");
+						command.add(emptyEnv.getAbsolutePath());
+						System.out.println("⚠️ backend .env 파일 없음, 빈 파일 전달");
+					}
+				} else {
+					// localBackDir 값 자체가 비어 있을 경우에도 처리
+					File emptyEnv = File.createTempFile("empty-backend", ".env");
+					command.add("-BackendEnvPath");
+					command.add(emptyEnv.getAbsolutePath());
+					System.out.println("⚠️ LOCAL_BACK_DIR이 설정되지 않음, 빈 .env 파일 전달");
 				}
 			} else {
 				// Linux 환경 명령어 구성 (필요한 경우)

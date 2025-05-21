@@ -25,4 +25,10 @@ public class JenkinsInstallRequestDto {
 
 	@Schema(description = "Jenkins 구성 디렉토리", defaultValue = "/opt/jenkins_config")
 	private String configDir = "/opt/jenkins_config";
+
+	@Schema(description = "로컬 프론트엔드 주소", example = "C:/Users/SSAFY/develop/S12P31A301/frontend")
+	private String localFrontDir;
+
+	@Schema(description = "로컬 백엔드 주소", example = "C:/Users/SSAFY/develop/S12P31A301/backend")
+	private String localBackendDir;
 }

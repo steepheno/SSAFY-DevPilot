@@ -417,14 +417,17 @@ $remoteGroovyDir = "/tmp/jenkins_groovy"
 $gitlabApiTokenGroovy = "$ScriptDir\gitlab_api_token.groovy"
 $gitlabPersonalTokenGroovy = "$ScriptDir\gitlab_personal_token.groovy"
 $gitlabAuthTokenGroovy = "$ScriptDir\username_password.groovy"
+$envFileGroovy = "$ScriptDir\register_env_file.groovy"
 
 $remoteApiTokenGroovy = "$remoteGroovyDir/gitlab_api_token.groovy"
 $remotePersonalTokenGroovy = "$remoteGroovyDir/gitlab_personal_token.groovy"
 $remoteAuthTokenGroovy = "$remoteGroovyDir/username_password.groovy"
+$remoteEnvFileGroovy = "$remoteGroovyDir/register_env_file.groovy"
 
 Upload-File -localPath $gitlabApiTokenGroovy -remotePath $remoteApiTokenGroovy
 Upload-File -localPath $gitlabPersonalTokenGroovy -remotePath $remotePersonalTokenGroovy
 Upload-File -localPath $gitlabAuthTokenGroovy -remotePath $remoteAuthTokenGroovy
+Upload-File -localPath $envFileGroovy -remotePath $remoteEnvFileGroovy
 
 $gitlabApiTokenCmd = "java -jar /tmp/jenkins-cli.jar -s http://localhost:$($Server.jenkins_port) -auth admin:$env:JENKINS_PASSWORD groovy = < $remoteApiTokenGroovy $git_credentials_id $git_token"
 Invoke-Remote $gitlabApiTokenCmd
@@ -440,6 +443,12 @@ Invoke-Remote $gitlabWebhookTokenCmd
 $auth_description = "gitlab_auth"
 $gitlabAuthTokenCmd = "java -jar /tmp/jenkins-cli.jar -s http://localhost:$($Server.jenkins_port) -auth admin:$env:JENKINS_PASSWORD groovy = < $remoteAuthTokenGroovy $($git_personal_credentials_id)_auth $git_username $git_personal_token"
 Invoke-Remote $gitlabAuthTokenCmd
+
+$env_file_id = "env_file"
+$env_file_path = "/var/lib/jenkins/workspace/$jenkins_job_name/.env"
+$env_file_description = "Frontend .env file for VITE config"
+$envFileCmd = "java -jar /tmp/jenkins-cli.jar -s http://localhost:$($Server.jenkins_port) -auth admin:$env:JENKINS_PASSWORD groovy = < $remoteEnvFileGroovy $env_file_id $env_file_path $env_file_description"
+Invoke-Remote $envFileCmd
 
 # 업로드할 Groovy 스크립트 경로 지정
 $connectionGroovyPath = "$ScriptDir\gitlab_connection.groovy"
