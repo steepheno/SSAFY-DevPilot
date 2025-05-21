@@ -12,15 +12,21 @@ export interface Job {
     | 'grey_anime'
     | 'disabled'
     | 'disabled_anime'
-    | 'aborted'
+    | 'aborted' // 취소됨
     | 'aborted_anime'
-    | 'notbuilt'
-    | 'notbuilt_anime';
+    | 'notbuilt' // 빌드 전
+    | 'notbuilt_anime'; // 최초 빌드 진행중
+}
+
+export interface JobsResponse {
+  mode: string;
+  nodeDescription: string;
+  jobs: Job[];
 }
 
 export interface BuildStatus {
   number: number;
-  result: 'SUCCESS' | 'FAILURE' | 'UNSTABLE';
+  result: 'SUCCESS' | 'FAILURE' | 'UNSTABLE' | 'ABORTED';
   timestamp: number;
   duration: number;
   fullDisplayName: string;
