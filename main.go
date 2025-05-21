@@ -53,8 +53,8 @@ func main() {
 	//- Bind: 프론트엔드에서 호출 가능한 Go 메서드(Bind 대상) 등록
 	err := wails.Run(&options.App{
 		Title:            "DevPilot",
-		Width:            1024,
-		Height:           768,
+		Width:            1400,
+		Height:           900,
 		AssetServer:      &assetserver.Options{Assets: assets},
 		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 1},
 		OnStartup:        app.startup,
