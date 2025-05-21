@@ -10,7 +10,7 @@
       - /etc/letsencrypt/live/##PROJECT_DOMAIN##/privkey.pem:/etc/nginx/ssl/privkey.pem:ro
     depends_on:
       - frontend
-      #- backend
+      - backend
     networks:
       - damul-network
     restart: always
