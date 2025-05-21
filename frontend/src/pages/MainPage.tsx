@@ -2,7 +2,13 @@ import DetailButton from '@/shared/ui/DetailButton.tsx';
 import DetailInput from '@/shared/ui/DetailInput.tsx';
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { CircleCheckIcon, CircleEllipsisIcon, CircleXIcon, Play } from 'lucide-react';
+import {
+  CircleCheckIcon,
+  CircleEllipsisIcon,
+  CircleXIcon,
+  SquareArrowOutUpRight,
+  SquareArrowUpRight,
+} from 'lucide-react';
 import { Job } from '@/features/jobs/types';
 import { getJobsInfo } from '@/features/jobs/api';
 
@@ -73,39 +79,20 @@ const MainPage: React.FC = () => {
       ) : (
         <>
           <h2 className="mb-4 text-2xl font-bold">프로젝트 목록</h2>
-          {/* 제목 편집 영역 */}
-          {!isEditMode ? (
-            <div className="mb-4 flex justify-end">
-              <DetailButton
-                isEditMode={isEditMode}
-                setIsEditMode={setIsEditMode}
-                savedText={savedText}
-              />
-            </div>
-          ) : (
-            <div className="mb-4">
-              <DetailInput
-                isEditMode={isEditMode}
-                setIsEditMode={setIsEditMode}
-                text={text}
-                setText={setText}
-                onSubmit={submitTitle}
-              />
-            </div>
-          )}
 
           {/* 테이블 */}
           <table className="w-full table-fixed border-separate border-spacing-0 overflow-hidden rounded-lg border">
             <thead>
               <tr className="bg-gray-700 align-middle text-white">
-                <th className="h-12 p-2 text-center">상태</th>
+                <th className="h-12 p-2 text-center">최근 상태</th>
                 <th className="h-12 p-2 text-center">프로젝트 이름</th>
-                <th className="h-12 p-2 text-center">빌드</th>
+                <th className="h-12 p-2 text-center">로그</th>
+                <th className="h-12 p-2 text-center">최근 빌드</th>
               </tr>
             </thead>
             <tbody>
               {jobs.map((job) => {
-                const link = (
+                const jobLink = (
                   <Link
                     to={`builds/${job.name}`}
                     state={job}
@@ -113,9 +100,6 @@ const MainPage: React.FC = () => {
                   >
                     {job.name}
                   </Link>
-                );
-                const buildIcon = (
-                  <Play size={25} color="rgb(0, 200, 0)" className="mx-auto cursor-pointer" />
                 );
 
                 return (
@@ -126,8 +110,17 @@ const MainPage: React.FC = () => {
                         <span className="mt-1 text-sm">{renderStatus(job.color)}</span>
                       </div>
                     </Cell>
-                    <Cell>{link}</Cell>
-                    <Cell>{buildIcon}</Cell>
+                    <Cell>{jobLink}</Cell>
+                    <Cell>
+                      <SquareArrowOutUpRight
+                        size={25}
+                        color="gray"
+                        className="mx-auto cursor-pointer"
+                      />
+                    </Cell>
+                    <Cell>
+                      <a>#67</a>
+                    </Cell>
                   </tr>
                 );
               })}
