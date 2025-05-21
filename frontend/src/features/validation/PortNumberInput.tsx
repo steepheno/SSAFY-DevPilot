@@ -4,9 +4,17 @@ interface PortNumberInputProps {
   value: number;
   onChange: (value: number) => void;
   placeholder?: string;
+  name?: string; // name 속성 추가
+  required?: boolean; // required 속성 추가
 }
 
-const PortNumberInput = ({ value, onChange }: PortNumberInputProps) => {
+const PortNumberInput = ({
+  value,
+  onChange,
+  placeholder,
+  name,
+  required = false,
+}: PortNumberInputProps) => {
   const [error, setError] = useState('');
   // 입력 필드에 표시할 값 (빈 문자열 또는 숫자 문자열)
   const [displayValue, setDisplayValue] = useState<string>(value === 0 ? '' : value.toString());
@@ -78,6 +86,14 @@ const PortNumberInput = ({ value, onChange }: PortNumberInputProps) => {
           setIsTry(true); // 필드에서 포커스가 벗어나면 isTouched를 false -> true
           validatePortNumber(inputValue);
         }}
+        name={name}
+        required={required}
+        min="0"
+        max="65535"
+        placeholder={placeholder}
+        // HTML5 유효성 검사를 위한 pattern 속성 (숫자만 허용)
+        pattern="[0-9]*"
+        title="포트 번호는 0부터 65535 사이의 숫자여야 합니다."
       />
       {error && (
         <div className="absolute left-5 top-full z-10 w-[200px] p-1 text-xs text-red-500">
