@@ -1,6 +1,6 @@
 import DetailButton from '@/shared/ui/DetailButton.tsx';
 import DetailInput from '@/shared/ui/DetailInput.tsx';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router';
 import { useEffect, useState } from 'react';
 import {
   CircleCheckIcon,
@@ -10,7 +10,7 @@ import {
   SquareArrowUpRight,
 } from 'lucide-react';
 import { Job } from '@/features/jobs/types';
-import { getJobsInfo } from '@/features/jobs/api';
+import { getJobBuildInfo, getJobsInfo, getLastJobId } from '@/features/jobs/api';
 
 interface CellProps {
   children: React.ReactNode;
@@ -43,13 +43,48 @@ const MainPage: React.FC = () => {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
+  // useEffect(() => {
+  //
+  // 백엔드 구동 -> 젠킨스 설치완 -> 로그인시 -> 구독의 흐름
+  //  메인 진입점에서 백엔드 구동 확인함 (app.tsx or index.tsx 에서 커스텀훅 useLoadServer호출)
+  //
+  //  백엔드 구동 확인 시 jenkins 설치 요청 보내고  >>>>>( 설치 진행되는동안 로그인 ->  )
+  //
+  //  백엔드 구동 확인 & 젠킨스 설치 완료되면 SSE구독 확인 (useInstallJenkins훅 써야될진 몰겠음 SSE구독은 useSSE를 메인 진입점에서 호출, 근데 "/" 를 피해가는 가능성이 있는지 모르니 ?index같은 절대적으로 거쳐야 하는 경로에서 실행하는게 맞을거같은데)
+  //    onError 시 재시도
+  //
+
+  // }, []);
+
+  const navigate = useNavigate();
   useEffect(() => {
     setIsLoading(true);
     getJobsInfo()
-      .then((data) => setJobs(data.jobs))
+      .then((response) => setJobs(response.jobs))
       .catch((err) => console.error(err))
-      .finally(() => setIsLoading(false));
+      .finally(() => {
+        console.log(jobs);
+        setIsLoading(false);
+      });
   }, []);
+
+  const handleLogClick = async (jobName: string) => {
+    try {
+      // 클릭한 job에 대해서만 lastBuildId 호출
+      const lastId = await getLastJobId(jobName);
+      const lastBuildStatus = await getJobBuildInfo(jobName, lastId);
+
+      console.log(lastBuildStatus);
+      // 빌드 결과가 정해지지 않은 경우 로그 출력 페이지로 이동
+      if (lastBuildStatus.result === null || 'undefined') {
+        navigate(`/builds/${jobName}/${lastId}/log`, { state: { name: jobName } });
+      } else {
+        navigate(`/builds/${jobName}/${lastId}/`, { state: { name: jobName } });
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -84,15 +119,14 @@ const MainPage: React.FC = () => {
           <table className="w-full table-fixed border-separate border-spacing-0 overflow-hidden rounded-lg border">
             <thead>
               <tr className="bg-gray-700 align-middle text-white">
-                <th className="h-12 p-2 text-center">최근 상태</th>
-                <th className="h-12 p-2 text-center">프로젝트 이름</th>
-                <th className="h-12 p-2 text-center">로그</th>
                 <th className="h-12 p-2 text-center">최근 빌드</th>
+                <th className="h-12 p-2 text-center">프로젝트 이름</th>
+                <th className="h-12 p-2 text-center">빌드 목록</th>
               </tr>
             </thead>
             <tbody>
               {jobs.map((job) => {
-                const jobLink = (
+                const buildListLink = (
                   <Link
                     to={`builds/${job.name}`}
                     state={job}
@@ -108,19 +142,21 @@ const MainPage: React.FC = () => {
                       <div className="flex flex-col items-center">
                         {iconMap[job.color]}
                         <span className="mt-1 text-sm">{renderStatus(job.color)}</span>
+                        {/* 가장 최근 빌드가 존재할 때만 링크 표시 */}
+                        {job.color !== 'notbuilt' && (
+                          <SquareArrowOutUpRight
+                            size={25}
+                            color="gray"
+                            className="mx-auto cursor-pointer"
+                            onClick={() => {
+                              handleLogClick(job.name);
+                            }}
+                          />
+                        )}
                       </div>
                     </Cell>
-                    <Cell>{jobLink}</Cell>
-                    <Cell>
-                      <SquareArrowOutUpRight
-                        size={25}
-                        color="gray"
-                        className="mx-auto cursor-pointer"
-                      />
-                    </Cell>
-                    <Cell>
-                      <a>#67</a>
-                    </Cell>
+                    <Cell>{job.name}</Cell>
+                    <Cell>{buildListLink}</Cell>
                   </tr>
                 );
               })}

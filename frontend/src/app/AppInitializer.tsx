@@ -8,7 +8,7 @@ interface Props {
 }
 
 export default function AppInitializer({ children }: Props) {
-  const status = useBackendStatus();
+  const status = useBackendStatus(); // 백엔드 구동 상태 확인
 
   return (
     <div className="flex h-screen items-center justify-center">
