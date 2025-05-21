@@ -115,4 +115,9 @@ public class JenkinsParser {
 
 		return new JenkinsEventDto(evt, name, buildNumber, result, timestamp);
 	}
+
+	public static int parseLastBuildNumber(String json) {
+		JSONObject root = new JSONObject(json);
+		return root.optInt("number", 0);
+	}
 }

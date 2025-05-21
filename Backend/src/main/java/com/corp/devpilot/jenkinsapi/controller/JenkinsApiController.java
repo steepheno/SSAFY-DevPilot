@@ -41,6 +41,14 @@ public class JenkinsApiController {
 	}
 
 	/**
+	 * Job lastBuild 불러오기
+	 */
+	@GetMapping("{jobName}/lastBuild")
+	public ResponseEntity<Integer> getLastBuild(@PathVariable String jobName) {
+		return ResponseEntity.ok(jenkinsApiService.lastBuild(jobName));
+	}
+
+	/**
 	 * Jenkins build log 실시간 스트리밍 (SSE)
 	 */
 	@GetMapping(value = "/stream/{jobName}/{buildNumber}",
