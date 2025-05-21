@@ -3,27 +3,31 @@ import PortNumberInput from '@/features/validation/PortNumberInput';
 import { useFormStore } from '@/shared/store';
 import { useState } from 'react';
 
-// FormField 컴포넌트 추가
+// FormField 컴포넌트 수정 - 에러 메시지 레이아웃 변경
 const FormField = ({
   label,
   children,
   required = false,
   error = '',
   showError = false,
+  dataFieldAttr = '',
 }: {
   label: string;
   children: React.ReactNode;
   required?: boolean;
   error?: string;
   showError?: boolean;
+  dataFieldAttr?: string;
 }) => (
-  <div className="flex items-center">
-    <span className="text-m block font-medium">
-      {required && <span className="mr-1 text-red-500">*</span>}
-      {label}
-    </span>
-    <div className="ml-5">{children}</div>
-    {showError && error && <div className="ml-2 text-xs text-red-500">{error}</div>}
+  <div className="flex flex-col" data-field={dataFieldAttr}>
+    <div className="flex items-center">
+      <span className="text-m block font-medium">
+        {required && <span className="mr-1 text-red-500">*</span>}
+        {label}
+      </span>
+      <div className="ml-5">{children}</div>
+    </div>
+    {showError && error && <div className="ml-16 mt-1 text-xs text-red-500">{error}</div>}
   </div>
 );
 
@@ -91,9 +95,12 @@ const BuildInfo = () => {
           required
           showError={isTry.backendDir && !!errors.backendDir}
           error={errors.backendDir}
+          dataFieldAttr="backendDir"
         >
           <FolderNameInput
             value={backendConfig.backendDir}
+            name="backendDir"
+            required
             onChange={(e) => {
               setBackendConfig({ ...backendConfig, backendDir: e.target.value });
               setIsTry((prev) => ({ ...prev, backendDir: true }));
@@ -106,9 +113,12 @@ const BuildInfo = () => {
           required
           showError={isTry.backendPort && !!errors.backendPort}
           error={errors.backendPort}
+          dataFieldAttr="backendPort"
         >
           <PortNumberInput
-            value={backendConfig.backendPort}
+            value={Number(backendConfig.backendPort)}
+            name="backendPort"
+            required
             onChange={(value) => {
               setBackendConfig({ ...backendConfig, backendPort: value });
               setIsTry((prev) => ({ ...prev, backendPort: true }));
@@ -121,10 +131,13 @@ const BuildInfo = () => {
           required
           showError={isTry.javaVersion && !!errors.javaVersion}
           error={errors.javaVersion}
+          dataFieldAttr="javaVersion"
         >
           <select
             className={`h-[25px] rounded border px-2 ${isTry.javaVersion && errors.javaVersion ? 'border-red-500' : 'border-border'}`}
             value={backendConfig.javaVersion}
+            name="javaVersion"
+            required
             onChange={handleJavaVersionChange}
             onBlur={handleJavaVersionChange}
           >
@@ -144,9 +157,12 @@ const BuildInfo = () => {
           required
           showError={isTry.frontendDir && !!errors.frontendDir}
           error={errors.frontendDir}
+          dataFieldAttr="frontendDir"
         >
           <FolderNameInput
             value={frontendConfig.frontendDir}
+            name="frontendDir"
+            required
             onChange={(e) => {
               setFrontendConfig({ ...frontendConfig, frontendDir: e.target.value });
               setIsTry((prev) => ({ ...prev, frontendDir: true }));
@@ -159,9 +175,12 @@ const BuildInfo = () => {
           required
           showError={isTry.frontendPort && !!errors.frontendPort}
           error={errors.frontendPort}
+          dataFieldAttr="frontendPort"
         >
           <PortNumberInput
-            value={frontendConfig.frontendPort}
+            value={Number(frontendConfig.frontendPort)}
+            name="frontendPort"
+            required
             onChange={(value) => {
               setFrontendConfig({ ...frontendConfig, frontendPort: value });
               setIsTry((prev) => ({ ...prev, frontendPort: true }));
@@ -174,10 +193,13 @@ const BuildInfo = () => {
           required
           showError={isTry.dockerfileFrontendType && !!errors.dockerfileFrontendType}
           error={errors.dockerfileFrontendType}
+          dataFieldAttr="dockerfileFrontendType"
         >
           <select
             className={`h-[25px] rounded border px-2 ${isTry.dockerfileFrontendType && errors.dockerfileFrontendType ? 'border-red-500' : 'border-border'}`}
             value={frontendConfig.dockerfileFrontendType}
+            name="dockerfileFrontendType"
+            required
             onChange={handleFrontendTypeChange}
             onBlur={handleFrontendTypeChange}
           >
