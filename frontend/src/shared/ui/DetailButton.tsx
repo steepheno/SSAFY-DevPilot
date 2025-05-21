@@ -15,7 +15,6 @@ const DetailButton = ({ isEditMode, setIsEditMode, savedText }: DetailButtonProp
       onClick={() => setIsEditMode(true)}
     >
       <Pencil />
-      <span className="ml-3">{savedText ? '내용 수정' : '상세 내용 입력'}</span>
     </button>
   );
 };

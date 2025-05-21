@@ -1,4 +1,5 @@
 import MainLogo from '@/assets/login_icon.png';
+import { loginJenkins } from '@/features/login/api.ts';
 import { useAuth } from '@/features/login/lib/useAuth';
 import { useConfigStore } from '@/shared/store/configStore';
 import { useState } from 'react';
@@ -9,7 +10,7 @@ const LoginPage = () => {
   const navigate = useNavigate();
 
   const { login, isLoggingIn } = useAuth(password);
-  const { setIsLoggedIn } = useConfigStore();
+  const { isLoggedIn, setIsLoggedIn } = useConfigStore();
   // 비밀번호 상태 체크
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPassword(e.target.value);
