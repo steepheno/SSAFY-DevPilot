@@ -8,7 +8,8 @@ param(
     [string]$BackendDockerfile,
     [string]$FrontendDockerfile,
     [string]$DockerCompose,
-    [string]$NginxConf
+    [string]$NginxConf,
+    [string]$BackendEnvPath
 )
 
 # ----------------------------------
@@ -120,6 +121,7 @@ Upload-File -LocalPath $BackendDockerfile -RemotePath "$RemoteBackend/Dockerfile
 Upload-File -LocalPath $FrontendDockerfile -RemotePath "$RemoteFrontend/Dockerfile"
 Upload-File -LocalPath $DockerCompose -RemotePath "$RemoteBase/docker-compose.yml"
 Upload-File -LocalPath $NginxConf -RemotePath "$RemoteBase/nginx.conf"
+Upload-File -LocalPath $BackendEnvPath -RemotePath"$RemoteBase/.env"
 
 # ----------------------------------
 # 업로드 완료 후 원래 소유권 복원
