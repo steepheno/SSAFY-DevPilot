@@ -26,7 +26,7 @@ services:
       - damul-network
 
   mysql:
-    image: mysql:8.4.5
+    image: mysql:8.0.33
     container_name: damul-mysql
     environment:
       MYSQL_ROOT_PASSWORD: ssafy
@@ -64,7 +64,7 @@ services:
       - /etc/letsencrypt/live/k12a301.p.ssafy.io/privkey.pem:/etc/nginx/ssl/privkey.pem:ro
     depends_on:
       - frontend
-      #- backend
+      - backend
     networks:
       - damul-network
     restart: always
