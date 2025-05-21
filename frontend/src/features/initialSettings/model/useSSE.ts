@@ -5,16 +5,17 @@ export type SubscriptionStatus =
   | 'subscription_error'
   | 'subscription_end';
 
-interface UseSubscriptionStatusOptions {
+interface SubscriptionStatusOptions {
   onEvent: (type: string, payload: any) => void;
 }
 
-export function useSubscriptionStatus({ onEvent }: UseSubscriptionStatusOptions) {
+export function useSSE({ onEvent }: SubscriptionStatusOptions) {
   const [status, setStatus] = useState<SubscriptionStatus>('subscription_end');
   const evtSourceRef = useRef<EventSource | null>(null);
+  const url = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
-    const es = new EventSource('http://localhost:3000/api/jenkinsapi/events/stream/clientId');
+    const es = new EventSource(`${url}/jenkinsapi/events/stream/clientId`);
     evtSourceRef.current = es;
 
     // 1) 연결 성공

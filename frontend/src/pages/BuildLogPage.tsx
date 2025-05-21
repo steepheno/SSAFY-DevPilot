@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router';
 import LoadingSpinner from '@/shared/ui/lottie/LoadingSpinner';
-import { useSubscriptionStatus } from '@/features/initialSettings/model/useSSE';
+import { useSSE } from '@/features/initialSettings/model/useSSE';
 
 const BuildLogPage = () => {
   const { jobName, buildId } = useParams<{ jobName: string; buildId: string }>();
@@ -9,7 +9,7 @@ const BuildLogPage = () => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   // status 이벤트 구독
-  const subStatus = useSubscriptionStatus({
+  const subStatus = useSSE({
     onEvent: () => {},
   });
 
