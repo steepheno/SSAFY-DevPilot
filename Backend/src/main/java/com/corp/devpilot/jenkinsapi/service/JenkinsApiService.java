@@ -79,6 +79,23 @@ public class JenkinsApiService {
 		}
 	}
 
+	public int lastBuild(String jobName) throws JenkinsApiException {
+		isClient();
+		try {
+			String last = authorizedClient().get()
+				.uri(uri -> uri.path("/job/" + jobName + "/lastBuild/api/json")
+					.queryParam("pretty", "true")
+					.build())
+				.retrieve()
+				.bodyToMono(String.class)
+				.block();
+
+			return JenkinsParser.parseLastBuildNumber(last);
+		} catch (Exception e) {
+			return 0;
+		}
+	}
+
 	public JenkinsInfoDto fetchInfo() {
 		// GET 요청이므로 Crumb 없이 바로 호출
 		isClient();
