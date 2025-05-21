@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useJobs } from '@/features/jobs/model/useJobs';
 import { Link, useParams } from 'react-router';
 import { formatTimestamp, formatDuration } from '@/shared/lib/time';
@@ -17,16 +18,16 @@ export interface BuildEntry {
 
 const BuildList = () => {
   const { jobName } = useParams<'jobName'>();
-  const { builds, buildsError, isBuildsLoading } = useJobs(jobName!);
+  const { builds, buildsError, isBuildsLoading, refetchBuilds } = useJobs(jobName!);
 
   const headers = ['빌드 번호', '상태', '빌드 시작 시각', '경과 시간'];
 
+  useEffect(() => {
+    refetchBuilds();
+  }, [jobName, refetchBuilds]);
+
   if (isBuildsLoading) {
-    return (
-      <div>
-        <LoadingSpinner />
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   return (

@@ -1,4 +1,5 @@
 import DetailButton from '@/shared/ui/DetailButton.tsx';
+import { useJobs } from '@/features/jobs/model/useJobs';
 import DetailInput from '@/shared/ui/DetailInput.tsx';
 import { Link, useNavigate } from 'react-router';
 import { useEffect, useState } from 'react';
@@ -12,6 +13,7 @@ import {
 import { Job } from '@/features/jobs/types';
 import { getJobBuildInfo, getJobsInfo, getLastJobId } from '@/features/jobs/api';
 import { getInitialSettingsStatus } from '@/features/initialSettings/api/getInitialSettingsStatus';
+import LoadingSpinner from '@/shared/ui/lottie/LoadingSpinner';
 
 interface CellProps {
   children: React.ReactNode;
@@ -38,23 +40,24 @@ const iconMap: Record<Job['color'], JSX.Element> = {
 };
 
 const MainPage: React.FC = () => {
+  const { jobList, isJobListLoading, refetchJobList } = useJobs('');
   const [isEditMode, setIsEditMode] = useState(false);
   const [text, setText] = useState('');
   const [savedText, setSavedText] = useState('');
-  const [jobs, setJobs] = useState<Job[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
+  // 마운트될 때마다 최신 jobList를 refetch
+  //
   useEffect(() => {
-    setIsLoading(true);
-    getJobsInfo()
-      .then((response) => setJobs(response.jobs))
-      .catch((err) => console.error(err))
-      .finally(() => {
-        console.log(jobs);
-        setIsLoading(false);
-      });
-  }, []);
+    refetchJobList();
+  }, [refetchJobList]);
+
+  if (isJobListLoading) {
+    return <LoadingSpinner />;
+  }
+
+  const jobs = jobList?.jobs ?? [];
 
   const handleLogClick = async (jobName: string) => {
     try {
