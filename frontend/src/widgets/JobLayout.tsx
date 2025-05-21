@@ -1,16 +1,16 @@
-import { useParams, useLocation, useMatch, Outlet } from 'react-router-dom';
+import { useParams, useMatch, Outlet } from 'react-router-dom';
 import { CircleCheck, CircleEllipsis, CircleXIcon } from 'lucide-react';
 import LoadingSpinner from '@/shared/ui/lottie/LoadingSpinner';
 import { useJobs } from '@/features/jobs/model/useJobs';
 
 export default function JobLayout() {
   const { jobName, buildId } = useParams<{ jobName: string; buildId: string }>();
-  const location = useLocation();
+
   // 로그 페이지 매칭: /builds/:jobName/:buildId/log
   const isLogPage = useMatch('/builds/:jobName/:buildId/log');
   const isListPage = useMatch('/builds/:jobName');
 
-  const { build, isBuildLoading } = useJobs(jobName!, buildId!);
+  const { build } = useJobs(jobName!, buildId!);
 
   // 빌드 상세나 정보 페이지는 build.result 가 반드시 undefined가 아님
   // (서버에서 응답받아 세팅해 주는 상태)
