@@ -1,15 +1,13 @@
 import { useJobs } from '@/features/jobs/model/useJobs';
-import { Link, useParams, useLocation } from 'react-router';
-import { LogIn } from 'lucide-react';
-import { useEffect } from 'react';
+import { Link, useParams } from 'react-router';
 import { formatTimestamp, formatDuration } from '@/shared/lib/time';
 
-interface BuildListProps {
+export interface BuildListProps {
   jobName: string;
 }
 
 // 빌드 리스트 항목 타입 정의
-interface BuildEntry {
+export interface BuildEntry {
   number: string;
   result: string;
   timestamp: number;
@@ -18,15 +16,14 @@ interface BuildEntry {
 
 const BuildList = () => {
   const { jobName } = useParams<'jobName'>();
-  const location = useLocation();
-  const { builds, isBuildsError, buildsError, isBuildsLoading } = useJobs(jobName!);
+  const { builds } = useJobs(jobName!);
 
   const headers = ['빌드 번호', '상태', '빌드 시작 시각', '경과 시간'];
 
   return (
     <>
       {/* <h2 className="text-lg font-semibold">{location.state.name}</h2> */}
-      <table className="w-full table-fixed border-separate border-spacing-0">
+      <table className="w-full table-fixed border-separate border-spacing-0 pt-5">
         <thead>
           <tr>
             {headers.map((title) => (
@@ -50,13 +47,6 @@ const BuildList = () => {
                 <td className="border p-2 text-center align-middle">
                   {formatDuration(b.duration)}
                 </td>
-                {/* <td className="border p-2 text-center align-middle"> */}
-                {/*   <LogIn */}
-                {/*     size={20} */}
-                {/*     className="mx-auto cursor-pointer" */}
-                {/*     // onClick={() => window.open(b.logUrl, '_blank')} */}
-                {/*   /> */}
-                {/* </td> */}
               </tr>
             ))
           ) : (
