@@ -1,6 +1,7 @@
 import { useJobs } from '@/features/jobs/model/useJobs';
 import { Link, useParams } from 'react-router';
 import { formatTimestamp, formatDuration } from '@/shared/lib/time';
+import LoadingSpinner from '@/shared/ui/lottie/LoadingSpinner';
 
 export interface BuildListProps {
   jobName: string;
@@ -16,9 +17,17 @@ export interface BuildEntry {
 
 const BuildList = () => {
   const { jobName } = useParams<'jobName'>();
-  const { builds } = useJobs(jobName!);
+  const { builds, buildsError, isBuildsLoading } = useJobs(jobName!);
 
   const headers = ['빌드 번호', '상태', '빌드 시작 시각', '경과 시간'];
+
+  if (isBuildsLoading) {
+    return (
+      <div>
+        <LoadingSpinner />
+      </div>
+    );
+  }
 
   return (
     <>
@@ -34,26 +43,31 @@ const BuildList = () => {
           </tr>
         </thead>
         <tbody>
-          {builds?.length > 0 ? (
-            builds.map((b: any) => (
+          {buildsError ? (
+            // 에러가 있을 때
+            <tr>
+              <td colSpan={headers.length} className="border p-2 text-center text-red-500">
+                빌드 정보를 불러오는 중 오류가 발생했습니다.
+              </td>
+            </tr>
+          ) : builds && builds.length > 0 ? (
+            // 에러 없고 빌드가 있을 때
+            builds.map((b: BuildEntry) => (
               <tr key={b.number} className="align-middle">
-                <td className="border p-2 text-center align-middle">
+                <td className="border p-2 text-center">
                   <Link to={`${b.number}`}>#{b.number}</Link>
                 </td>
-                <td className="border p-2 text-center align-middle">{b.result}</td>
-                <td className="border p-2 text-center align-middle">
-                  {formatTimestamp(b.timestamp)}
-                </td>
-                <td className="border p-2 text-center align-middle">
-                  {formatDuration(b.duration)}
-                </td>
+                <td className="border p-2 text-center">{b.result}</td>
+                <td className="border p-2 text-center">{formatTimestamp(b.timestamp)}</td>
+                <td className="border p-2 text-center">{formatDuration(b.duration)}</td>
               </tr>
             ))
           ) : (
-            // 빌드 데이터가 없을 때 컬럼 수에 맞춰 빈 행 표시
-            <tr className="align-middle">
-              <td className="border p-2 text-center text-gray-500" colSpan={headers.length}>
-                빌드 정보가 없습니다.
+            // 에러 없고 빌드 데이터가 없을 때
+            <tr>
+              <td colSpan={headers.length} className="border p-2 text-center text-gray-500">
+                빌드 정보가 없습니다. 원격 브랜치의 target 브랜치에 push 이벤트 발생 시 새 빌드가
+                진행됩니다.
               </td>
             </tr>
           )}
