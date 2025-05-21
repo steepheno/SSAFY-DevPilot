@@ -1,4 +1,4 @@
-interface DockerfileConfig {
+export interface DockerConfig {
   projectName: string;
   backendDir: string;
   frontendDir: string;
@@ -16,5 +16,3 @@ interface DockerfileConfig {
   mysqlUser: string;
   mysqlPassword: string;
 }
-
-export default DockerfileConfig;
