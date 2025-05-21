@@ -1,9 +1,16 @@
 import { instance } from '@/shared/api/instance';
+import { Job } from './types';
 import { BuildStatus } from './types';
 
 // Job 목록 정보 조회
-export const getJobsInfo = async () => {
+export const getJobsInfo = async (): Promise<Job[]> => {
   const response = await instance.get('/jenkinsapi/info');
+  return response.data;
+};
+
+// 가장 마지막의 Job id 조회
+export const getLastJobId = async (jobName: string) => {
+  const response = await instance.get(`/jenkinsapi/${jobName}/lastBuild`);
   return response.data;
 };
 
