@@ -12,9 +12,9 @@ const InitialPage = () => {
   const [settings, setSettings] = useState<InitialSettings>({
     pemPath: '',
     ec2Host: '',
-    jenkinsPort: '',
+    jenkinsPort: '8080',
     jenkinsPassword: '',
-    configDir: '',
+    configDir: '/opt/jenkins_config',
   });
   const fields = Object.keys(settings) as (keyof InitialSettings)[];
 
@@ -78,9 +78,6 @@ const InitialPage = () => {
     }
   };
 
-  const inputStyle = `
-`;
-
   return (
     <div className="flex h-screen items-center justify-center">
       <form
@@ -91,7 +88,7 @@ const InitialPage = () => {
       >
         <img src={MainLogo} alt="Main Logo" className="h-[130px] w-[150px] justify-start" />
 
-        <div className={`${inputStyle} m-10 flex w-[280px] flex-col gap-5`}>
+        <div className={`m-10 flex w-[280px] flex-col gap-5`}>
           {/* <div className="flex items-center gap-2 p-0"> */}
           <input
             type="text"
@@ -105,7 +102,7 @@ const InitialPage = () => {
           {/* </div> */}
 
           {fields
-            .filter((k) => k !== 'pemPath')
+            .filter((k) => k !== 'pemPath' && k !== 'jenkinsPort' && k !== 'configDir')
             .map((key) => {
               return (
                 <input
