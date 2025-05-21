@@ -1,42 +1,31 @@
+import { useJobs } from '@/features/jobs/model/useJobs';
+import { Link, useParams, useLocation } from 'react-router';
 import { LogIn } from 'lucide-react';
+import { useEffect } from 'react';
+import { formatTimestamp, formatDuration } from '@/shared/lib/time';
+
+interface BuildListProps {
+  jobName: string;
+}
 
 // 빌드 리스트 항목 타입 정의
-// interface BuildEntry {
-//   number: string;
-//   duration: string;
-//   status: string;
-//   logUrl: string;
-// }
+interface BuildEntry {
+  number: string;
+  result: string;
+  timestamp: number;
+  duration: number;
+}
 
 const BuildList = () => {
-  // 컬럼 헤더 설정
-  const headers = ['빌드 번호', '상태', '경과 시간', '로그'];
+  const { jobName } = useParams<'jobName'>();
+  const location = useLocation();
+  const { builds, isBuildsError, buildsError, isBuildsLoading } = useJobs(jobName!);
 
-  const builds = [
-    {
-      number: 1,
-      duration: 1,
-      status: '성공',
-    },
+  const headers = ['빌드 번호', '상태', '빌드 시작 시각', '경과 시간'];
 
-    {
-      number: 2,
-      duration: 1,
-      status: '성공',
-    },
-    {
-      number: 3,
-      duration: 1,
-      status: '성공',
-    },
-    {
-      number: 4,
-      duration: 1,
-      status: '성공',
-    },
-  ];
   return (
     <>
+      {/* <h2 className="text-lg font-semibold">{location.state.name}</h2> */}
       <table className="w-full table-fixed border-separate border-spacing-0">
         <thead>
           <tr>
@@ -48,19 +37,26 @@ const BuildList = () => {
           </tr>
         </thead>
         <tbody>
-          {builds.length > 0 ? (
-            builds.map((b) => (
+          {builds?.length > 0 ? (
+            builds.map((b: any) => (
               <tr key={b.number} className="align-middle">
-                <td className="border p-2 text-center align-middle">#{b.number}</td>
-                <td className="border p-2 text-center align-middle">{b.status}</td>
-                <td className="border p-2 text-center align-middle">{b.duration}</td>
                 <td className="border p-2 text-center align-middle">
-                  <LogIn
-                    size={20}
-                    className="mx-auto cursor-pointer"
-                    // onClick={() => window.open(b.logUrl, '_blank')}
-                  />
+                  <Link to={`${b.number}`}>#{b.number}</Link>
                 </td>
+                <td className="border p-2 text-center align-middle">{b.result}</td>
+                <td className="border p-2 text-center align-middle">
+                  {formatTimestamp(b.timestamp)}
+                </td>
+                <td className="border p-2 text-center align-middle">
+                  {formatDuration(b.duration)}
+                </td>
+                {/* <td className="border p-2 text-center align-middle"> */}
+                {/*   <LogIn */}
+                {/*     size={20} */}
+                {/*     className="mx-auto cursor-pointer" */}
+                {/*     // onClick={() => window.open(b.logUrl, '_blank')} */}
+                {/*   /> */}
+                {/* </td> */}
               </tr>
             ))
           ) : (

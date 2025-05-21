@@ -1,8 +1,10 @@
-import LoadingSpinner from '@/shared/ui/lottie/LoadingSpinner.tsx';
-import { CircleCheckIcon, CirclePlayIcon, CircleXIcon } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
+import { useParams } from 'react-router';
+import { CircleCheckIcon, CirclePlayIcon, CircleXIcon } from 'lucide-react';
+import LoadingSpinner from '@/shared/ui/lottie/LoadingSpinner.tsx';
 
 const BuildLogPage = () => {
+  const { buildId } = useParams<{ buildId: string }>();
   const [buildStatus, setBuildStatus] = useState<'pending' | 'progress' | 'complete' | 'error'>(
     'pending',
   );
@@ -31,11 +33,12 @@ const BuildLogPage = () => {
   //   };
   // }
 
-  const sse_url = import.meta.env.VITE_SSE_URL;
+  const url = import.meta.env.VITE_API_URL;
   useEffect(() => {
-    const eventSource = new EventSource(sse_url);
+    const eventSource = new EventSource(`${url}/events/stream/clientId`);
     eventSource.onmessage = (event) => {
       const { type, payload } = JSON.parse(event.data);
+      const text = typeof payload === 'string' ? payload : JSON.stringify(payload);
 
       switch (type) {
         // case 'subscription_succeeded':
@@ -69,7 +72,8 @@ const BuildLogPage = () => {
     });
 
     eventSource.onerror = (error: any) => {
-      setLog((prev) => [...prev, { message: error as string, isError: true }]);
+      const errorMessage = (error as ErrorEvent).message || 'SSE error';
+      setLog((prev) => [...prev, { message: errorMessage as string, isError: true }]);
       eventSource.close();
     };
 
@@ -92,37 +96,22 @@ const BuildLogPage = () => {
   }, [log]);
 
   return (
-    <div className="">
-      <h2>빌드 로그</h2>
-      <div className="flex items-center gap-2">
-        {buildStatus === 'progress' ? (
-          <LoadingSpinner />
-        ) : buildStatus === 'complete' ? (
-          <CircleCheckIcon size={24} color="green" />
-        ) : buildStatus === 'error' ? (
-          <CircleXIcon size={24} color="red" />
-        ) : (
-          <CirclePlayIcon size={24} color="gray" />
-        )}
-        <h3>{'buildNo.'}</h3>
-      </div>
-
+    <div className="overflow-hidden">
       <div
         ref={containerRef}
-        className="h-1/3 max-h-full min-h-48 overflow-y-auto overscroll-none whitespace-pre-wrap rounded-sm bg-gray-200 p-2 font-mono text-sm"
+        className="h-[60vh] max-h-full overflow-y-auto whitespace-pre-wrap bg-gray-200 p-2 font-mono text-sm"
       >
         {/* 라인넘버와 로그 표시 */}
         {log.map((line, idx) => (
-          <div className="flex">
-            <span
-              className={`${line.isError ? 'text-red-600' : ''} w-10 select-none pr-4 text-left text-gray-400`}
+          <pre key={idx} className="flex whitespace-pre-wrap">
+            <div
+              className={`${line.isError ? 'text-red-600' : ''} w-10 select-none pr-4 text-right text-gray-400`}
             >
               {idx + 1}
-            </span>
-            {/* 구분선 */}
-            <div className="mx-2 border-r border-gray-400" />
+            </div>
+            <div className="mx-2" />
             <span className={line.isError ? 'text-red-600' : ''}>{line.message}</span>
-          </div>
+          </pre>
         ))}
       </div>
     </div>

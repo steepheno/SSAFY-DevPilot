@@ -12,7 +12,6 @@ import {
   InitialPage,
   MainPage,
   DockerSettings,
-  BuildInfoPage,
   BuildLogPage,
   RepositorySettingsPage,
   NotFoundPage,
@@ -21,7 +20,7 @@ import {
 } from '@/pages';
 import BuildList from '@/pages/buildLog/ui/BuildList';
 import BuildDetail from '@/pages/buildLog/ui/BuildDetail';
-import { useQueryClient } from '@tanstack/react-query';
+import JobLayout from '@/widgets/JobLayout';
 
 const Router = createHashRouter([
   {
@@ -86,14 +85,28 @@ const Router = createHashRouter([
         element: <Outlet />, // 하위 라우트만 렌더
         handle: { breadcrumb: '빌드 기록' },
         children: [
-          { index: true, element: <BuildList /> },
-          { path: ':buildId', element: <BuildInfoPage /> },
           {
-            path: ':buildId/detail',
-            element: <BuildDetail />,
-            handle: { breadcrumb: '빌드 상세' },
+            path: ':jobName',
+            element: <JobLayout />,
+            children: [
+              // 2-1) /builds/:jobName   (index, optional)
+              { index: true, element: <BuildList /> },
+              // 2-2) /builds/:jobName/:buildId
+              // { path: ':buildId', element: <BuildInfoPage /> },
+              // 2-3) /builds/:jobName/:buildId/detail
+              {
+                path: ':buildId/',
+                element: <BuildDetail />,
+                handle: { breadcrumb: '빌드 상세' },
+              },
+              // 2-4) /builds/:jobName/:buildId/log
+              {
+                path: ':buildId/log',
+                element: <BuildLogPage />,
+                handle: { breadcrumb: '빌드 로그' },
+              },
+            ],
           },
-          { path: ':buildId/log', element: <BuildLogPage />, handle: { breadcrumb: '빌드 로그' } },
         ],
       },
 

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { CircleCheck, CircleEllipsis, CircleXIcon } from 'lucide-react';
-import { BuildStatus } from '@/entities/build/types';
+import { BuildStatus } from '@/features/jobs/types';
 
 const BuildDetailPage = () => {
   const [buildStatus] = useState<BuildStatus | null>(null);
