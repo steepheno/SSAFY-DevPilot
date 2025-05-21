@@ -4,6 +4,7 @@ import { InitialSettings } from '@/features/initialSettings/types';
 
 import PemUploaderContainer from '@/features/upload';
 import { useConfigStore } from '@/shared/store/configStore';
+import LoadingSpinner from '@/shared/ui/lottie/LoadingSpinner';
 import { useState } from 'react';
 
 const InitialPage = () => {
@@ -67,7 +68,6 @@ const InitialPage = () => {
     try {
       // API 호출
       const response = await postInitialSettings(settings);
-      console.log(settings);
       if (response === true) {
         alert(
           `초기 설정이 완료되었습니다. \n아래 발급된 Password를 반드시 저장해주세요.\nPassword: ${settings.jenkinsPassword}`,
@@ -81,18 +81,15 @@ const InitialPage = () => {
     }
   };
 
-  const inputStyle = `
-    [&_input]:h-[35px]
-    [&_input]:rounded-md
-    [&_input]:border-none
-    [&_input]:bg-white
-    [&_input]:px-4
-    [&_input]:py-1.5
-    [&_input]:text-sm
-    [&_input]:font-bold
-    [&_input]:text-[#748194]
-    [&_input]:outline-none
-`;
+  if (loading) {
+    return (
+      <div className="flex h-screen flex-col items-center justify-center">
+        <LoadingSpinner />
+        <span className="ml-2 text-lg font-medium">초기 설정을 처리 중입니다. </span>
+        <span className="ml-2 text-sm font-normal">(5~10분 정도 걸릴 수 있습니다...)</span>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen items-center justify-center">

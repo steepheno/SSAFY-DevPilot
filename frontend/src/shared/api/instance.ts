@@ -18,3 +18,8 @@ export const fastApiInstance = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
+export const initialSettingsInstance = axios.create({
+  baseURL: API_URL,
+  timeout: 10 * 60 * 1000, // 10분
+});
