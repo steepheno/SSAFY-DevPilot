@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useFormStore } from '@/shared/store';
 import { TagInput, Tag } from 'emblor';
 import { BranchConfig } from '@/entities/repository/types';
@@ -16,14 +16,16 @@ const FormField = ({
   required = false,
   error = '',
   showError = false,
+  dataFieldAttr,
 }: {
   label: string;
   children: React.ReactNode;
   required?: boolean;
   error?: string;
   showError?: boolean;
+  dataFieldAttr?: string;
 }) => (
-  <div className="mt-3 space-y-2">
+  <div className="mt-3 space-y-2" data-field={dataFieldAttr}>
     <span className="text-m block font-medium text-gray-700">
       {required && <span className="mr-1 text-red-500">*</span>}
       {label}
@@ -35,8 +37,16 @@ const FormField = ({
 
 const RepositoryForm = () => {
   const { repositoryConfig, setRepositoryConfig } = useFormStore();
+  const tagInputRef = useRef<HTMLDivElement>(null);
 
-  const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
+  // 스토어의 브랜치 설정에서 초기 태그 목록 생성
+  const initialTags =
+    repositoryConfig.jenkinsfileBranchConfigs?.map((branch) => ({
+      id: branch.branchName,
+      text: branch.branchName,
+    })) || [];
+
+  const [selectedTags, setSelectedTags] = useState<Tag[]>(initialTags);
   const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null);
 
   // 각 필드별 에러 상태
@@ -139,6 +149,30 @@ const RepositoryForm = () => {
     }
   };
 
+  // 스토어의 브랜치 설정이 바뀌면 컴포넌트 상태도 업데이트
+  useEffect(() => {
+    if (repositoryConfig.jenkinsfileBranchConfigs) {
+      const tagsFromStore = repositoryConfig.jenkinsfileBranchConfigs.map((branch) => ({
+        id: branch.branchName,
+        text: branch.branchName,
+      }));
+
+      // 태그 내용이 다를 때만 업데이트하여 무한 루프 방지
+      const currentTagIds = selectedTags
+        .map((tag) => tag.id)
+        .sort()
+        .join(',');
+      const storeTagIds = tagsFromStore
+        .map((tag) => tag.id)
+        .sort()
+        .join(',');
+
+      if (currentTagIds !== storeTagIds) {
+        setSelectedTags(tagsFromStore);
+      }
+    }
+  }, [repositoryConfig.jenkinsfileBranchConfigs]);
+
   return (
     <>
       <div>
@@ -147,6 +181,7 @@ const RepositoryForm = () => {
           required
           error={errors.gitUserName}
           showError={isTry.gitUserName && !!errors.gitUserName}
+          dataFieldAttr="gitUserName"
         >
           <input
             required
@@ -156,6 +191,7 @@ const RepositoryForm = () => {
             value={repositoryConfig.gitUserName}
             onChange={(e) => handleFieldChange('gitUserName', e.target.value)}
             onBlur={(e) => handleBlur('gitUserName', e.target.value)}
+            name="gitUserName"
           />
         </FormField>
       </div>
@@ -166,6 +202,7 @@ const RepositoryForm = () => {
           required
           error={errors.gitRepoUrl}
           showError={isTry.gitRepoUrl && !!errors.gitRepoUrl}
+          dataFieldAttr="gitRepoUrl"
         >
           <input
             required
@@ -175,6 +212,7 @@ const RepositoryForm = () => {
             value={repositoryConfig.gitRepoUrl}
             onChange={(e) => handleFieldChange('gitRepoUrl', e.target.value)}
             onBlur={(e) => handleBlur('gitRepoUrl', e.target.value)}
+            name="gitRepoUrl"
           />
         </FormField>
 
@@ -183,38 +221,51 @@ const RepositoryForm = () => {
           required
           error={errors.branches}
           showError={isTry.branches && !!errors.branches}
+          dataFieldAttr="branches"
         >
-          <TagInput
-            minTags={1}
-            required
-            tags={selectedTags}
-            setTags={(newTags: any) => {
-              onTagsChange(newTags);
-            }}
-            styleClasses={{
-              tagList: {
-                container: 'p-0',
-              },
-              input: `max-w-80 p-0 min-w-20 h-10 md:max-w-[350px] ${
-                isTry.branches && errors.branches ? 'border-red-500' : ''
-              }`,
-              inlineTagsContainer: `min-w-20 bg-white p-0 gap-2 ${
-                isTry.branches && errors.branches ? 'border-red-500' : ''
-              }`,
-              autoComplete: {
-                popoverContent: 'bg-white p-0',
-              },
-              tag: {
-                body: 'bg-gray-100 p-1 ml-2 rounded-md text-gray-600',
-                closeButton: 'text-gray-400',
-              },
-            }}
-            enableAutocomplete={true}
-            autocompleteOptions={tagChoices}
-            activeTagIndex={activeTagIndex}
-            setActiveTagIndex={setActiveTagIndex}
-            onBlur={() => handleBlur('branches', selectedTags)}
-          />
+          <div className="branch-input-container" ref={tagInputRef}>
+            <TagInput
+              minTags={1}
+              required
+              tags={selectedTags}
+              setTags={(newTags: any) => {
+                onTagsChange(newTags);
+              }}
+              styleClasses={{
+                tagList: {
+                  container: 'p-0',
+                },
+                input: `max-w-80 p-0 min-w-20 h-10 md:max-w-[350px] ${
+                  isTry.branches && errors.branches ? 'border-red-500' : ''
+                }`,
+                inlineTagsContainer: `min-w-20 bg-white p-0 gap-2 ${
+                  isTry.branches && errors.branches ? 'border-red-500' : ''
+                }`,
+                autoComplete: {
+                  popoverContent: 'bg-white p-0',
+                },
+                tag: {
+                  body: 'bg-gray-100 p-1 ml-2 rounded-md text-gray-600',
+                  closeButton: 'text-gray-400',
+                },
+              }}
+              enableAutocomplete={true}
+              autocompleteOptions={tagChoices}
+              activeTagIndex={activeTagIndex}
+              setActiveTagIndex={setActiveTagIndex}
+              onBlur={() => handleBlur('branches', selectedTags)}
+              data-testid="branch-tag-input"
+            />
+            {/* 브랜치 선택에 포커스를 맞추기 위한 숨겨진 input 추가 */}
+            <input
+              type="hidden"
+              name="branches-validation"
+              required={true}
+              value={selectedTags.length > 0 ? 'valid' : ''}
+              tabIndex={-1}
+              aria-hidden="true"
+            />
+          </div>
         </FormField>
       </div>
 
@@ -224,6 +275,7 @@ const RepositoryForm = () => {
           required
           error={errors.gitCredentialsId}
           showError={isTry.gitCredentialsId && !!errors.gitCredentialsId}
+          dataFieldAttr="gitCredentialsId"
         >
           <input
             className={`h-10 min-w-20 max-w-full rounded border-[1px] pl-2 ${
@@ -233,6 +285,7 @@ const RepositoryForm = () => {
             required
             onChange={(e) => setRepositoryConfig({ gitCredentialsId: e.target.value })}
             onBlur={(e) => handleBlur('gitCredentialsId', e.target.value)}
+            name="gitCredentialsId"
           />
         </FormField>
 
@@ -241,6 +294,7 @@ const RepositoryForm = () => {
           required
           error={errors.gitToken}
           showError={isTry.gitToken && !!errors.gitToken}
+          dataFieldAttr="gitToken"
         >
           <input
             className={`h-10 w-80 min-w-20 rounded border-[1px] pl-2 ${
@@ -250,6 +304,7 @@ const RepositoryForm = () => {
             required
             onChange={(e) => setRepositoryConfig({ gitToken: e.target.value })}
             onBlur={(e) => handleBlur('gitToken', e.target.value)}
+            name="gitToken"
           />
         </FormField>
       </div>
@@ -260,6 +315,7 @@ const RepositoryForm = () => {
           required
           error={errors.gitPersonalCredentialsId}
           showError={isTry.gitPersonalCredentialsId && !!errors.gitPersonalCredentialsId}
+          dataFieldAttr="gitPersonalCredentialsId"
         >
           <input
             className={`h-10 min-w-20 max-w-full rounded border-[1px] pl-2 ${
@@ -271,6 +327,7 @@ const RepositoryForm = () => {
             required
             onChange={(e) => setRepositoryConfig({ gitPersonalCredentialsId: e.target.value })}
             onBlur={(e) => handleBlur('gitPersonalCredentialsId', e.target.value)}
+            name="gitPersonalCredentialsId"
           />
         </FormField>
 
@@ -279,6 +336,7 @@ const RepositoryForm = () => {
           required
           error={errors.gitPersonalToken}
           showError={isTry.gitPersonalToken && !!errors.gitPersonalToken}
+          dataFieldAttr="gitPersonalToken"
         >
           <input
             className={`h-10 w-80 min-w-20 rounded border-[1px] pl-2 ${
@@ -288,6 +346,7 @@ const RepositoryForm = () => {
             required
             onChange={(e) => setRepositoryConfig({ gitPersonalToken: e.target.value })}
             onBlur={(e) => handleBlur('gitPersonalToken', e.target.value)}
+            name="gitPersonalToken"
           />
         </FormField>
       </div>
