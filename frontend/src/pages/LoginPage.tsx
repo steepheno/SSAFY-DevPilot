@@ -1,5 +1,4 @@
 import MainLogo from '@/assets/login_icon.png';
-import { loginJenkins } from '@/features/login/api.ts';
 import { useAuth } from '@/features/login/lib/useAuth';
 import { useConfigStore } from '@/shared/store/configStore';
 import { useState } from 'react';
@@ -9,12 +8,8 @@ const LoginPage = () => {
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
-<<<<<<< HEAD
   const { login, isLoggingIn } = useAuth(password);
-=======
-  const { login } = useAuth(password);
->>>>>>> 9a403fbb37117d760cfeb6a1c5653e3fa5e1e482
-  const { isLoggedIn, setIsLoggedIn } = useConfigStore();
+  const { setIsLoggedIn } = useConfigStore();
   // 비밀번호 상태 체크
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPassword(e.target.value);
@@ -29,27 +24,12 @@ const LoginPage = () => {
       return;
     }
 
-<<<<<<< HEAD
     // 로그인 성공 시 리다이렉트
     const success = await login({ initialPassword: password });
 
     if (success) {
       setIsLoggedIn(true);
       navigate('/');
-=======
-    try {
-      // 로그인 성공 시 리다이렉트
-      const success = await login({ initialPassword: password });
-
-      if (success) {
-        setIsLoggedIn(true);
-        navigate('/');
-      }
-    } catch (error) {
-      console.error('로그인 실패: ', error);
-    } finally {
-      setIsLoading(false);
->>>>>>> 9a403fbb37117d760cfeb6a1c5653e3fa5e1e482
     }
   };
 
