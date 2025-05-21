@@ -4,7 +4,6 @@ import DetailButton from '@/shared/ui/DetailButton.tsx';
 import DetailInput from '@/shared/ui/DetailInput.tsx';
 import { useJobs } from '@/features/jobs/model/useJobs';
 import { formatTimestamp } from '@/shared/lib/time';
-import { instance } from '@/shared/api/instance';
 import { getBuildStream } from '@/features/jobs/api';
 
 const BuildDetail = () => {
@@ -16,7 +15,7 @@ const BuildDetail = () => {
     jobName: string;
     buildId: string;
   }>();
-  const { build, isBuildError, isBuildLoading } = useJobs(jobName!, buildId!);
+  const { build, isBuildLoading } = useJobs(jobName!, buildId!);
   const [streamLines, setStreamLines] = useState<string[]>([]);
 
   useEffect(() => {
