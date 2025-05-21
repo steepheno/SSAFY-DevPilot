@@ -12,7 +12,6 @@ import {
   InitialPage,
   MainPage,
   DockerSettings,
-  BuildInfoPage,
   BuildLogPage,
   RepositorySettingsPage,
   NotFoundPage,

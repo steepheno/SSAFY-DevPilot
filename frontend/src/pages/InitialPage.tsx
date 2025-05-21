@@ -1,10 +1,10 @@
 import MainLogo from '@/assets/login_icon.png';
 import { postInitialSettings } from '@/features/initialSettings/api/postInitialSettings';
 import { InitialSettings } from '@/features/initialSettings/types';
+
 import PemUploaderContainer from '@/features/upload';
 import { useConfigStore } from '@/shared/store/configStore';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 const InitialPage = () => {
   const [loading, setLoading] = useState(false);
@@ -26,8 +26,7 @@ const InitialPage = () => {
     configDir: '설정 디렉토리',
   };
 
-  const navigate = useNavigate();
-  const { isInitialized, setIsInitialized } = useConfigStore();
+  const { setIsInitialized } = useConfigStore();
 
   // 입력 필드 변경 처리
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -77,6 +76,19 @@ const InitialPage = () => {
       setLoading(false);
     }
   };
+
+  const inputStyle = `
+    [&_input]:h-[35px]
+    [&_input]:rounded-md
+    [&_input]:border-none
+    [&_input]:bg-white
+    [&_input]:px-4
+    [&_input]:py-1.5
+    [&_input]:text-sm
+    [&_input]:font-bold
+    [&_input]:text-[#748194]
+    [&_input]:outline-none
+`;
 
   return (
     <div className="flex h-screen items-center justify-center">
