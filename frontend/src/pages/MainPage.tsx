@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { Job } from '@/features/jobs/types';
 import { getJobBuildInfo, getJobsInfo, getLastJobId } from '@/features/jobs/api';
+import { getInitialSettingsStatus } from '@/features/initialSettings/api/getInitialSettingsStatus';
 
 interface CellProps {
   children: React.ReactNode;
@@ -42,19 +43,6 @@ const MainPage: React.FC = () => {
   const [savedText, setSavedText] = useState('');
   const [jobs, setJobs] = useState<Job[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-
-  // useEffect(() => {
-  //
-  // 백엔드 구동 -> 젠킨스 설치완 -> 로그인시 -> 구독의 흐름
-  //  메인 진입점에서 백엔드 구동 확인함 (app.tsx or index.tsx 에서 커스텀훅 useLoadServer호출)
-  //
-  //  백엔드 구동 확인 시 jenkins 설치 요청 보내고  >>>>>( 설치 진행되는동안 로그인 ->  )
-  //
-  //  백엔드 구동 확인 & 젠킨스 설치 완료되면 SSE구독 확인 (useInstallJenkins훅 써야될진 몰겠음 SSE구독은 useSSE를 메인 진입점에서 호출, 근데 "/" 를 피해가는 가능성이 있는지 모르니 ?index같은 절대적으로 거쳐야 하는 경로에서 실행하는게 맞을거같은데)
-  //    onError 시 재시도
-  //
-
-  // }, []);
 
   const navigate = useNavigate();
   useEffect(() => {
