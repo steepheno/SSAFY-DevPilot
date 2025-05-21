@@ -27,13 +27,16 @@ public class JenkinsApiService {
 	private WebClient client;
 	private final String user;
 	private final TokenManager tokenManager;
+	private final String envPath;
 
 	public JenkinsApiService(
 		TokenManager tokenManager,
-		@Value("${server.jenkins.user}") String user
+		@Value("${server.jenkins.user}") String user,
+		@Value("${user.home}/.devpilot/.env") String envPath
 	) {
 		this.tokenManager = tokenManager;
 		this.user = user;
+		this.envPath = envPath;
 	}
 
 	// 토큰 증명용
@@ -52,7 +55,7 @@ public class JenkinsApiService {
 		if (client == null) {
 			try {
 				Properties props = new Properties();
-				props.load(new FileInputStream("/root/.devpilot/.env"));
+				props.load(new FileInputStream(envPath));
 
 				SslContext sslContext = SslContextBuilder.forClient()
 					.trustManager(InsecureTrustManagerFactory.INSTANCE)

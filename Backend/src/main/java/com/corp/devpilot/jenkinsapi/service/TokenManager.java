@@ -33,7 +33,7 @@ public class TokenManager {
 
 	private WebClient webClientForAuth;
 	private final String user;
-	private final File tokenFile;
+	private final String tokenFilePath;
 	private final String envPath;
 
 	public TokenManager(
@@ -42,7 +42,7 @@ public class TokenManager {
 		@Value("${user.home}/.devpilot/.env") String envPath
 	) {
 		this.user = user;
-		this.tokenFile = new File(tokenFilePath);
+		this.tokenFilePath = tokenFilePath;
 		this.envPath = envPath;
 	}
 
@@ -80,6 +80,7 @@ public class TokenManager {
 	public String getToken() {
 		isClient();
 		try {
+			File tokenFile = new File(tokenFilePath);
 			if (!tokenFile.exists()) {
 				return "";
 			}
@@ -154,6 +155,7 @@ public class TokenManager {
 			.getJSONObject("data")
 			.getString("tokenValue");
 
+		File tokenFile = new File(tokenFilePath);
 		File parentDir = tokenFile.getParentFile();
 		if (parentDir != null && !parentDir.exists()) {
 			boolean created = parentDir.mkdirs();
