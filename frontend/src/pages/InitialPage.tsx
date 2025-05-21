@@ -64,11 +64,16 @@ const InitialPage = () => {
     try {
       // API 호출
       const response = await postInitialSettings(settings);
+<<<<<<< HEAD
       console.log(settings);
       if (response === true) {
         alert(
           `초기 설정이 완료되었습니다. \n아래 발급된 Password를 반드시 저장해주세요.\nPassword: ${settings.jenkinsPassword}`,
         );
+=======
+      if (response === true) {
+        alert('다운로드 완료! 아래 발급된 Password를 반드시 저장해주세요.\nPassword: aaa');
+>>>>>>> 9a403fbb37117d760cfeb6a1c5653e3fa5e1e482
         setIsInitialized(response);
       }
     } catch (error) {
@@ -79,23 +84,44 @@ const InitialPage = () => {
   };
 
   const inputStyle = `
+<<<<<<< HEAD
+=======
+    [&_input]:h-[35px]
+    [&_input]:rounded-md
+    [&_input]:border-none
+    [&_input]:bg-white
+    [&_input]:px-4
+    [&_input]:py-1.5
+    [&_input]:text-sm
+    [&_input]:font-bold
+    [&_input]:text-[#748194]
+    [&_input]:outline-none
+>>>>>>> 9a403fbb37117d760cfeb6a1c5653e3fa5e1e482
 `;
 
   return (
     <div className="flex h-screen items-center justify-center">
       <form
         className={
+<<<<<<< HEAD
           'flex min-h-[500px] max-w-[400px] flex-col items-center rounded-2xl bg-gray-200 p-10'
+=======
+          'flex h-[500px] max-w-[400px] flex-col items-center rounded-2xl bg-gray-200 p-10'
+>>>>>>> 9a403fbb37117d760cfeb6a1c5653e3fa5e1e482
         }
         onSubmit={handleSubmit}
       >
         <img src={MainLogo} alt="Main Logo" className="h-[130px] w-[150px] justify-start" />
+<<<<<<< HEAD
 
+=======
+>>>>>>> 9a403fbb37117d760cfeb6a1c5653e3fa5e1e482
         <div className={`${inputStyle} m-10 flex w-[280px] flex-col gap-5`}>
           {/* <div className="flex items-center gap-2 p-0"> */}
           <input
             type="text"
             name="pemPath"
+<<<<<<< HEAD
             placeholder=".pem 파일 경로"
             value={settings.pemPath}
             onChange={handleChange}
@@ -119,6 +145,29 @@ const InitialPage = () => {
                 />
               );
             })}
+=======
+            placeholder="pem Path"
+            value={settings.pemPath}
+            onChange={handleChange}
+            className=""
+          />
+          {/* <PemUploaderContainer /> */}
+          {/* </div> */}
+          <input
+            type="text"
+            name="ec2Host"
+            value={settings.ec2Host}
+            onChange={handleChange}
+            placeholder="EC2 Host"
+          />
+          <input
+            type="text"
+            name="jenkinsPassword"
+            value={settings.jenkinsPassword}
+            onChange={handleChange}
+            placeholder="Jenkins Password"
+          />
+>>>>>>> 9a403fbb37117d760cfeb6a1c5653e3fa5e1e482
         </div>
         <button
           type="submit"

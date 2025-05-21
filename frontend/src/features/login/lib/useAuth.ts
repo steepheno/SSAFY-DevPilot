@@ -8,8 +8,13 @@ export function useAuth(password: string | null) {
   const {
     data: isLoggedIn = false,
     isPending: isChecking,
+<<<<<<< HEAD
     isError: isLoginError,
     error: loginError,
+=======
+    isError,
+    error,
+>>>>>>> 9a403fbb37117d760cfeb6a1c5653e3fa5e1e482
   } = useQuery<boolean, Error>({
     queryKey: ['auth'],
     queryFn: () => loginJenkins({ initialPassword: password! }),
@@ -21,6 +26,7 @@ export function useAuth(password: string | null) {
     onSuccess: (loggedIn) => {
       client.setQueryData(['auth', password], loggedIn);
     },
+<<<<<<< HEAD
     onError: (err: any) => {
       if (err.response?.status === 401) {
         alert('패스워드가 틀렸습니다.');
@@ -31,4 +37,9 @@ export function useAuth(password: string | null) {
   });
 
   return { isLoggedIn, login, isLoggingIn, isChecking, isLoginError, loginError };
+=======
+  });
+
+  return { isLoggedIn, login, isLoggingIn, isChecking, isError, error };
+>>>>>>> 9a403fbb37117d760cfeb6a1c5653e3fa5e1e482
 }

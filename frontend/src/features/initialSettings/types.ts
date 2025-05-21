@@ -9,3 +9,7 @@ export interface InitialSettings {
 export interface InitialSettingsStatus {
   initialized: boolean;
 }
+
+export interface InitialSettingsStatus {
+  initialized: boolean;
+}
