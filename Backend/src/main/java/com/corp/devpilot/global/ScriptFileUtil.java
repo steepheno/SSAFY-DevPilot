@@ -56,24 +56,36 @@ public class ScriptFileUtil {
 
 		String jarPath;
 		try {
-			URL url = ScriptFileUtil.class.getProtectionDomain()
+			URL location = ScriptFileUtil.class.getProtectionDomain()
 				.getCodeSource()
 				.getLocation();
 
-			String fullPath = url.toString();
+			// 예: jar:file:/C:/Users/.../devpilot.jar!/BOOT-INF/classes/
+			String locationStr = location.toString();
 
-			if (fullPath.startsWith("jar:")) {
-				fullPath = fullPath.substring(4); // "jar:" 제거
-			}
-			if (fullPath.contains("!")) {
-				fullPath = fullPath.substring(0, fullPath.indexOf("!")); // 내부 경로 제거
+			// "jar:" 접두어 제거
+			if (locationStr.startsWith("jar:")) {
+				locationStr = locationStr.substring(4);
 			}
 
-			jarPath = new File(new URI(fullPath)).getAbsolutePath();
+			// "!/" 포함되어 있으면 JAR 내부 경로이므로 잘라냄
+			if (locationStr.contains("!")) {
+				locationStr = locationStr.substring(0, locationStr.indexOf("!"));
+			}
+
+			// 이 시점에 locationStr은 "file:/C:/Users/.../devpilot.jar"
+			URI fileUri = new URI(locationStr);
+
+			if (!"file".equalsIgnoreCase(fileUri.getScheme())) {
+				throw new IllegalArgumentException("JAR URI가 file 스킴이 아님: " + fileUri);
+			}
+
+			jarPath = new File(fileUri).getAbsolutePath();
 
 		} catch (URISyntaxException e) {
 			throw new RuntimeException("JAR 경로 URI 변환 실패", e);
 		}
+
 
 		File jarDir = new File(jarPath).getParentFile();
 		File targetDir = new File(jarDir, "scripts");
