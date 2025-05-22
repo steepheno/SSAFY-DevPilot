@@ -16,8 +16,6 @@ const InitialPage = () => {
     jenkinsPort: '8080',
     jenkinsPassword: '',
     configDir: '/opt/jenkins_config',
-    localBackendDir: '',
-    localFrontDir: '',
   });
   const fields = Object.keys(settings) as (keyof InitialSettings)[];
 
@@ -27,8 +25,6 @@ const InitialPage = () => {
     jenkinsPort: 'Jenkins 포트',
     jenkinsPassword: '사용할 Jenkins 패스워드',
     configDir: '설정 디렉토리',
-    localBackendDir: '로컬 백엔드 경로',
-    localFrontDir: '로컬 프론트엔드 경로',
   };
 
   const { setIsInitialized } = useConfigStore();
