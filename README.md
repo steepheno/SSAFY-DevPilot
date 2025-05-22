@@ -155,7 +155,6 @@ VITE_FAST_API_URL = "http://70.12.130.101:8000/api"
   6. 컨테이너 실행: `docker-compose up -d`
 
 ### ⚠️ 배포 시 특이사항
-
 #### 인프라 
 1. port가 열려 있어야 함
   - 22(ssh) 
@@ -164,8 +163,8 @@ VITE_FAST_API_URL = "http://70.12.130.101:8000/api"
   - 8080(Jenkins)
 
 2. SSL 설정
-   * /nginx/ssl/fullchain.pem
-   * /nginx/ssl/privkey.pem
+  - /nginx/ssl/fullchain.pem
+  - /nginx/ssl/privkey.pem
 
 ### 📦 프로젝트 종속성
 #### 1) 백엔드 종속성
