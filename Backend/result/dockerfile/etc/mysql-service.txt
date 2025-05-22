@@ -1,0 +1,15 @@
+  mysql:
+    image: mysql:8.0.33
+    container_name: damul-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ssafy
+      MYSQL_DATABASE: damul
+      MYSQL_USER: damul
+      MYSQL_PASSWORD: ssafy
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - damul-network
+    restart: always
