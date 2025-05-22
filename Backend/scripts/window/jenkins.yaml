@@ -1,0 +1,24 @@
+﻿credentials:
+  system:
+    domainCredentials:
+      - domain:
+          name: "global"
+          description: "Global credentials domain"
+        credentials:
+          - string:
+              scope: GLOBAL
+              id: "gitlab_personal_token"
+              secret: "SN57eHzWx64DMsezspxT"  # ?섍꼍蹂?섏뿉???좏겙???쎌뒿?덈떎
+              description: "GitLab Personal Access Token"
+
+unclassified:
+  gitLabServers:
+    servers:
+      - name: "gitlab-server"
+        serverUrl: "https://lab.ssafy.com"
+        credentialsId: "gitlab_token"  # ?꾩뿉???깅줉??ID 李몄“
+        manageWebHooks: true
+        manageSystemHooks: false
+        secretToken: "uPjxHLCvbDzNjsya_H5T"
+        hookRootUrl: ""
+

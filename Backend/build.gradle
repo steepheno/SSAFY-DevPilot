@@ -1,0 +1,80 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.4.5'
+	id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.corp'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(17)
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	// Spring Boot 기본
+	implementation 'org.springframework.boot:spring-boot-starter'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+	// Test
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.security:spring-security-test'
+	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.2'
+	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
+	testImplementation 'org.mockito:mockito-core'
+	testImplementation 'org.mockito:mockito-junit-jupiter'
+	testImplementation 'org.mockito:mockito-inline:3.12.4'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	// Dev Tools
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+
+	// Test에서 lombok 사용을 위한 의존성 추가
+	testCompileOnly 'org.projectlombok:lombok'
+	testAnnotationProcessor 'org.projectlombok:lombok'
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+	// Swagger
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'
+
+	// Logback
+	implementation 'ch.qos.logback:logback-classic'
+	implementation 'ch.qos.logback:logback-core'
+
+	// json
+	implementation 'org.json:json:20231013'
+
+	// SSH 및 원격 명령 실행
+	implementation 'com.jcraft:jsch:0.1.55'
+	implementation 'commons-io:commons-io:2.11.0'
+	implementation 'org.apache.commons:commons-lang3:3.12.0'
+
+	// 템플릿 엔진 (Jenkinsfile, Dockerfile 생성용)
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+
+	// HTTP 클라이언트 (Jenkins API 호출용)
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
+	// 보안 및 암호화
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.bouncycastle:bcprov-jdk15on:1.70'
+
+	// YAML 처리
+	implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
+
+	// 구성 값 검증
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}

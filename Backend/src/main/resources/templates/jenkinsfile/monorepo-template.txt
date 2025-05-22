@@ -1,0 +1,229 @@
+pipeline {
+  agent any
+
+  parameters {
+      string(name: 'BRANCH_NAME', defaultValue: 'master', description: 'Branch to build')
+  }
+
+  environment {
+      PROJECT_NAME = '[(${projectName})]'
+      GIT_REPO = '[(${gitRepositoryUrl})]'
+      FRONTEND_DIR = '[(${frontendDir})]'
+      BACKEND_DIR = '[(${backendDir})]'
+      BASE_PATH = "/var/lib/jenkins/workspace"
+      // Determine branch from parameter
+      BRANCH_TO_BUILD = "${params.BRANCH_NAME}"
+  }
+
+  stages {
+      stage('Debug Info') {
+          steps {
+              echo "Building branch: ${BRANCH_TO_BUILD}"
+              sh 'id'
+          }
+      }
+
+      stage('Checkout') {
+          steps {
+              checkout([$class: 'GitSCM',
+                  branches: [[name: "*/${BRANCH_TO_BUILD}"]],
+                  doGenerateSubmoduleConfigurations: false,
+                  extensions: [],
+                  submoduleCfg: [],
+                  userRemoteConfigs: [[
+                      credentialsId: '[(${gitCredentialsId})]',
+                      url: '[(${gitRepositoryUrl})]'
+                  ]]
+              ])
+              echo "Checked out branch: ${BRANCH_TO_BUILD}"
+
+              // Verify current branch
+              script {
+                  // Get current checked out branch name
+                  env.CURRENT_BRANCH = sh(script: 'git rev-parse --abbrev-ref HEAD', returnStdout: true).trim()
+                  echo "Detected current branch: ${env.CURRENT_BRANCH}"
+
+                  // If we are in detached HEAD state, use the build parameter instead
+                  if (env.CURRENT_BRANCH == 'HEAD') {
+                      env.CURRENT_BRANCH = BRANCH_TO_BUILD
+                      echo "Using build parameter for branch name: ${env.CURRENT_BRANCH}"
+                  }
+              }
+          }
+      }
+
+      stage('Frontend Build') {
+          when {
+              expression {
+                  def config = findBranchConfig("${env.CURRENT_BRANCH}")
+                  return config != null && config.buildEnabled
+              }
+          }
+          steps {
+              dir('[(${frontendDir})]') {
+                  script {
+                      echo "Building frontend in directory: [(${frontendDir})]"
+                      // Use clean ASCII characters only in shell commands
+                      sh '''
+                          # Create cache directory
+                          mkdir -p ~/.npm
+
+                          # Node.js 22 build with fallback
+                          docker run --rm -v "$(pwd):/app" -w /app node:22-alpine sh -c "rm -rf node_modules package-lock.json && npm install && npm run build" || \
+                          docker run --rm -v "$(pwd):/app" -w /app node:22-alpine sh -c "npm install && npm run build"
+
+                          # Package artifacts
+                          mkdir -p ./dist
+                          cp -r build/* ./dist/ 2>/dev/null || cp -r dist/* ./dist/ 2>/dev/null || true
+                      '''
+                  }
+              }
+          }
+      }
+
+      stage('Backend Build') {
+          when {
+              expression {
+                  def config = findBranchConfig("${env.CURRENT_BRANCH}")
+                  return config != null && config.buildEnabled
+              }
+          }
+          steps {
+              dir('[(${backendDir})]') {
+                  script {
+                      echo "Building backend in directory: [(${backendDir})]"
+                      // Check project type
+                      if (fileExists('pom.xml')) {
+                          sh 'docker run --rm -v "$(pwd):/app" -w /app maven:3.8-openjdk-17 mvn clean package -DskipTests'
+                      } else if (fileExists('build.gradle') || fileExists('build.gradle.kts')) {
+                          sh 'docker run --rm -v "$(pwd):/app" -w /app gradle:7.4-jdk17 ./gradlew clean build -x test'
+                      } else {
+                          error "Neither pom.xml nor build.gradle found in backend directory"
+                      }
+                  }
+              }
+          }
+      }
+
+      stage('Test') {
+          when {
+              expression {
+                  def config = findBranchConfig("${env.CURRENT_BRANCH}")
+                  // Skip tests
+                  return false
+              }
+          }
+          steps {
+              dir('[(${backendDir})]') {
+                  script {
+                      echo "Running tests in directory: [(${backendDir})]"
+                      if (fileExists('pom.xml')) {
+                          sh 'docker run --rm -v "$(pwd):/app" -w /app maven:3.8-openjdk-17 mvn test'
+                          sh 'find . -name "*.xml" -path "*/target/surefire-reports/*" -exec cp {} . \\;'
+                          junit '**/target/surefire-reports/*.xml'
+                      } else if (fileExists('build.gradle') || fileExists('build.gradle.kts')) {
+                          sh 'docker run --rm -v "$(pwd):/app" -w /app gradle:7.4-jdk17 ./gradlew test'
+                          sh 'find . -name "*.xml" -path "*/build/test-results/test/*" -exec cp {} . \\;'
+                          junit '**/build/test-results/test/*.xml'
+                      } else {
+                          error "Neither pom.xml nor build.gradle found in backend directory"
+                      }
+                  }
+              }
+          }
+      }
+
+      stage('Docker Build & Deploy') {
+          when {
+              expression {
+                  def config = findBranchConfig("${env.CURRENT_BRANCH}")
+                  return config != null && config.deployEnabled
+              }
+          }
+          steps {
+              script {
+                  // Debug commands
+                  sh '''
+                      echo "Docker commands debug"
+                      id
+                      docker --version || echo "Docker command failed"
+                      docker compose --version || echo "Docker compose command failed"
+                  '''
+
+                  // Execute Docker commands
+                  if (isUnix()) {
+                      sh '''
+                          # Deploy with docker-compose
+                          cd ${BASE_PATH}/${PROJECT_NAME} && docker compose down || echo "down failed"
+                          cd ${BASE_PATH}/${PROJECT_NAME} && docker compose build || echo "build failed"
+                          cd ${BASE_PATH}/${PROJECT_NAME} && docker compose up -d || echo "up failed"
+                      '''
+                  } else {
+                      // Windows commands
+                      bat "cd ${BASE_PATH}\\${PROJECT_NAME} && docker compose down"
+                      bat "cd ${BASE_PATH}\\${PROJECT_NAME} && docker compose build"
+                      bat "cd ${BASE_PATH}\\${PROJECT_NAME} && docker compose up -d"
+                  }
+              }
+          }
+      }
+  }
+
+  post {
+      [# th:if="${mattermostNotification}"]
+      always {
+          mattermostSend channel: '[(${mattermostChannel})]',
+                         color: currentBuild.currentResult == 'SUCCESS' ? 'good' : 'danger',
+                         message: "Build ${currentBuild.currentResult}: ${env.JOB_NAME} #${env.BUILD_NUMBER}\nDetails: ${env.BUILD_URL}",
+                         endpoint: '[(${mattermostWebhookUrl})]'
+      }
+      [/]
+      success {
+          echo "Pipeline for ${PROJECT_NAME} completed successfully!"
+      }
+      failure {
+          echo "Pipeline for ${PROJECT_NAME} failed!"
+      }
+  }
+}
+
+def findBranchConfig(branchName) {
+  echo "Finding configuration for branch: ${branchName}"
+
+  // Handle null, empty or HEAD branch names
+  if (branchName == null || branchName.trim() == '' || branchName == 'HEAD') {
+      branchName = 'master'
+      echo "Invalid branch name detected, using default: ${branchName}"
+  }
+
+  def branchConfigs = [
+      ##BRANCH_CONFIGS##
+  ]
+
+  // First try exact match
+  def exactMatch = branchConfigs.find { it.branchName == branchName }
+  if (exactMatch) {
+      return exactMatch
+  }
+
+  // Then try pattern matching for feature branches
+  if (branchName.startsWith('feature/')) {
+      def featureConfig = branchConfigs.find { it.branchName == 'feature/*' }
+      if (featureConfig) {
+          return featureConfig
+      }
+  }
+
+  // Default handling for common branches
+  if (branchName == 'main' || branchName == 'master' || branchName == 'develop') {
+      def defaultConfig = [:]
+      defaultConfig.branchName = branchName
+      defaultConfig.buildEnabled = true
+      defaultConfig.testEnabled = true
+      defaultConfig.deployEnabled = branchName == 'main' || branchName == 'master'
+      return defaultConfig
+  }
+
+  // No configuration found
+  return null
+}
