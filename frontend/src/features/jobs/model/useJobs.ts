@@ -8,9 +8,12 @@ export const useJobs = (jobName: string, buildNumber?: string) => {
     error: jobListError,
     isPending: isJobListLoading,
     isError: isJobListError,
+    refetch: refetchJobList,
   } = useQuery({
     queryKey: ['jobs'],
     queryFn: () => getJobsInfo(),
+    refetchOnMount: true,
+    refetchOnReconnect: true,
   });
 
   const {
@@ -18,6 +21,7 @@ export const useJobs = (jobName: string, buildNumber?: string) => {
     error: buildsError,
     isPending: isBuildsLoading,
     isError: isBuildsError,
+    refetch: refetchBuilds,
   } = useQuery({
     queryKey: [jobName, 'builds'],
     queryFn: () => {
@@ -32,6 +36,7 @@ export const useJobs = (jobName: string, buildNumber?: string) => {
     error: buildError,
     isPending: isBuildLoading,
     isError: isBuildError,
+    refetch: refetchBuild,
   } = useQuery({
     queryKey: [jobName, 'build', buildNumber],
     queryFn: () => getJobBuildInfo(jobName, buildNumber!),
@@ -60,5 +65,9 @@ export const useJobs = (jobName: string, buildNumber?: string) => {
     isJobListLoading,
     isBuildsLoading,
     isBuildLoading,
+
+    refetchJobList,
+    refetchBuilds,
+    refetchBuild,
   };
 };

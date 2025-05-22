@@ -1,15 +1,11 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	"embed"
 	"fmt"
 	"os"
-	"os/exec"
 	"os/signal"
-	"runtime"
-	"strings"
 	"syscall"
 
 	"github.com/wailsapp/wails/v2"
@@ -31,28 +27,6 @@ var assets embed.FS
 */
 //go:embed devpilot-0.0.1-SNAPSHOT.jar
 var jarBytes []byte // 실제 jar 파일 내용이 들어갈 메모리 공간
-
-/*
-시스템 내 java 실행 파일 경로 확인
-결과가 유효하면 절대 경로, 아니면 PATH 환경변수 내 "java" 리턴
-*/
-func findJava() string {
-	var cmd *exec.Cmd
-	if runtime.GOOS == "windows" {
-		cmd = exec.Command("where", "java")
-	} else {
-		cmd = exec.Command("which", "java")
-	}
-	var out bytes.Buffer
-	cmd.Stdout = &out
-	if err := cmd.Run(); err == nil {
-		line := strings.TrimSpace(strings.SplitN(out.String(), "\n", 2)[0])
-		if info, err := os.Stat(line); err == nil && !info.IsDir() {
-			return line
-		}
-	}
-	return "java"
-}
 
 func main() {
 	// App 구조체 instance (startup, shutdown 로직 포함)
@@ -79,8 +53,8 @@ func main() {
 	//- Bind: 프론트엔드에서 호출 가능한 Go 메서드(Bind 대상) 등록
 	err := wails.Run(&options.App{
 		Title:            "DevPilot",
-		Width:            1024,
-		Height:           768,
+		Width:            1280,
+		Height:           800,
 		AssetServer:      &assetserver.Options{Assets: assets},
 		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 1},
 		OnStartup:        app.startup,

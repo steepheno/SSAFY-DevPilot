@@ -59,7 +59,7 @@ const Router = createHashRouter([
       },
       {
         path: 'new',
-        handle: { breadcrumb: '새 파이프라인' },
+        handle: { breadcrumb: '새 프로젝트' },
         element: <BuildFormLayout />,
         children: [
           {

@@ -27,7 +27,7 @@ const FormField = ({
       </span>
       <div className="ml-5">{children}</div>
     </div>
-    {showError && error && <div className="ml-16 mt-1 text-xs text-red-500">{error}</div>}
+    {showError && error && <div className="ml-20 mt-1 text-xs text-red-500">{error}</div>}
   </div>
 );
 
@@ -105,6 +105,14 @@ const BuildInfo = () => {
               setBackendConfig({ ...backendConfig, backendDir: e.target.value });
               setIsTry((prev) => ({ ...prev, backendDir: true }));
             }}
+            onBlur={(e) => {
+              setIsTry((prev) => ({ ...prev, backendDir: true }));
+              if (!e.target.value.trim()) {
+                setErrors((prev) => ({ ...prev, backendDir: '백엔드 폴더명을 입력해주세요.' }));
+              } else {
+                setErrors((prev) => ({ ...prev, backendDir: '' }));
+              }
+            }}
           />
         </FormField>
 
@@ -166,6 +174,17 @@ const BuildInfo = () => {
             onChange={(e) => {
               setFrontendConfig({ ...frontendConfig, frontendDir: e.target.value });
               setIsTry((prev) => ({ ...prev, frontendDir: true }));
+            }}
+            onBlur={(e) => {
+              setIsTry((prev) => ({ ...prev, frontendDir: true }));
+              if (!e.target.value.trim()) {
+                setErrors((prev) => ({
+                  ...prev,
+                  frontendDir: '프론트엔드 폴더명을 입력해주세요.',
+                }));
+              } else {
+                setErrors((prev) => ({ ...prev, frontendDir: '' }));
+              }
             }}
           />
         </FormField>
