@@ -60,18 +60,22 @@ public class ScriptFileUtil {
 				.getCodeSource()
 				.getLocation();
 
-			String path = location.getPath(); // ← 핵심
-			if (path.contains("!")) {
-				path = path.substring(0, path.indexOf("!"));
+			// URL.toString() 대신 안전하게 getPath() 사용
+			String rawPath = location.getPath(); // 이건 "/C:/Users/.../devpilot.jar"
+			if (rawPath.contains("!")) {
+				rawPath = rawPath.substring(0, rawPath.indexOf("!"));
 			}
-			if (path.startsWith("file:")) {
-				path = path.substring("file:".length());
+			if (rawPath.startsWith("file:")) {
+				rawPath = rawPath.substring("file:".length());
+			}
+			if (rawPath.startsWith("/")) {
+				// 윈도우에서는 /C:/... 형태를 C:/...로 바꿔야 함
+				rawPath = rawPath.substring(1);
 			}
 
-			// 디코딩 필요: 공백이 %20 등으로 인코딩되어 있을 수 있음
-			path = java.net.URLDecoder.decode(path, "UTF-8");
+			rawPath = java.net.URLDecoder.decode(rawPath, "UTF-8");
 
-			File jarFile = new File(path);
+			File jarFile = new File(rawPath);
 			jarPath = jarFile.getAbsolutePath();
 
 		} catch (Exception e) {
