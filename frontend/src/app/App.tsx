@@ -9,7 +9,7 @@ import PageLayout from '@/widgets/PageLayout';
 import BuildFormLayout from '@/widgets/BuildFormLayout';
 import {
   LoginPage,
-  InitialPage,
+  // InitialPage,
   MainPage,
   DockerSettings,
   BuildLogPage,
@@ -34,14 +34,14 @@ const Router = createHashRouter([
           </PublicRoute>
         ),
       },
-      {
-        path: 'new',
-        element: (
-          <InitRoute>
-            <InitialPage />
-          </InitRoute>
-        ),
-      },
+      // {
+      //   path: 'new',
+      //   element: (
+      //     <InitRoute>
+      //       <InitialPage />
+      //     </InitRoute>
+      //   ),
+      // },
     ],
   },
   {

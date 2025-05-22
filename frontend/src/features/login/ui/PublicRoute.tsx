@@ -29,10 +29,10 @@ function PublicRoute({ children }: Props) {
   if (isLoggedIn) {
     return <Navigate to="/" replace state={{ from: location }} />;
   }
-  // 초기 설정이 안 돼 있으면 초기 설정 페이지로
-  if (!isInitialized) {
-    return <Navigate to="/login/new" replace state={{ from: location }} />;
-  }
+  // // 초기 설정이 안 돼 있으면 초기 설정 페이지로
+  // if (!isInitialized) {
+  //   return <Navigate to="/login/new" replace state={{ from: location }} />;
+  // }
   // 초기 설정도 완료, 로그인 전 사용자 전용 페이지 렌더
   return <>{children}</>;
 }
