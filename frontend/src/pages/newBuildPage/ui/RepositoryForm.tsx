@@ -40,11 +40,7 @@ const RepositoryForm = () => {
   const tagInputRef = useRef<HTMLDivElement>(null);
 
   // 스토어의 브랜치 설정에서 초기 태그 목록 생성
-  const initialTags =
-    repositoryConfig.jenkinsfileBranchConfigs?.map((branch) => ({
-      id: branch.branchName,
-      text: branch.branchName,
-    })) || [];
+  const initialTags: Tag[] = [];
 
   const [selectedTags, setSelectedTags] = useState<Tag[]>(initialTags);
   const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null);
@@ -140,13 +136,12 @@ const RepositoryForm = () => {
 
     setRepositoryConfig({ jenkinsfileBranchConfigs: newBranchConfigs });
 
-    // 브랜치 필드 유효성 검사
-    if (isTry.branches) {
-      setErrors((prev) => ({
-        ...prev,
-        branches: validateField('branches', newTags),
-      }));
-    }
+    // 브랜치 필드 상호작용 표시 및 유효성 검사
+    setIsTry((prev) => ({ ...prev, branches: true }));
+    setErrors((prev) => ({
+      ...prev,
+      branches: validateField('branches', newTags),
+    }));
   };
 
   // 스토어의 브랜치 설정이 바뀌면 컴포넌트 상태도 업데이트
