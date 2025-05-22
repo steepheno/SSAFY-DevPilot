@@ -6,6 +6,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.StreamUtils;
 
 import java.io.*;
+import java.net.URISyntaxException;
 import java.nio.file.Paths;
 
 @Slf4j
@@ -51,9 +52,18 @@ public class ScriptFileUtil {
 			"scripts/window/utils.ps1"
 		};
 
+		String jarPath;
+		try {
+			jarPath = new File(ScriptFileUtil.class.getProtectionDomain()
+				.getCodeSource()
+				.getLocation()
+				.toURI()).getAbsolutePath();
+		} catch (URISyntaxException e) {
+			throw new RuntimeException("JAR 경로 URI 변환 실패", e);
+		}
 
-		String basePath = System.getProperty("java.io.tmpdir") + "devpilot-" + System.nanoTime();
-		File targetDir = new File(basePath, "scripts");
+		File jarDir = new File(jarPath).getParentFile();
+		File targetDir = new File(jarDir, "scripts");
 		if (!targetDir.exists()) {
 			targetDir.mkdirs();
 		}
