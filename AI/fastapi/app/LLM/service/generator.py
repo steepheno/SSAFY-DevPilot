@@ -83,44 +83,43 @@ You are an expert in CICD and Jenkins. Please answer the user's question strictl
 [Answer]
 """
 
+
 prompt = PromptTemplate.from_template(template)
 chain = prompt | llm | StrOutputParser()
 
 chat_histories: Dict[str, List[Dict[str, str]]] = {}
 
-def build_chat_history_string(history: List[Dict[str, str]], max_turns: int = 4) -> str:
-    # 최근 N턴만 사용
-    if len(history) > max_turns * 2:
-        history = history[-max_turns * 2:]
-
-    return "\n".join([
-        f"<|user|>\n{m['content']}" if m["role"] == "user" else f"<|assistant|>\n{m['content']}"
-        for m in history
-    ])
-
 async def generate_chat_response(session_id: str, question: str) -> str:
-    history = chat_histories.get(session_id, [])
 
+    if not question or len(question.strip()) == 0:
+        return "질문을 입력해주세요."
+    if len(question) > 1000:  # 예시로 500자 제한
+        return "질문이 너무 길어요. 1000자 이하로 입력해주세요."
+
+    if question.lower() == "새 대화":
+        chat_histories[session_id] = []  # 대화 이력 초기화
+        return "대화 내역이 초기화 됐습니다. 새로 질문해주세요!"
+        
+    history = chat_histories.get(session_id, [])
+        
     # RAG 검색
     best_answers = query_multiple_indexes(question, embeddings)
     context = " ".join([doc['metadata']['text'] for doc in best_answers]) if best_answers else ""
+    history_str = "\n".join([f"{m['role'].capitalize()}: {m['content']}" for m in history])
 
-    # 대화 이력 문자열 생성
-    history_str = build_chat_history_string(history)
-
-    # 답변 생성
+    # 응답 생성
     if not context and not history:
         response = "저는 Jenkins 및 CICD와 관련된 질문에만 답변할 수 있습니다. 다른 질문을 부탁드립니다."
     elif not context:
         response = "죄송합니다. 해당 내용을 찾을 수 없습니다."
     else:
-        response = await chain.ainvoke({
+        response = chain.invoke({
             "context": context,
             "chat_history": history_str,
             "question": question
         })
 
-    # 이력 저장
+    # 히스토리 저장
     history.append({"role": "user", "content": question})
     history.append({"role": "assistant", "content": response})
     chat_histories[session_id] = history
