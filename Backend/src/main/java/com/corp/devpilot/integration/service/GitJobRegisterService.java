@@ -61,7 +61,7 @@ public class GitJobRegisterService {
 			+ "git_credential_id: " + request.getGitCredentialsId() + "\n"
 			+ "git_personal_token: " + request.getGitPersonalToken() + "\n"
 			+ "git_personal_credential_id: " + request.getGitPersonalCredentialsId() + "\n"
-			+ "git_username: " + request.getGitUsername() + "\n"
+			+ "git_username: " + request.getGitUserName() + "\n"
 			+ "git_repo_url: " + request.getGitRepoUrl() + "\n"
 			+ "jenkins_job_name: " + request.getJenkinsJobName());
 
@@ -80,7 +80,7 @@ public class GitJobRegisterService {
 		command.add(request.getGitPersonalCredentialsId());
 
 		command.add("-git_username");
-		command.add(request.getGitUsername());
+		command.add(request.getGitUserName());
 
 		command.add("-git_repo_url");
 		command.add(request.getGitRepoUrl());
