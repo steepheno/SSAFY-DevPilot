@@ -56,6 +56,14 @@ public class GitJobRegisterService {
 		} else {
 			command.add("bash");
 		}
+		System.out.println("scriptPath: " + scriptPath + "\n"
+			+ "git_token: " + request.getGitToken() + "\n"
+			+ "git_credential_id: " + request.getGitCredentialsId() + "\n"
+			+ "git_personal_token: " + request.getGitPersonalToken() + "\n"
+			+ "git_personal_credential_id: " + request.getGitPersonalCredentialsId() + "\n"
+			+ "git_username: " + request.getGitUsername() + "\n"
+			+ "git_repo_url: " + request.getGitRepoUrl() + "\n"
+			+ "jenkins_job_name: " + request.getJenkinsJobName());
 
 		command.add(scriptPath);
 
