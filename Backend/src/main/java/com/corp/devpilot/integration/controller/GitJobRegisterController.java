@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,9 +28,17 @@ public class GitJobRegisterController {
 	@Operation(summary = "GitHub 파이프라인 등록", description = "GitHub 저장소를 Jenkins Job으로 등록합니다.")
 	public ResponseEntity<Map<String, Object>> registerGithubJob(@RequestBody GitJobRegisterRequest requestDto) {
 		String os = System.getProperty("os.name").toLowerCase();
-		String scriptPath = os.contains("win")
-			? githubScriptPath.replace(".sh", ".ps1").replace("/scripts/", "/scripts/window/")
-			: githubScriptPath.replace("/scripts/", "/scripts/linux/");
+		boolean isWindows = os.contains("win");
+
+		// 로깅 추가
+		System.out.println("운영체제: " + os);
+		System.out.println("Windows 환경: " + isWindows);
+
+		// 상대 경로 사용
+		String projectRoot = new File("").getAbsolutePath();
+		String scriptPath = isWindows ?
+			projectRoot + "/scripts/window/upload_jenkinsfile.ps1" :
+			projectRoot + "/scripts/linux/upload_jenkinsfile.sh";
 
 		gitJobRegisterService.registerJob(requestDto, scriptPath);
 		Map<String, Object> response = new HashMap<>();
@@ -41,9 +50,17 @@ public class GitJobRegisterController {
 	@Operation(summary = "GitLab 파이프라인 등록", description = "GitLab 저장소를 Jenkins Job으로 등록합니다.")
 	public ResponseEntity<Map<String, Object>> registerGitlabJob(@RequestBody GitJobRegisterRequest requestDto) {
 		String os = System.getProperty("os.name").toLowerCase();
-		String scriptPath = os.contains("win")
-			? gitlabScriptPath.replace(".sh", ".ps1").replace("/scripts/", "/scripts/window/")
-			: gitlabScriptPath.replace("/scripts/", "/scripts/linux/");
+		boolean isWindows = os.contains("win");
+
+		// 로깅 추가
+		System.out.println("운영체제: " + os);
+		System.out.println("Windows 환경: " + isWindows);
+
+		// 상대 경로 사용
+		String projectRoot = new File("").getAbsolutePath();
+		String scriptPath = isWindows ?
+			projectRoot + "/scripts/window/upload_jenkinsfile.ps1" :
+			projectRoot + "/scripts/linux/upload_jenkinsfile.sh";
 
 		gitJobRegisterService.registerJob(requestDto, scriptPath);
 		Map<String, Object> response = new HashMap<>();
