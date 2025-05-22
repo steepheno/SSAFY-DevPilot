@@ -4,7 +4,7 @@ import BuildInfo from '@/features/dockerfileSettings/ui/BuildInfo.tsx';
 import ProjectEnvironment from '@/features/dockerfileSettings/ui/ProjectEnvironment.tsx';
 import MySqlInfo from '@/features/dockerfileSettings/ui/MySqlInfo.tsx';
 import ProjectNameInput from './newBuildPage/ui/ProjectNameInput';
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 const DockerfileSettings = () => {
   // Navigate
@@ -13,6 +13,19 @@ const DockerfileSettings = () => {
   const formRef = useRef<HTMLFormElement>(null);
 
   const { projectConfig, backendConfig, frontendConfig } = useFormStore();
+
+  // 새로고침 이탈 방지
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault(); // 브라우저가 기본 경고 메시지를 표시
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

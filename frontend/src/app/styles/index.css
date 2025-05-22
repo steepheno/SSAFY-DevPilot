@@ -70,7 +70,7 @@
   }
   html,
   body {
-    @apply overscroll-none font-noto-sans-kr;
+    @apply overscroll-y-none font-noto-sans-kr;
   }
   body {
     @apply bg-background text-foreground;

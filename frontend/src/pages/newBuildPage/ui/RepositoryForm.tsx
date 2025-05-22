@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { useFormStore } from '@/shared/store';
 import { TagInput, Tag } from 'emblor';
 import { BranchConfig } from '@/entities/repository/types';
@@ -35,16 +35,12 @@ const FormField = ({
   </div>
 );
 
-const RepositoryForm = () => {
+const RepositoryForm = forwardRef<{ validateUntouchedFields: () => boolean }>((props, ref) => {
   const { repositoryConfig, setRepositoryConfig } = useFormStore();
   const tagInputRef = useRef<HTMLDivElement>(null);
 
   // 스토어의 브랜치 설정에서 초기 태그 목록 생성
-  const initialTags =
-    repositoryConfig.jenkinsfileBranchConfigs?.map((branch) => ({
-      id: branch.branchName,
-      text: branch.branchName,
-    })) || [];
+  const initialTags: Tag[] = [];
 
   const [selectedTags, setSelectedTags] = useState<Tag[]>(initialTags);
   const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null);
@@ -102,6 +98,32 @@ const RepositoryForm = () => {
     return '';
   };
 
+  // 아직 터치되지 않은 필드들에 대해서만 유효성 검사를 실행하는 함수 추가
+  const validateUntouchedFields = () => {
+    const newErrors = { ...errors };
+    const newIsTry = { ...isTry };
+
+    // 아직 터치되지 않은 필드들만 검사
+    Object.keys(isTry).forEach((fieldName) => {
+      if (!isTry[fieldName as keyof typeof isTry]) {
+        newIsTry[fieldName as keyof typeof isTry] = true;
+
+        if (fieldName === 'branches') {
+          newErrors[fieldName] = validateField(fieldName, selectedTags);
+        } else {
+          const fieldValue = repositoryConfig[fieldName as keyof typeof repositoryConfig] as string;
+          newErrors[fieldName as keyof typeof errors] = validateField(fieldName, fieldValue);
+        }
+      }
+    });
+
+    setErrors(newErrors);
+    setIsTry(newIsTry);
+
+    // 전체 폼에 에러가 있는지 확인
+    return Object.values(newErrors).every((error) => error === '');
+  };
+
   // 필드 상태 변경 처리
   const handleFieldChange = (name: string, value: string) => {
     // 저장소 설정 업데이트
@@ -140,13 +162,12 @@ const RepositoryForm = () => {
 
     setRepositoryConfig({ jenkinsfileBranchConfigs: newBranchConfigs });
 
-    // 브랜치 필드 유효성 검사
-    if (isTry.branches) {
-      setErrors((prev) => ({
-        ...prev,
-        branches: validateField('branches', newTags),
-      }));
-    }
+    // 브랜치 필드 상호작용 표시 및 유효성 검사
+    setIsTry((prev) => ({ ...prev, branches: true }));
+    setErrors((prev) => ({
+      ...prev,
+      branches: validateField('branches', newTags),
+    }));
   };
 
   // 스토어의 브랜치 설정이 바뀌면 컴포넌트 상태도 업데이트
@@ -172,6 +193,10 @@ const RepositoryForm = () => {
       }
     }
   }, [repositoryConfig.jenkinsfileBranchConfigs]);
+
+  useImperativeHandle(ref, () => ({
+    validateUntouchedFields,
+  }));
 
   return (
     <>
@@ -352,6 +377,6 @@ const RepositoryForm = () => {
       </div>
     </>
   );
-};
+});
 
 export default RepositoryForm;
