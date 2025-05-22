@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "jsx": "react-jsx",
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "baseUrl": "src",
+    "paths": { "@/*": ["*"] }
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx", "main.tsx", "vite.config.ts", "src/global.d.ts"],
+  "exclude": ["node_modules", "dist"]
+}
