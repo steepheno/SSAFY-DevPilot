@@ -1,0 +1,109 @@
+/* Light (300) */
+@font-face {
+  font-family: 'Noto Sans KR';
+  font-style: normal;
+  font-weight: 300;
+  src:
+    local('Noto Sans KR Light'),
+    url('./../assets/fonts/NotoSansKR-Light.ttf') format('truetype');
+  font-display: swap;
+}
+
+/* Regular (400) */
+@font-face {
+  font-family: 'Noto Sans KR';
+  font-style: normal;
+  font-weight: 400;
+  src:
+    local('Noto Sans KR Regular'),
+    url('./../assets/fonts/NotoSansKR-Regular.ttf') format('truetype');
+  font-display: swap;
+}
+
+/* Medium (500) */
+@font-face {
+  font-family: 'Noto Sans KR';
+  font-style: normal;
+  font-weight: 500;
+  src:
+    local('Noto Sans KR Medium'),
+    url('./../assets/fonts/NotoSansKR-Medium.ttf') format('truetype');
+  font-display: swap;
+}
+
+/* SemiBold (600) */
+@font-face {
+  font-family: 'Noto Sans KR';
+  font-style: normal;
+  font-weight: 600;
+  src:
+    local('Noto Sans KR SemiBold'),
+    url('./../assets/fonts/NotoSansKR-SemiBold.ttf') format('truetype');
+  font-display: swap;
+}
+
+/* Bold (700) */
+@font-face {
+  font-family: 'Noto Sans KR';
+  font-style: normal;
+  font-weight: 700;
+  src:
+    local('Noto Sans KR Bold'),
+    url('./../assets/fonts/NotoSansKR-Bold.ttf') format('truetype');
+  font-display: swap;
+}
+
+/* Light (300) */
+@font-face {
+  font-family: 'Inconsolata';
+  font-style: normal;
+  font-weight: 300;
+  src:
+    local('Inconsolata Light'),
+    url('./../assets/fonts/Inconsolata-Light.ttf') format('truetype');
+  font-display: swap;
+}
+
+/* Regular (400) */
+@font-face {
+  font-family: 'Inconsolata';
+  font-style: normal;
+  font-weight: 400;
+  src:
+    local('Inconsolata Regular'),
+    url('./../assets/fonts/Inconsolata-Regular.ttf') format('truetype');
+  font-display: swap;
+}
+
+/* Medium (500) */
+@font-face {
+  font-family: 'Inconsolata';
+  font-style: normal;
+  font-weight: 500;
+  src:
+    local('Inconsolata Medium'),
+    url('./../assets/fonts/Inconsolata-Medium.ttf') format('truetype');
+  font-display: swap;
+}
+
+/* SemiBold (600) */
+@font-face {
+  font-family: 'Inconsolata';
+  font-style: normal;
+  font-weight: 600;
+  src:
+    local('Inconsolata SemiBold'),
+    url('./../assets/fonts/Inconsolata-SemiBold.ttf') format('truetype');
+  font-display: swap;
+}
+
+/* Bold (700) */
+@font-face {
+  font-family: 'Inconsolata';
+  font-style: normal;
+  font-weight: 700;
+  src:
+    local('Inconsolata Bold'),
+    url('./../assets/fonts/Inconsolata-Bold.ttf') format('truetype');
+  font-display: swap;
+}
