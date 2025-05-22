@@ -37,8 +37,8 @@ public class GitJobRegisterController {
 		// 상대 경로 사용
 		String projectRoot = new File("").getAbsolutePath();
 		String scriptPath = isWindows ?
-			projectRoot + "/scripts/window/upload_jenkinsfile.ps1" :
-			projectRoot + "/scripts/linux/upload_jenkinsfile.sh";
+			projectRoot + "/scripts/window/register_github_job.ps1" :
+			projectRoot + "/scripts/linux/register_github_job.sh";
 
 		gitJobRegisterService.registerJob(requestDto, scriptPath);
 		Map<String, Object> response = new HashMap<>();
@@ -59,8 +59,8 @@ public class GitJobRegisterController {
 		// 상대 경로 사용
 		String projectRoot = new File("").getAbsolutePath();
 		String scriptPath = isWindows ?
-			projectRoot + "/scripts/window/upload_jenkinsfile.ps1" :
-			projectRoot + "/scripts/linux/upload_jenkinsfile.sh";
+			projectRoot + "/scripts/window/register_gitlab_job.ps1" :
+			projectRoot + "/scripts/linux/register_gitlab_job.sh";
 
 		gitJobRegisterService.registerJob(requestDto, scriptPath);
 		Map<String, Object> response = new HashMap<>();
