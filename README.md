@@ -128,6 +128,7 @@ ec2:
 ```
 
 #### 프론트엔드 (React + TypeScript)
+`.env`
 ```
 # APIs
 VITE_API_LOCAL_URL = "http://localhost:3000/api"
