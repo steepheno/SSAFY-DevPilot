@@ -60,32 +60,23 @@ public class ScriptFileUtil {
 				.getCodeSource()
 				.getLocation();
 
-			// 예: jar:file:/C:/Users/.../devpilot.jar!/BOOT-INF/classes/
-			String locationStr = location.toString();
-
-			// "jar:" 접두어 제거
-			if (locationStr.startsWith("jar:")) {
-				locationStr = locationStr.substring(4);
+			String path = location.getPath(); // ← 핵심
+			if (path.contains("!")) {
+				path = path.substring(0, path.indexOf("!"));
+			}
+			if (path.startsWith("file:")) {
+				path = path.substring("file:".length());
 			}
 
-			// "!/" 포함되어 있으면 JAR 내부 경로이므로 잘라냄
-			if (locationStr.contains("!")) {
-				locationStr = locationStr.substring(0, locationStr.indexOf("!"));
-			}
+			// 디코딩 필요: 공백이 %20 등으로 인코딩되어 있을 수 있음
+			path = java.net.URLDecoder.decode(path, "UTF-8");
 
-			// 이 시점에 locationStr은 "file:/C:/Users/.../devpilot.jar"
-			URI fileUri = new URI(locationStr);
+			File jarFile = new File(path);
+			jarPath = jarFile.getAbsolutePath();
 
-			if (!"file".equalsIgnoreCase(fileUri.getScheme())) {
-				throw new IllegalArgumentException("JAR URI가 file 스킴이 아님: " + fileUri);
-			}
-
-			jarPath = new File(fileUri).getAbsolutePath();
-
-		} catch (URISyntaxException e) {
-			throw new RuntimeException("JAR 경로 URI 변환 실패", e);
+		} catch (Exception e) {
+			throw new RuntimeException("JAR 경로 추출 실패", e);
 		}
-
 
 		File jarDir = new File(jarPath).getParentFile();
 		File targetDir = new File(jarDir, "scripts");
