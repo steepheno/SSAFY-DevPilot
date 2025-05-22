@@ -22,6 +22,19 @@ export default function RepositorySettingsPage() {
     }
   }, [repositoryConfig.jenkinsfileBranchConfigs]);
 
+  // 새로고침 이탈 방지
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault(); // 브라우저가 기본 경고 메시지를 표시
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, []);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const form = formRef.current!;
