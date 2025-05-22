@@ -6,7 +6,9 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.StreamUtils;
 
 import java.io.*;
+import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Paths;
 
 @Slf4j
@@ -54,10 +56,21 @@ public class ScriptFileUtil {
 
 		String jarPath;
 		try {
-			jarPath = new File(ScriptFileUtil.class.getProtectionDomain()
+			URL url = ScriptFileUtil.class.getProtectionDomain()
 				.getCodeSource()
-				.getLocation()
-				.toURI()).getAbsolutePath();
+				.getLocation();
+
+			String fullPath = url.toString();
+
+			if (fullPath.startsWith("jar:")) {
+				fullPath = fullPath.substring(4); // "jar:" 제거
+			}
+			if (fullPath.contains("!")) {
+				fullPath = fullPath.substring(0, fullPath.indexOf("!")); // 내부 경로 제거
+			}
+
+			jarPath = new File(new URI(fullPath)).getAbsolutePath();
+
 		} catch (URISyntaxException e) {
 			throw new RuntimeException("JAR 경로 URI 변환 실패", e);
 		}
