@@ -1,71 +1,83 @@
 package com.corp.devpilot.global;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.util.StreamUtils;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.*;
-import java.util.Collections;
+import java.io.*;
+import java.nio.file.Paths;
 
 @Slf4j
 public class ScriptFileUtil {
 
-	public static void extractScriptsToTemp(ResourceLoader resourceLoader) {
+	public static void extractScriptsToTemp(ResourceLoader loader) {
+		String[] files = {
+			// linux 스크립트
+			"scripts/linux/confirm.sh",
+			"scripts/linux/deploy_project_files.sh",
+			"scripts/linux/docker_helper.sh",
+			"scripts/linux/jenkins_configuration.sh",
+			"scripts/linux/jenkins_installation.sh",
+			"scripts/linux/jenkins_pipeline.sh",
+			"scripts/linux/main.sh",
+			"scripts/linux/register_github_job.sh",
+			"scripts/linux/register_gitlab_job.sh",
+			"scripts/linux/register_gitlab_webhook.sh",
+			"scripts/linux/setup_jenkins_system_config.groovy",
+			"scripts/linux/ssh_connection.sh",
+			"scripts/linux/upload_jenkinsfile.sh",
+			"scripts/linux/utils.sh",
+
+			"scripts/window/deploy_projects_files.ps1",
+			"scripts/window/docker_helper.ps1",
+			"scripts/window/gitlab_api_token.groovy",
+			"scripts/window/gitlab_connection.groovy",
+			"scripts/window/gitlab_personal_token.groovy",
+			"scripts/window/gitlab_server.groovy",
+			"scripts/window/jenkins.yaml",
+			"scripts/window/jenkins_configuration.ps1",
+			"scripts/window/jenkins_installation.ps1",
+			"scripts/window/jenkins_pipeline.ps1",
+			"scripts/window/main.ps1",
+			"scripts/window/register_env_file.groovy",
+			"scripts/window/register_github_job.ps1",
+			"scripts/window/register_gitlab_job.ps1",
+			"scripts/window/register_gitlab_webhook.ps1",
+			"scripts/window/setup_jenkins_system_config.groovy",
+			"scripts/window/ssh_connection.ps1",
+			"scripts/window/upload_jenkinsfile.ps1",
+			"scripts/window/username_password.groovy",
+			"scripts/window/utils.ps1"
+		};
+
+
 		String basePath = System.getProperty("java.io.tmpdir") + "devpilot-" + System.nanoTime();
 		File targetDir = new File(basePath, "scripts");
-
-		try {
-			copyResourceDirectory(resourceLoader, "scripts", targetDir);
-			System.setProperty("devpilot.script.base-path", targetDir.getAbsolutePath());
-			log.info("스크립트 복사 완료: {}", targetDir.getAbsolutePath());
-		} catch (IOException e) {
-			throw new RuntimeException("스크립트 디렉토리 복사 실패", e);
-		}
-	}
-
-	private static void copyResourceDirectory(ResourceLoader loader, String resourcePath, File destDir) throws IOException {
-		URL url;
-		try {
-			url = loader.getResource(resourcePath).getURL();
-		} catch (IOException e) {
-			throw new IllegalArgumentException("해당 리소스를 찾을 수 없습니다: " + resourcePath, e);
+		if (!targetDir.exists()) {
+			targetDir.mkdirs();
 		}
 
-		if (url.getProtocol().equals("jar")) {
-			// jar 내부에 있을 경우
-			try (FileSystem fs = FileSystems.newFileSystem(URI.create(url.toString().split("!")[0]), Collections.emptyMap())) {
-				Path jarPath = fs.getPath("/" + resourcePath);
-				copyDirectory(jarPath, destDir.toPath());
-			}
-		} else {
-			// 개발 환경에서 파일 시스템 접근
+		for (String path : files) {
 			try {
-				Path srcPath = Paths.get(url.toURI());
-				copyDirectory(srcPath, destDir.toPath());
-			} catch (URISyntaxException e) {
-				throw new RuntimeException("리소스 URL을 URI로 변환하는 중 오류 발생: " + url, e);
-			}
-		}
-	}
-
-	private static void copyDirectory(Path src, Path target) throws IOException {
-		Files.walk(src).forEach(path -> {
-			try {
-				Path relative = src.relativize(path);
-				Path targetPath = target.resolve(relative.toString());
-				if (Files.isDirectory(path)) {
-					Files.createDirectories(targetPath);
-				} else {
-					Files.copy(path, targetPath, StandardCopyOption.REPLACE_EXISTING);
+				Resource resource = loader.getResource("classpath:" + path);
+				if (!resource.exists()) {
+					throw new FileNotFoundException("리소스 없음: " + path);
 				}
+
+				File outFile = new File(targetDir, Paths.get(path).getFileName().toString());
+				try (InputStream in = resource.getInputStream(); OutputStream out = new FileOutputStream(outFile)) {
+					StreamUtils.copy(in, out);
+					outFile.setExecutable(true);
+				}
+				log.info("복사 완료: {}", outFile.getAbsolutePath());
+
 			} catch (IOException e) {
-				throw new UncheckedIOException(e);
+				throw new RuntimeException("스크립트 복사 실패: " + path, e);
 			}
-		});
+		}
+
+		System.setProperty("devpilot.script.base-path", targetDir.getAbsolutePath());
+		log.info("스크립트 디렉토리 복사 완료. 설정된 base-path: {}", System.getProperty("devpilot.script.base-path"));
 	}
 }
