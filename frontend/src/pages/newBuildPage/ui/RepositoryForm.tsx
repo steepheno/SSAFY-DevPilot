@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { useFormStore } from '@/shared/store';
 import { TagInput, Tag } from 'emblor';
 import { BranchConfig } from '@/entities/repository/types';
@@ -35,7 +35,7 @@ const FormField = ({
   </div>
 );
 
-const RepositoryForm = () => {
+const RepositoryForm = forwardRef<{ validateUntouchedFields: () => boolean }>((props, ref) => {
   const { repositoryConfig, setRepositoryConfig } = useFormStore();
   const tagInputRef = useRef<HTMLDivElement>(null);
 
@@ -96,6 +96,32 @@ const RepositoryForm = () => {
       }
     }
     return '';
+  };
+
+  // 아직 터치되지 않은 필드들에 대해서만 유효성 검사를 실행하는 함수 추가
+  const validateUntouchedFields = () => {
+    const newErrors = { ...errors };
+    const newIsTry = { ...isTry };
+
+    // 아직 터치되지 않은 필드들만 검사
+    Object.keys(isTry).forEach((fieldName) => {
+      if (!isTry[fieldName as keyof typeof isTry]) {
+        newIsTry[fieldName as keyof typeof isTry] = true;
+
+        if (fieldName === 'branches') {
+          newErrors[fieldName] = validateField(fieldName, selectedTags);
+        } else {
+          const fieldValue = repositoryConfig[fieldName as keyof typeof repositoryConfig] as string;
+          newErrors[fieldName as keyof typeof errors] = validateField(fieldName, fieldValue);
+        }
+      }
+    });
+
+    setErrors(newErrors);
+    setIsTry(newIsTry);
+
+    // 전체 폼에 에러가 있는지 확인
+    return Object.values(newErrors).every((error) => error === '');
   };
 
   // 필드 상태 변경 처리
@@ -167,6 +193,10 @@ const RepositoryForm = () => {
       }
     }
   }, [repositoryConfig.jenkinsfileBranchConfigs]);
+
+  useImperativeHandle(ref, () => ({
+    validateUntouchedFields,
+  }));
 
   return (
     <>
@@ -347,6 +377,6 @@ const RepositoryForm = () => {
       </div>
     </>
   );
-};
+});
 
 export default RepositoryForm;
