@@ -7,6 +7,7 @@ import { useFormStore } from '@/shared/store';
 
 export default function RepositorySettingsPage() {
   const formRef = useRef<HTMLFormElement>(null);
+  const RepositoryFormRef = useRef<{ validateUntouchedFields: () => boolean }>(null);
   const navigate = useNavigate();
   const { repositoryConfig } = useFormStore();
   const [, setShowBranchError] = useState(false);
@@ -37,9 +38,16 @@ export default function RepositorySettingsPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // validateUntouchedFields 먼저 호출 -> 입력되지 않은 필드 검증
+    const isAllFieldsValid = RepositoryFormRef.current?.validateUntouchedFields();
+    if (!isAllFieldsValid) {
+      return;
+    }
+
     const form = formRef.current!;
 
-    // 브랜치 선택 여부 확인 (우선 검사)
+    // 브랜치 선택 여부 확인
     if (
       !repositoryConfig.jenkinsfileBranchConfigs ||
       repositoryConfig.jenkinsfileBranchConfigs.length === 0
@@ -87,8 +95,9 @@ export default function RepositorySettingsPage() {
         <ProjectNameInput />
         <div className="mb-4 mt-3 flex flex-col gap-2 rounded-[10px] bg-gray-100 px-5 py-5">
           <p className="text-xl font-bold">저장소 정보</p>
+
           {/* 저장소 폼 */}
-          <RepositoryForm />
+          <RepositoryForm ref={RepositoryFormRef} />
         </div>
         <button className="inline-flex cursor-pointer" type="submit">
           다음
