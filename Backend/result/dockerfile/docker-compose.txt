@@ -1,0 +1,88 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: ./backend/Dockerfile
+    container_name: damul-backend
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./.env
+    restart: always
+    networks:
+      - damul-network
+
+  frontend:
+    build:
+      context: .
+      dockerfile: ./frontend/Dockerfile
+      args:
+        VITE_API_OCR_URL: ${VITE_API_OCR_URL}
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL}
+        VITE_KAKAO_OAUTH2_LOGIN_URI: ${VITE_KAKAO_OAUTH2_LOGIN_URI}
+        VITE_GOOGLE_OAUTH2_LOGIN_URI: ${VITE_GOOGLE_OAUTH2_LOGIN_URI}
+        VITE_WS_BASE_URL: ${VITE_WS_BASE_URL}
+        VITE_NAVER_OAUTH2_LOGIN_URI: ${VITE_NAVER_OAUTH2_LOGIN_URI}
+
+    container_name: damul-frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    restart: always
+    networks:
+      - damul-network
+
+  mysql:
+    image: mysql:8.0.33
+    container_name: damul-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ssafy
+      MYSQL_DATABASE: damul
+      MYSQL_USER: damul
+      MYSQL_PASSWORD: ssafy
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - damul-network
+    restart: always
+
+  redis:
+    image: redis:latest
+    container_name: damul-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - damul-network
+    restart: always
+
+  nginx:
+    image: nginx:alpine
+    container_name: damul-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - /etc/letsencrypt/live/k12a301.p.ssafy.io/fullchain.pem:/etc/nginx/ssl/fullchain.pem:ro
+      - /etc/letsencrypt/live/k12a301.p.ssafy.io/privkey.pem:/etc/nginx/ssl/privkey.pem:ro
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - damul-network
+    restart: always
+
+
+
+networks:
+  damul-network:
+    driver: bridge
+
+volumes:
+  mysql-data:
+  redis-data:
