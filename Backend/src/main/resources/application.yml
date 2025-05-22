@@ -91,9 +91,9 @@ springdoc:
   default-produces-media-type: application/json
 
 scripts:
-  linux-main-path: ./scripts/linux/main.sh
-  window-main-path: ./scripts/window/main.ps1
-  linux-confirm-path: ./scripts/linux/confirm.sh
+  linux-main-path: classpath:scripts/linux/main.sh
+  window-main-path: classpath:scripts/window/main.ps1
+  linux-confirm-path: classpath:scripts/linux/confirm.sh
 
 ec2:
   remote-base-dir: /home/ubuntu
