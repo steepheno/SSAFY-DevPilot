@@ -3,7 +3,13 @@
  * 1) 밀리초 단위 timestamp → "YYYY-MM-DD HH:mm:ss" 형식
  */
 export function formatTimestamp(ms: number): string {
+  if (typeof ms !== 'number' || isNaN(ms)) {
+    return '—';
+  }
   const d = new Date(ms);
+  if (isNaN(d.getTime())) {
+    return '유효하지 않은 날짜';
+  }
   const yyyy = d.getFullYear();
   const MM = String(d.getMonth() + 1).padStart(2, '0');
   const dd = String(d.getDate()).padStart(2, '0');
@@ -24,6 +30,9 @@ export function formatTimestamp(ms: number): string {
  * 2) 밀리초 단위 duration → "HH:mm:ss" 형식
  */
 export function formatDuration(ms: number): string {
+  if (typeof ms !== 'number' || isNaN(ms) || ms < 0) {
+    return '—';
+  }
   const totalSec = Math.floor(ms / 1000);
   const h = Math.floor(totalSec / 3600);
   const m = Math.floor((totalSec % 3600) / 60);
