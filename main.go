@@ -21,11 +21,14 @@ dist 폴더 하위 마크업, 스타일시트, 스크립트를 내부 웹서버�
 //go:embed all:frontend/dist
 var assets embed.FS
 
+//go:embed backend/scripts/**
+var scriptsFS embed.FS
+
 /*
  Backend jar 파일을 []byte 형태로 번들에 포함
 런타임에 임시 파일로 풀어 Java 백엔드 기동
 */
-//go:embed devpilot-0.0.1-SNAPSHOT.jar
+//go:embed backend/build/libs/devpilot-0.0.1-SNAPSHOT.jar
 var jarBytes []byte // 실제 jar 파일 내용이 들어갈 메모리 공간
 
 func main() {
