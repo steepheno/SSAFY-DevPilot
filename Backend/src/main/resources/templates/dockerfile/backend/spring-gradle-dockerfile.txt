@@ -1,0 +1,36 @@
+# Build stage
+FROM gradle:7.6-jdk##JAVA_VERSION## as build
+WORKDIR /app
+
+# Copy gradle files for dependency resolution
+COPY ##BACKEND_DIR##/build.gradle ##BACKEND_DIR##/settings.gradle ./
+COPY ##BACKEND_DIR##/gradlew .
+COPY ##BACKEND_DIR##/gradle ./gradle
+
+# Make the gradlew script executable
+RUN chmod +x gradlew
+
+# Download dependencies
+RUN ./gradlew dependencies
+
+# Copy source code
+COPY ##BACKEND_DIR##/src ./src
+
+# Build the application
+RUN ./gradlew build -x test
+
+# Run stage
+FROM openjdk:##JAVA_VERSION##-jdk-slim
+WORKDIR /app
+
+# Copy the built jar file from the build stage
+COPY --from=build /app/build/libs/*.jar app.jar
+
+# Set environment variables
+ENV SERVER_PORT=##BACKEND_PORT##
+
+# Expose the application port
+EXPOSE ##BACKEND_PORT##
+
+# Run the application
+ENTRYPOINT ["java", "-jar", "app.jar"]

@@ -1,0 +1,99 @@
+spring:
+  application:
+    name: devpilot
+
+  thymeleaf:
+    cache: false
+    prefix: classpath:/templates/
+    suffix: .txt
+    mode: TEXT
+
+  jackson:
+    default-property-inclusion: non_null
+    serialization:
+      fail-on-empty-beans: false
+
+server:
+  port: ${PORT:3000}
+  compression:
+    enabled: true
+  error:
+    include-stacktrace: never
+
+  ssh:
+    connection-timeout: 30000
+    channel-timeout: 60000
+    default-port: 22
+    known-hosts-file: ${user.home}/.ssh/known_hosts
+
+  jenkins:
+    url: https://localhost
+    user: admin
+    tokenFile: ${user.home}/.devpilot/jenkins_api_token.txt
+    default-port: 8080
+    cli-download-path: /jnlpJars/jenkins-cli.jar
+    admin-scripts-path: classpath:/scripts/jenkins
+    default-plugins:
+      - git
+      - workflow-aggregator
+      - pipeline-stage-view
+      - docker-workflow
+      - credentials-binding
+      - ssh-credentials
+
+  jenkinsfile:
+    output:
+      directory: ./result/jenkinsfile
+
+  dockerfile:
+    output:
+      directory: ./result/dockerfile
+
+  logging:
+    file-path: ${user.home}/.devpilot/logs
+    keep-days: 7
+    max-size: 100MB
+
+  execution:
+    timeout: 300000
+    retry-count: 3
+    retry-delay: 5000
+
+  temp:
+    cleanup-on-exit: true
+    directory: ${user.home}/.devpilot/temp
+
+logging:
+  level:
+    root: INFO
+    com.corp.devpilot: DEBUG
+    org.springframework.web: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+springdoc:
+  api-docs:
+    path: /api-docs
+    enabled: true
+  packages-to-scan: com.corp.devpilot
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+    disable-swagger-default-url: true
+    display-request-duration: true
+    filter: true
+  cache:
+    disabled: true
+  show-actuator: false
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json
+
+scripts:
+  linux-main-path: classpath:scripts/linux/main.sh
+  window-main-path: classpath:scripts/window/main.ps1
+  linux-confirm-path: classpath:scripts/linux/confirm.sh
+
+ec2:
+  remote-base-dir: /home/ubuntu
