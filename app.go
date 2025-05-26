@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io/fs"
 	"net"
 	"os"
 	"os/exec"
@@ -60,6 +61,25 @@ func findJava() string {
 	return "java"
 }
 
+func writeEmbeddedScripts(tmpDir string) error {
+	return fs.WalkDir(scriptsFS, "backend/scripts", func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		relPath, _ := filepath.Rel("backend/scripts", path)
+		target := filepath.Join(tmpDir, "scripts", relPath)
+
+		if d.IsDir() {
+			return os.MkdirAll(target, 0755)
+		}
+		data, err := scriptsFS.ReadFile(path)
+		if err != nil {
+			return err
+		}
+		return os.WriteFile(target, data, 0755)
+	})
+}
+
 // .jar 백엔드 실행
 func (a *App) StartJar() error {
 	// Java .jar을 임시 디렉토리에 풂
@@ -74,6 +94,12 @@ func (a *App) StartJar() error {
 	if err := os.WriteFile(jarPath, jarBytes, 0755); err != nil {
 		return err
 	}
+
+	// scripts 폴더 복사
+	if err := writeEmbeddedScripts(tmpDir); err != nil {
+		return err
+	}
+
 	info, _ := os.Stat(jarPath)
 	fmt.Println("Wrote JAR to", jarPath, "size=", info.Size(), "bytes")
 
