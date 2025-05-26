@@ -4,8 +4,6 @@ export interface InitialSettings {
   jenkinsPort: string;
   jenkinsPassword: string;
   configDir: string;
-  localFrontDir: string;
-  localBackendDir: string;
 }
 
 export interface InitialSettingsStatus {
